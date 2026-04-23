@@ -1,0 +1,65 @@
+/*jshint browser: true */
+/*jshint -W097 */
+/*jshint -W117 */
+/*jshint -W061 */
+//Assets for DownHeel
+"use strict";
+
+
+
+/** END */
+
+LoadFonts = [
+    
+];
+
+LoadTextures = [
+    /** textures used by shaders */
+    //{ srcName: "Shading/Fire_color_map_512.webp", name: "Fire_color_map" },
+    //{ srcName: "Shading/fire_noise_512.webp", name: "Fire_noise" },
+
+     /**wall, floor, ceil */
+    { srcName: "Wall/RockWall_SDXL_003.jpg", name: "RockWall_SDXL_003" },
+   
+
+    //objects
+
+    //title
+
+
+    //explosions
+    //{ srcName: "ObjectTextures/Explosion2.webp", name: "Explosion2" },
+    //{ srcName: "ObjectTextures/Explosion3.webp", name: "Explosion" },
+    //{ srcName: "ObjectTextures/Tile.webp", name: "Tile" },
+    //{ srcName: "ObjectTextures/WoodTexture.webp", name: "WoodTexture" },
+    //{ srcName: "ObjectTextures/RedLiquid.jpg", name: "RedLiquid" },
+    //{ srcName: "ObjectTextures/FireTexture.webp", name: "FireTexture" },
+    //{ srcName: "ObjectTextures/FireTexture2.webp", name: "FireTexture2" },
+    //{ srcName: "ObjectTextures/FireTexture2_Blue.webp", name: "FireTexture2_Blue" },
+    //{ srcName: "ObjectTextures/FireTexture2_Green.webp", name: "FireTexture2_Green" },
+    //{ srcName: "ObjectTextures/RedFireTexture.webp", name: "RedFireTexture" },
+    //{ srcName: "ObjectTextures/BluBallTexture.webp", name: "BluBallTexture" },
+];
+
+LoadAudio = [
+    //{ srcName: "LaughingSkull - Ex Nihilo.mp3", name: "Title" },
+
+    //action sounds
+    //{ srcName: "Explosion1.mp3", name: "Explosion" },
+
+];
+
+/*LoadShaders = [
+    'vShader_1_2.glsl', 'fShader_1_3.glsl', 'pick_vShader_1_0.glsl', 'pick_fShader_1_0.glsl',
+    'particle_render_fShader_1_1.glsl', 'particle_render_vShader_1_0.glsl', 'particle_transform_fShader_1_0.glsl', 'particle_transform_vShader_1_1.glsl',
+    'model_vShader_1_2.glsl', 'fire_transform_vShader_1_0.glsl', 'fire_render_fShader_1_0.glsl',
+    'shadow_vShader_1_0.glsl', 'shadow_fShader_1_0.glsl'
+];*/
+
+//LoadObjects = [  ];
+
+//LoadModels = [];
+
+//LoadSprites = [];
+
+console.log("%cAssets for DownHeel ready.", "color: orange");
