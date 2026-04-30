@@ -38,13 +38,13 @@
                             </legend>
 
                             Grid dimensions:
-                            <input name="gridsize" id="horizontalGrid" type="text" size="2" maxlength="2" value="16">
+                            <input name="gridsize" id="horizontalGrid" type="text" size="3" maxlength="3" value="128">
                             <span> X </span>
-                            <input name="gridsize" id="verticalGrid" type="text" size="2" maxlength="2" value="16">
+                            <input name="gridsize" id="verticalGrid" type="text" size="2" maxlength="2" value="3">
 
                             <br />
                             Grid size (px):
-                            <input name="gridsize" id="gridsize" type="text" size="2" maxlength="2" value="64">
+                            <input name="gridsize" id="gridsize" type="text" size="2" maxlength="2" value="16">
                             <br />
                             RoomID:
                             <input name="roomid" id="roomid" type="text" size="16" maxlength="16" value="1">
@@ -67,7 +67,7 @@
                             <input type="radio" name="renderer" value="block" checked="checked"> Block <br />
                             <input type="checkbox" id="corr" value="corr" name="corr"> Draw corridor gridline<br />
                             <input type="checkbox" id="grid" value="grid" name="grid" checked="checked"> Main grid<br />
-                            <input type="checkbox" id="coord" value="coord" name="coord" checked="checked">
+                            <input type="checkbox" id="coord" value="coord" name="coord" >
                             Coordinates
                             <input type="checkbox" id="all_coord" value="all_coord" name="all_coord">All
                             <br />
@@ -103,6 +103,18 @@
                             <input type="radio" name="directions" value="LEFT"> LEFT <br />
                             <input type="radio" name="directions" value="RIGHT"> RIGHT <br />
                             <input type="radio" name="directions" value="NOWAY" checked="checked"> NOWAY <br />
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>
+                                Version:
+                            </legend>
+                            ENGINE: <span id="engine_version"></span><br>
+                            GRID: <span id="grid_version"></span><br>
+                            MAZE: <span id="maze_version"></span><br>
+                            Prototype LIB: <span id="lib_version"></span><br>
+                            IAM: <span id="iam_version"></span><br>
+                            WebGL: <span id="webgl_version"></span><br>
                         </fieldset>
 
 
@@ -143,25 +155,9 @@
                             <input type="radio" name="painter" value="start"> Start position <br />
                             <hr>
                             <input type="radio" name="painter" value="cleargrid"> Clear grid <br />
-                            <hr>
-                            <input type="radio" name="painter" value="fire"> Fire <br />
-                            <div class="d-flex justify-content-center">
-                                <select id="fire_type"> </select>
-                            </div>
-                            <hr>
                         </fieldset>
 
-                        <fieldset>
-                            <legend>
-                                Version:
-                            </legend>
-                            ENGINE: <span id="engine_version"></span><br>
-                            GRID: <span id="grid_version"></span><br>
-                            MAZE: <span id="maze_version"></span><br>
-                            Prototype LIB: <span id="lib_version"></span><br>
-                            IAM: <span id="iam_version"></span><br>
-                            WebGL: <span id="webgl_version"></span><br>
-                        </fieldset>
+
 
                         <fieldset>
                             <legend>
@@ -319,28 +315,13 @@
                             Export:
                         </legend>
                         <textarea id="exp" style="width: 1200px; height: 256px;">
-    65: {
-        name: "Amazing",
-        sg: 0,
-        maxSpawned: 0,
-        killCountdown: 0,
-        killsRequiredToStopSpawning: 99,
-        spawnDelay: 9999,
-        data: '{"width":"21","height":"21","depth":1,"map":"BB2AA8BAA3BB2ABAA4BAA2BB2ABABAA2BABAA7BB5AA2BB2AA4BB2AA4BABB4AA2BAA3BAA5BAA3BB3AA2BAA5BAA6BAA2BAA4BB2ABB2ABABB3AA3BAA2BB4AA2BABB7AA2BB3ABABABB2AA2BB8ABB7AA2BABB4ABB3ABB3ABB3ABB8ABB6ABB3AA3BAA2BAA8BAA12BABB7ABAA2BB2ABABAA3BB4ABAA3BB4AA2BAA2BB3AA2BB6AA2BABB2AA5BABB3ABB2AA2BAA4BABB2AA5BB3ABB2ABAA2BABB3ABAA4BB2AA8BB3AA2BB3ABB3AA2BB2AA3BB2ABABB2ABB5ABB3AA2BB4ABB2ABB24ABB12A$"}',
-        wall: "DarkWallSDXL329",
-        floor: "IrregularTiledFloorCeil10",
-        ceil: "DarkWallSDXL315",
-        start: '[376,7]',
-        decals: '[[367,4,"RustyFloorGrille_08","crest"],[324,7,"OilDommes_1073","picture"],[326,7,"Apparitia_1013","picture"],[50,7,"FemDommes_21417","picture"],[90,7,"FemDommes_16676","picture"],[88,7,"SVS130","picture"],[17,7,"FemDommes_5080","picture"],[19,7,"Domme356","picture"],[52,7,"FemDommes_17213","picture"],[99,7,"FemDommes_14119","picture"],[173,7,"Fred_AI_3","picture"],[213,7,"FemDommes_22159","picture"],[256,7,"FemDommes_8321","picture"],[338,7,"FemDommes_5075","picture"],[341,7,"FemDommes_14012","picture"],[301,7,"FluxDommes2151","picture"],[289,7,"FemDommes_5244","picture"],[143,7,"GameDommes_132","picture"],[353,7,"FemDommes_17478","picture"],[351,7,"FemDommes_20352","picture"],[96,7,"FemDommes_12204","picture"],[286,7,"GhostFace4","picture"],[408,1,"FemDommes_8560","picture"],[410,1,"GemDommes_026","picture"],[425,1,"FemDommes_18810","picture"],[422,1,"FemDommes_18815","picture"],[435,1,"FemDommes_10068","picture"],[437,1,"RetroGames_2313","picture"],[439,1,"FemDommes_17472","picture"],[352,1,"FemDommes_17022","picture"],[329,1,"FemDommes_8529","picture"],[332,1,"FemDommes_17447","picture"],[285,1,"Princess9","picture"],[246,1,"FemDommes_17115","picture"],[187,1,"FemDommes_6198","picture"],[139,1,"Montezuma200","picture"],[302,1,"FemDommes_21372","picture"],[216,1,"FemDommes_15396","picture"],[257,1,"FemDommes_10070","picture"],[340,1,"FemDommes_22029","picture"],[172,1,"FemDommes_8355","picture"],[169,1,"CreepyWindow_03","picture"],[101,1,"FemDommes_6197","picture"],[136,1,"FemDommes_15280","picture"],[391,1,"FemDommes_4100","picture"],[385,1,"FemDommes_21616","picture"],[39,3,"Retro_Games_7029","picture"],[83,3,"FemDommes_21105","picture"],[72,3,"SVS100","picture"],[75,3,"FemDommes_17517","picture"],[110,3,"FemDommes_13029","picture"],[114,3,"CrawlMaster114","picture"],[119,3,"FemDommes_16179","picture"],[125,3,"Babes406","picture"],[167,3,"BlackBeret_082","picture"],[184,3,"C64_ZX_Classics201","picture"],[226,3,"FemDommes_14162","picture"],[209,3,"FemDommes_15426","picture"],[312,3,"FemDommes_22064","picture"],[270,3,"FemDommes_8316","picture"],[377,3,"FemDommes_13095","picture"],[373,3,"RetroGames_2331","picture"],[417,3,"Hero100","picture"],[309,3,"FemDommes_19213","picture"],[267,3,"FemDommes_17404","picture"],[223,3,"UnusedEntities120","picture"],[160,3,"Morana135","picture"],[196,3,"TheHobbit72","picture"],[238,3,"FemDommes_17295","picture"],[278,3,"FemDommes_18327","picture"],[320,3,"Amiga_Games_5043","picture"],[323,3,"FemDommes_8267","picture"],[282,3,"GameDommes_167","picture"],[365,3,"Domme305","picture"],[369,3,"FemDommes_19759","picture"],[361,3,"FemDommes_21046","picture"],[407,3,"FemDommes_16120","picture"],[152,3,"FemDommes_4032","picture"],[21,5,"FemDommes_16284","picture"],[63,5,"FemDommes_18134","picture"],[147,5,"FemDommes_13115","picture"],[110,5,"GameDommes_116","picture"],[189,5,"AtariST_Games_4058","picture"],[357,5,"MontyMole51","picture"],[399,5,"C64Games_3249","picture"],[361,5,"FemDommes_8162","picture"],[320,5,"CCC_177","picture"],[278,5,"FemDommes_18772","picture"],[365,5,"FemDommes_8373","picture"],[217,5,"C64Games_3188","picture"],[154,5,"FemDommes_22164","picture"],[72,5,"Apparitia_1009","picture"],[114,5,"FemDommes_19468","picture"],[119,5,"PrincessDragonDomme_024","picture"],[181,5,"FluxDommes3055","picture"],[223,5,"Domme328","picture"],[263,5,"FemDommes_16925","picture"],[305,5,"GameDommes_262","picture"],[369,5,"FemDommes_8467","picture"],[411,5,"C64Games_3225","picture"],[373,5,"FemDommes_4143","picture"],[205,5,"Unknown400","picture"],[163,5,"FemDommes_20013","picture"],[267,5,"FluxDommes3118","picture"],[75,5,"FemDommes_6033","picture"],[107,5,"FluxDommes2079","picture"],[317,5,"Apparitias_006","picture"],[233,5,"FemDommes_19440","picture"],[275,5,"GemDommes_058","picture"],[379,1,"GemDommes_227","picture"],[309,5,"AI_Pic_103","picture"],[55,7,"AI_Pic_103","picture"],[9,7,"FemDommes_17713","picture"],[47,1,"FemDommes_19646","picture"],[55,1,"FemDommes_6084","picture"],[89,1,"FemDommes_21043","picture"],[46,7,"FemDommes_20268","picture"]]',
-        lights: '[[136,7,"Candelabra18","standardYellowSoft"],[1,7,"SkullLantern56","standardYellowSoft"],[187,7,"FluxLight121","standardYellowSoft"],[169,7,"Candle56","standardYellowSoft"],[258,7,"FluxLight126","standardYellowSoft"],[245,7,"WallLamp33","standardYellowSoft"]]',
-        gates: '[[430,1,"65.1","56.6","Closed"]]',
-        monsters: '[[197,"CyGirl"],[201,"CyGirl"],[68,"PurpleGalaxy"],[73,"PurpleGalaxy"],[23,"Goblin"],[103,"Goblin"],[319,"SkeleDwarf"],[403,"SkeleDwarf"],[414,"SkeleDwarf"],[311,"SkeleDwarf"]]',
-        gold: '[[182,"RedGem"],[360,"RedGem"],[262,"GoldBar"],[220,"GoldBar"],[157,"GoldBar"],[176,"GoldBar"],[180,"GoldBar"],[281,"GoldBar"],[321,"GoldBar"],[404,"GoldBar"],[401,"GoldBar"],[358,"GoldBar"],[232,"GoldBar"],[194,"GoldBar"],[236,"GoldBar"],[277,"GoldBar"],[112,"GoldBar"],[71,"GoldBar"],[130,"GoldBar"],[148,"GoldBar"],[106,"GoldBar"],[64,"GoldBar"],[22,"GoldBar"],[26,"GoldBar"],[31,"GoldBar"],[35,"GoldBar"],[80,"GoldBar"],[82,"GoldBar"],[76,"GoldBar"],[116,"GoldBar"],[123,"GoldBar"],[166,"GoldBar"],[162,"GoldBar"],[206,"GoldBar"],[290,"GoldBar"],[250,"GoldBar"],[355,"GoldBar"],[375,"GoldBar"],[415,"GoldBar"],[393,"GoldBar"],[349,"GoldBar"],[287,"GoldBar"],[243,"GoldBar"]]',
-        skills: '[[40,"Attack"],[331,"Heart"],[406,"Defense"],[74,"Magic"],[306,"Mana"],[412,"Mana"],[237,"Mana"],[224,"Mana"]]',
-        containers: '[[400,"Barrel_471","GOLD_ITEM_TYPE.RedGem",5],[268,"MetalCrate51","GOLD_ITEM_TYPE.RedGem",5]]',
-        objects: '[[108,"GoldCoin"],[318,"RedLiquid"],[418,"BlueLiquid"]]',
-        movables: '[[235,"RoastChicken"],[248,"RoastChicken"],[30,"RedWolfSpider"],[178,"RedWolfSpider"],[397,"RedWolfSpider"],[405,"RedWolfSpider"]]',
-    }
+Demo : {
+name: "Demo",
+data: '{"width":"7","height":"7","depth":1,"map":"BB3AA4BB2AA2BAA6BB6ABB3ABABB3ABB6ABB5$BA"}',
+wall: "RockWall_SDXL_003",
+floor: "RockWall_SDXL_003",
+start: '[17,1]',
+}
                         </textarea>
                     </fieldset>
                 </div>
@@ -374,7 +355,7 @@
     <script src="/Code/JS/Library/Engine/Prototype_5_02.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/LS_Matrix_1_04.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/ENGINE_5_01.js" type="text/javascript"></script>
-    <script src="/Code/JS/Library/Engine/GRID_4_01.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/GRID_4_02.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/MAZE_5_00.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/BWT_1_00.js" type="text/javascript"></script>
     <script src='/Code/JS/Library/Engine/IndexArrayManagers_4_01.js'></script>

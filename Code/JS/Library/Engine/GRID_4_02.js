@@ -17,7 +17,7 @@ known bugs:
 */
 
 const GRID = {
-    VERSION: "4.01",
+    VERSION: "4.02",
     CSS: "color: #0AA",
     SETTING: {
         ALLOW_CROSS: false,
@@ -1955,6 +1955,9 @@ class GridArray3D extends Classes([ArrayBasedDataStructure3D, GA_Dimension_Agnos
                 this.setValue(grid2, set);
             }
         }
+    }
+    fill(fill) {
+        this.map.fill(fill);
     }
     fillArea(X, Y, W, H, floor, set) {
         for (let x = X; x <= X + W; x++) {

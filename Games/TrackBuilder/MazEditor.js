@@ -30,7 +30,6 @@ const MAP = {
     floor: "GreyFloor27",
     ceil: "GreyFloor27",
     start: '[17,1]',
-    //lights: '[[45,1,"Candelabra01","standard"]]',
   }
 };
 
