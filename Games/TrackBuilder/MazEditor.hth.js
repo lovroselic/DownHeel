@@ -26,11 +26,11 @@ const MAP = {
     killsRequiredToStopSpawning: 99,
     spawnDelay: -1,
     data: '{"width":7,"height":7,"depth":1,"map":"BB3AA4BB2AA2BAA6BB6ABB3ABABB3ABB6ABB5$BA"}',
-    wall: "BlackWall45",
-    floor: "GreyFloor27",
-    ceil: "GreyFloor27",
+    wall: "RockWall_SDXL_003",
+    floor: "Wood1",
+    ceil: "DetailedFloor1",
     start: '[17,1]',
-    //lights: '[[45,1,"Candelabra01","standard"]]',
+    lights: '[[45,1,"Candelabra01","standard"]]',
   }
 };
 
@@ -60,15 +60,15 @@ const INI = {
   MININT: 5,
   MAX_GRID: 64,
   MIN_GRID: 5,
-  SPACE_X: 4096,
-  SPACE_Y: 4096,
+  SPACE_X: 2048,
+  SPACE_Y: 2048,
   CANVAS_RESOLUTION: 256,
   MAX_DEPTH: 13,
   DRAW_OCCLUSION_MAP: true,
 };
 
 const PRG = {
-  VERSION: "0.17.5",
+  VERSION: "0.17.0",
   NAME: "MazEditor",
   YEAR: "2022, 2023, 2024, 2025",
   CSS: "color: #239AFF;",
@@ -79,6 +79,7 @@ const PRG = {
     console.log("%c**************************************************************************************************************************************", PRG.CSS);
     $("#title").html(PRG.NAME);
     $("#version").html(`${PRG.NAME} V${PRG.VERSION} <span style='font-size:14px'>&copy</span> LaughingSkull ${PRG.YEAR}`);
+    
     $("input#toggleAbout").val("About " + PRG.NAME);
     $("#about fieldset legend").append(" " + PRG.NAME + " ");
 
@@ -109,7 +110,6 @@ const PRG = {
     $("#buttons").on("click", "#new", GAME.init);
     $("#buttons").on("click", "#arena", GAME.arena);
     $("#buttons").on("click", "#maze", GAME.maze);
-    $("#buttons").on("click", "#axonize", GAME.axonize);
     $("#buttons").on("click", "#export", GAME.export);
     $("#buttons").on("click", "#import", GAME.import);
     $("#buttons").on("click", "#copy", GAME.copyToClipboard);
@@ -148,11 +148,6 @@ const GAME = {
     GAME.init();
     GAME.started = true;
     GAME.level = "Demo";
-
-    WebGL.PRUNE = false;
-    WebGL.HERO_AS_INNER = true;
-    WebGL.INI.BACKGROUND_ALPHA = 0.0;
-    WebGL.USE_SHADOW = false;
     GAME.levelStart();
   },
   levelStart() {
@@ -193,39 +188,15 @@ const GAME = {
     const start_dir = MAP[level].map.startPosition.vector;
     let start_grid = MAP[level].map.startPosition.grid;
     start_grid = Vector3.from_Grid(Grid.toCenter(start_grid), 0.6);
-    HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.Taxxon);
-    HERO.player.useCollision(HERO.player.boundingBoxCollision);
-    //WebGL.CONFIG.set("first_person", false);
+    WebGL.CONFIG.set("first_person", false);
 
-    /*if (WebGL.CONFIG.firstperson) {
+    if (WebGL.CONFIG.firstperson) {
       HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, null);
-    }*/
+    }
 
     WebGL.init_required_IAM($MAP.map, HERO);
     this.buildWorld(level);
     this.setWorld(level);
-    WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
-  },
-  axonize() {
-    console.warn("axxonizing", "floors", $MAP.depth, "$MAP.map.width", $MAP.map.width, "$MAP.map.height", $MAP.map.height);
-    let GA = $MAP.map.GA;
-    const startPad = $("#startpad").val();
-    const endPad = $("#endpad").val();
-
-    GA.sliceFill($MAP.map.width, $MAP.map.width * ($MAP.map.height - 1), MAPDICT.EMPTY);
-    for (let F = 1; F < $MAP.map.height; F++) {
-      GA.sliceFill($MAP.map.width * ($MAP.map.height * F + 1), $MAP.map.width * ($MAP.map.height - 1), MAPDICT.HOLE);
-    }
-
-    //startpad, endpad
-    for (let F = 0; F < $MAP.map.depth; F++) {
-      for (let H = 0; H < $MAP.map.height; H++) {
-        GA.sliceFill(H * $MAP.map.width + F * $MAP.map.width * $MAP.map.height, startPad, MAPDICT.HOLE);
-        GA.sliceFill((H + 1) * $MAP.map.width + F * $MAP.map.width * $MAP.map.height - endPad, endPad, MAPDICT.HOLE);
-      }
-    }
-    $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
-    GAME.render();
   },
   arena() {
     let GA = $MAP.map.GA;
@@ -417,7 +388,6 @@ const GAME = {
       case "light":
         console.log("light, value", currentValue, "grid", grid);
         switch (currentValue) {
-          case MAPDICT.HOLE:
           case MAPDICT.WALL:
             dir = GAME.getSelectedDir();
             console.log(".dir", dir);
@@ -445,8 +415,8 @@ const GAME = {
       case "start":
         switch (currentValue) {
           case MAPDICT.EMPTY:
-          case MAPDICT.HOLE:
             dir = GAME.getSelectedDir();
+            console.log(".dir", dir);
             if (dir.same(NOWAY)) {
               $("#error_message").html("Start needs direction");
               return;
@@ -478,12 +448,8 @@ const GAME = {
       case "monster":
         switch (currentValue) {
           case MAPDICT.EMPTY:
-          case MAPDICT.HOLE:
             let monsterValue = $("#monster_type")[0].value;
-            dir = GAME.getSelectedDir();
-            if ($("input[name='directional']")[0].checked && !dir.same(NOWAY)) {
-              $MAP.map.monsters.push(Array(gridIndex, monsterValue, dir.toInt()));
-            } else $MAP.map.monsters.push(Array(gridIndex, monsterValue));
+            $MAP.map.monsters.push(Array(gridIndex, monsterValue));
             break;
           default:
             $("#error_message").html(`Monster placement not supported on value: ${currentValue}`);
@@ -1089,7 +1055,6 @@ const GAME = {
     ENGINE.resizeAndFill(LAYER.texturecanvas, textureTexture, INI.CANVAS_RESOLUTION);
     const ids = ["wall_resolution", "floor_resolution", "ceil_resolution"];
     for (const [i, pTexture] of [wallTexture, floorTexture, ceilTexture].entries()) {
-      if (!pTexture) continue;
       let res = GAME.getResolution(pTexture);
       $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
     }
@@ -1129,7 +1094,6 @@ const GAME = {
     $("#buttons").append("<input type='button' id='new' value='New'>");
     $("#buttons").append("<input type='button' id='arena' value='Arena'>");
     $("#buttons").append("<input type='button' id='maze' value='Maze'>");
-    $("#buttons").append("<input type='button' id='axonize' value='Axonize'>");
     $("#buttons").append("<input type='button' id='export' value='Export'>");
     $("#buttons").append("<input type='button' id='import' value='Import'>");
     $("#buttons").append("<input type='button' id='copy' value='Copy to Clipboard'>");
@@ -1168,37 +1132,31 @@ const GAME = {
     $("#swap").on("click", GAME.swapGates);
 
     /** pictures */
-    if (DECAL_PAINTINGS.length > 0) {
-      for (const pic of DECAL_PAINTINGS) {
-        $("#picture_decal").append(`<option value="${pic}">${pic}</option>`);
-      }
-      $("#picture_decal").change(function () {
-        ENGINE.drawToId("picturecanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#picture_decal")[0].value], INI.CANVAS_RESOLUTION));
-      });
-      $("#picture_decal").trigger("change");
+    for (const pic of DECAL_PAINTINGS) {
+      $("#picture_decal").append(`<option value="${pic}">${pic}</option>`);
     }
+    $("#picture_decal").change(function () {
+      ENGINE.drawToId("picturecanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#picture_decal")[0].value], INI.CANVAS_RESOLUTION));
+    });
+    $("#picture_decal").trigger("change");
 
     /** crests */
-    if (DECAL_CRESTS.length > 0) {
-      for (const crest of DECAL_CRESTS) {
-        $("#crest_decal").append(`<option value="${crest}">${crest}</option>`);
-      }
-      $("#crest_decal").change(function () {
-        ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
-      });
-      $("#crest_decal").trigger("change");
+    for (const crest of DECAL_CRESTS) {
+      $("#crest_decal").append(`<option value="${crest}">${crest}</option>`);
     }
+    $("#crest_decal").change(function () {
+      ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
+    });
+    $("#crest_decal").trigger("change");
 
     /** lights */
-    if (LIGHT_DECALS.length > 0) {
-      for (const light of LIGHT_DECALS) {
-        $("#light_decal").append(`<option value="${light}">${light}</option>`);
-      }
-      $("#light_decal").change(function () {
-        ENGINE.drawToId("lightcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#light_decal")[0].value], INI.CANVAS_RESOLUTION));
-      });
-      $("#light_decal").trigger("change");
+    for (const light of LIGHT_DECALS) {
+      $("#light_decal").append(`<option value="${light}">${light}</option>`);
     }
+    $("#light_decal").change(function () {
+      ENGINE.drawToId("lightcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#light_decal")[0].value], INI.CANVAS_RESOLUTION));
+    });
+    $("#light_decal").trigger("change");
 
     for (const light in LIGHT_COLORS) {
       $("#lighttype").append(`<option value="${light}">${light}</option>`);
@@ -1215,113 +1173,93 @@ const GAME = {
     $("#materialtype").change(GAME.printMaterialDetails);
 
     /** gates */
-    if (typeof GATE_TYPES !== "undefined") {
-      for (const gateType of GATE_TYPES) {
-        $("#gatetype").append(`<option value="${gateType}">${gateType}</option>`);
-      }
-      ENGINE.drawToId("gatecanvas", 0, 0, ENGINE.resizeCanvas(SPRITE[`DungeonDoor_${$("#gatetype")[0].value}`], INI.CANVAS_RESOLUTION));
-
-      $("#gatetype").change(function () {
-        ENGINE.drawToId("gatecanvas", 0, 0, ENGINE.resizeCanvas(SPRITE[`DungeonDoor_${$("#gatetype")[0].value}`], INI.CANVAS_RESOLUTION));
-      });
+    for (const gateType of GATE_TYPES) {
+      $("#gatetype").append(`<option value="${gateType}">${gateType}</option>`);
     }
+    ENGINE.drawToId("gatecanvas", 0, 0, ENGINE.resizeCanvas(SPRITE[`DungeonDoor_${$("#gatetype")[0].value}`], INI.CANVAS_RESOLUTION));
+
+    $("#gatetype").change(function () {
+      ENGINE.drawToId("gatecanvas", 0, 0, ENGINE.resizeCanvas(SPRITE[`DungeonDoor_${$("#gatetype")[0].value}`], INI.CANVAS_RESOLUTION));
+    });
 
     /** keys */
-    if (typeof KEY_TYPES !== "undefined") {
-      for (const keyType of KEY_TYPES) {
-        $("#key_type").append(`<option value="${keyType}" style="background-color: ${keyType.toLowerCase()}">${keyType}</option>`);
-      }
-
-      $("#key_type").change(function () {
-        let selectedOption = $("#key_type").val().toLowerCase();
-
-        ENGINE.drawToId("keycanvas", 0, 0, SPRITE[`${selectedOption.capitalize()}Key`]);
-
-        switch (selectedOption) {
-          case "emerald":
-            selectedOption = "#50C878";
-            break;
-          case "pearl":
-            selectedOption = "WhiteSmoke";
-            break;
-
-        }
-        $("#key_selection").css("background-color", selectedOption);
-
-      });
-
-      $("#key_type").trigger("change");
+    for (const keyType of KEY_TYPES) {
+      $("#key_type").append(`<option value="${keyType}" style="background-color: ${keyType.toLowerCase()}">${keyType}</option>`);
     }
+    $("#key_type").change(function () {
+      let selectedOption = $("#key_type").val().toLowerCase();
+
+      ENGINE.drawToId("keycanvas", 0, 0, SPRITE[`${selectedOption.capitalize()}Key`]);
+
+      switch (selectedOption) {
+        case "emerald":
+          selectedOption = "#50C878";
+          break;
+        case "pearl":
+          selectedOption = "WhiteSmoke";
+          break;
+
+      }
+      $("#key_selection").css("background-color", selectedOption);
+
+    });
+    $("#key_type").trigger("change");
 
     /** monster */
-    if (typeof MONSTER_TYPE !== "undefined") {
-      for (const monsterType in MONSTER_TYPE) {
-        //$("#monster_type").append(`<option value="${monsterType}">${monsterType} A: ${MONSTER_TYPE[monsterType].attack} D: ${MONSTER_TYPE[monsterType].defense} H: ${MONSTER_TYPE[monsterType].health} M: ${MONSTER_TYPE[monsterType].magic} XP: ${MONSTER_TYPE[monsterType].xp}</option>`);
-        $("#monster_type").append(`<option value="${monsterType}">${monsterType}</option>`);
-      }
+    for (const monsterType in MONSTER_TYPE) {
+      $("#monster_type").append(`<option value="${monsterType}">${monsterType} A: ${MONSTER_TYPE[monsterType].attack} D: ${MONSTER_TYPE[monsterType].defense} H: ${MONSTER_TYPE[monsterType].health} M: ${MONSTER_TYPE[monsterType].magic} XP: ${MONSTER_TYPE[monsterType].xp}</option>`);
     }
 
     /** scrolls */
-    if (typeof SCROLL_TYPE !== "undefined") {
-      for (const scrollType of SCROLL_TYPE) {
-        $("#scroll_type").append(`<option value="${scrollType}">${scrollType}`);
-      }
-      $("#scroll_type").change(function () {
-        ENGINE.drawToId("scrollcanvas", 0, 0, SPRITE[`SCR_${$("#scroll_type")[0].value}`]);
-      });
-      $("#scroll_type").trigger("change");
+    for (const scrollType of SCROLL_TYPE) {
+      $("#scroll_type").append(`<option value="${scrollType}">${scrollType}`);
     }
+    $("#scroll_type").change(function () {
+      ENGINE.drawToId("scrollcanvas", 0, 0, SPRITE[`SCR_${$("#scroll_type")[0].value}`]);
+    });
+    $("#scroll_type").trigger("change");
 
-    /** gold */
-    if (typeof GOLD_ITEM_TYPE !== "undefined") {
-      for (const goldType in GOLD_ITEM_TYPE) {
-        $("#gold_type").append(`<option value="${goldType}">${goldType}</option>`);
-      }
-      $("#gold_type").change(function () {
-        const sprite = $("#gold_type")[0].value;
-        ENGINE.drawToId("gold_canvas", 0, 0, SPRITE[sprite]);
-      });
-      $("#gold_type").trigger("change");
+    for (const goldType in GOLD_ITEM_TYPE) {
+      $("#gold_type").append(`<option value="${goldType}">${goldType}</option>`);
     }
+    $("#gold_type").change(function () {
+      const sprite = $("#gold_type")[0].value;
+      ENGINE.drawToId("gold_canvas", 0, 0, SPRITE[sprite]);
+    });
+    $("#gold_type").trigger("change");
 
     //skills
-    if (typeof SKILL_ITEM_TYPE !== "undefined") {
-      for (const skillType in SKILL_ITEM_TYPE) {
-        $("#skill_type").append(`<option value="${skillType}">${skillType}</option>`);
-      }
-      $("#skill_type").change(function () {
-        const skill_type = $("#skill_type")[0].value;
-        ENGINE.drawToId("skillcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[SKILL_ITEM_TYPE[skill_type].inventorySprite], INI.CANVAS_RESOLUTION));
-      });
-      $("#skill_type").trigger("change");
+    for (const skillType in SKILL_ITEM_TYPE) {
+      $("#skill_type").append(`<option value="${skillType}">${skillType}</option>`);
     }
+    $("#skill_type").change(function () {
+      const skill_type = $("#skill_type")[0].value;
+      ENGINE.drawToId("skillcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[SKILL_ITEM_TYPE[skill_type].inventorySprite], INI.CANVAS_RESOLUTION));
+    });
+    $("#skill_type").trigger("change");
 
     //containers
-    if (typeof CONTAINER_ITEM_TYPE !== "undefined") {
-      for (const containerType in CONTAINER_ITEM_TYPE) {
-        $("#container_type").append(`<option value="${containerType}">${containerType}</option>`);
-      }
-      $("#container_type").change(function () {
-        const container_type = $("#container_type")[0].value;
-        ENGINE.drawToId("containercanvas", 0, 0, ENGINE.conditionalResize(TEXTURE[CONTAINER_ITEM_TYPE[container_type].texture], INI.CANVAS_RESOLUTION));
-      });
-      $("#container_type").trigger("change");
+    for (const containerType in CONTAINER_ITEM_TYPE) {
+      $("#container_type").append(`<option value="${containerType}">${containerType}</option>`);
     }
+    $("#container_type").change(function () {
+      const container_type = $("#container_type")[0].value;
+      ENGINE.drawToId("containercanvas", 0, 0, ENGINE.conditionalResize(TEXTURE[CONTAINER_ITEM_TYPE[container_type].texture], INI.CANVAS_RESOLUTION));
+    });
+    $("#container_type").trigger("change");
 
     //container content
-    if (typeof CONTAINER_CONTENT_LIST !== "undefined") {
-      for (const contentType of CONTAINER_CONTENT_LIST) {
-        $("#content_type").append(`<option value="${contentType}">${contentType}</option>`);
-      }
-      $("#content_type").change(function () {
-        const sprite = $("#content_type")[0].value.split(".")[1];
-        ENGINE.drawToId("container_item_canvas", 0, 0, SPRITE[sprite]);
-      });
-      $("#content_type").trigger("change");
+    for (const contentType of CONTAINER_CONTENT_LIST) {
+      $("#content_type").append(`<option value="${contentType}">${contentType}</option>`);
     }
+    $("#content_type").change(function () {
+      const sprite = $("#content_type")[0].value.split(".")[1];
+      ENGINE.drawToId("container_item_canvas", 0, 0, SPRITE[sprite]);
+    });
+    $("#content_type").trigger("change");
 
     //shrines
-    if (typeof SHRINE_TYPE !== "undefined" && Object.keys(SHRINE_TYPE).length > 0) {
+    if (Object.keys(SHRINE_TYPE).length > 0) {
       for (const shrineType in SHRINE_TYPE) {
         $("#shrine_type").append(`<option value="${shrineType}">${shrineType}</option>`);
       }
@@ -1332,7 +1270,7 @@ const GAME = {
       $("#shrine_type").trigger("change");
     }
 
-    if (typeof INTERACTION_SHRINE !== "undefined" && Object.keys(INTERACTION_SHRINE).length > 0) {
+    if (Object.keys(INTERACTION_SHRINE).length > 0) {
       for (const item_shrine_type in INTERACTION_SHRINE) {
         $("#item_shrine_type").append(`<option value="${item_shrine_type}">${item_shrine_type}</option>`);
       }
@@ -1343,7 +1281,7 @@ const GAME = {
       $("#item_shrine_type").trigger("change");
     }
 
-    if (typeof ORACLE_TYPE !== "undefined" && Object.keys(ORACLE_TYPE).length > 0) {
+    if (Object.keys(ORACLE_TYPE).length > 0) {
       for (const oracleType in ORACLE_TYPE) {
         $("#oracle_type").append(`<option value="${oracleType}">${oracleType}</option>`);
       }
@@ -1355,30 +1293,23 @@ const GAME = {
     }
 
     //fires
-    if (typeof FIRE_TYPES !== "undefined" && Object.keys(FIRE_TYPES).length > 0) {
-      for (const fire in FIRE_TYPES) {
-        $("#fire_type").append(`<option value="${fire}">${fire}</option>`);
-      }
+    for (const fire in FIRE_TYPES) {
+      $("#fire_type").append(`<option value="${fire}">${fire}</option>`);
     }
-
     //triggers
-    if (typeof TRIGGER_DECALS !== "undefined") {
-      for (const triggerDecal of TRIGGER_DECALS) {
-        $("#trigger_decal").append(`<option value="${triggerDecal}">${triggerDecal}</option>`);
-      }
-      $("#trigger_decal").change(function () {
-        ENGINE.drawToId("triggercanvas", 0, 0, SPRITE[$("#trigger_decal")[0].value]);
-      });
-      $("#trigger_decal").trigger("change");
+    for (const triggerDecal of TRIGGER_DECALS) {
+      $("#trigger_decal").append(`<option value="${triggerDecal}">${triggerDecal}</option>`);
+    }
+    $("#trigger_decal").change(function () {
+      ENGINE.drawToId("triggercanvas", 0, 0, SPRITE[$("#trigger_decal")[0].value]);
+    });
+    $("#trigger_decal").trigger("change");
+
+    for (const action of TRIGGER_ACTIONS) {
+      $("#trigger_actions").append(`<option value="${action}">${action}</option>`);
     }
 
-    if (typeof TRIGGER_ACTIONS !== "undefined") {
-      for (const action of TRIGGER_ACTIONS) {
-        $("#trigger_actions").append(`<option value="${action}">${action}</option>`);
-      }
-    }
-
-    if (typeof INTERACTION_ENTITY !== "undefined" && Object.keys(INTERACTION_ENTITY).length > 0) {
+    if (Object.keys(INTERACTION_ENTITY).length > 0) {
       for (const entity in INTERACTION_ENTITY) {
         $("#entity_type").append(`<option value="${entity}">${entity}</option>`);
       }
@@ -1391,49 +1322,40 @@ const GAME = {
     }
 
     //interaction objects
-    if (typeof INTERACTION_OBJECT !== "undefined") {
-      for (const obj in INTERACTION_OBJECT) {
-        $("#interaction_object_type").append(`<option value="${obj}">${obj}</option>`);
-      }
-
-      $("#interaction_object_type").change(function () {
-        ENGINE.drawToId("object_canvas", 0, 0, SPRITE[INTERACTION_OBJECT[$("#interaction_object_type")[0].value].inventorySprite]);
-      });
-      $("#interaction_object_type").trigger("change");
+    for (const obj in INTERACTION_OBJECT) {
+      $("#interaction_object_type").append(`<option value="${obj}">${obj}</option>`);
     }
+
+    $("#interaction_object_type").change(function () {
+      ENGINE.drawToId("object_canvas", 0, 0, SPRITE[INTERACTION_OBJECT[$("#interaction_object_type")[0].value].inventorySprite]);
+    });
+    $("#interaction_object_type").trigger("change");
 
     //movables
-    if (typeof MOVABLE_INTERACTION_OBJECT !== "undefined") {
-      for (const obj in MOVABLE_INTERACTION_OBJECT) {
-        $("#movable_type").append(`<option value="${obj}">${obj}</option>`);
-      }
-
-      $("#movable_type").change(function () {
-        ENGINE.drawToId("movable_canvas", 0, 0, SPRITE[MOVABLE_INTERACTION_OBJECT[$("#movable_type")[0].value].inventorySprite]);
-      });
-      $("#movable_type").trigger("change");
+    for (const obj in MOVABLE_INTERACTION_OBJECT) {
+      $("#movable_type").append(`<option value="${obj}">${obj}</option>`);
     }
 
-    //interactors
-    if (typeof INTERACTOR !== "undefined") {
-      for (const obj in INTERACTOR) {
-        $("#interactor_type").append(`<option value="${obj}">${obj}</option>`);
-      }
+    $("#movable_type").change(function () {
+      ENGINE.drawToId("movable_canvas", 0, 0, SPRITE[MOVABLE_INTERACTION_OBJECT[$("#movable_type")[0].value].inventorySprite]);
+    });
+    $("#movable_type").trigger("change");
+
+    for (const obj in INTERACTOR) {
+      $("#interactor_type").append(`<option value="${obj}">${obj}</option>`);
     }
 
     //traps
-    if (typeof TRAP_ACTION_LIST !== "undefined") {
-      for (const action of TRAP_ACTION_LIST) {
-        $("#trap_type").append(`<option value="${action}">${action}</option>`);
-      }
-      $("#trap_type").change(() => {
-        $("#trap_entity").html("");
-        for (const val of TRAP_ACTIONS[$("#trap_type")[0].value]) {
-          $("#trap_entity").append(`<option value="${val}">${val}</option>`);
-        }
-      });
-      $("#trap_type").trigger("change");
+    for (const action of TRAP_ACTION_LIST) {
+      $("#trap_type").append(`<option value="${action}">${action}</option>`);
     }
+    $("#trap_type").change(() => {
+      $("#trap_entity").html("");
+      for (const val of TRAP_ACTIONS[$("#trap_type")[0].value]) {
+        $("#trap_entity").append(`<option value="${val}">${val}</option>`);
+      }
+    });
+    $("#trap_type").trigger("change");
 
     //lairs
     if (LAIR_DECALS.length > 0) {

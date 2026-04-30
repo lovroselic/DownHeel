@@ -79,6 +79,13 @@ const PRG = {
         $("#horizontalGrid").change(GAME.updateWH);
         $("#gridsize").change(GAME.updateWH);
 
+        $("#engine_version").html(ENGINE.VERSION);
+        $("#grid_version").html(GRID.VERSION);
+        $("#maze_version").html(DUNGEON.VERSION);
+        $("#lib_version").html(LIB.VERSION);
+        $("#webgl_version").html(WebGL.VERSION);
+        $("#iam_version").html(IndexArrayManagers.VERSION);
+
         $(".section").show();
     },
     start() {
@@ -88,9 +95,11 @@ const PRG = {
     }
 };
 
+const HERO = {};
+
 const GAME = {
     start() {
-        //WebGL.setContext('webgl');
+        WebGL.setContext('webgl');
         $MAP.properties = MAP_TOOLS.properties;
         $MAP.lists = MAP_TOOLS.lists;
         $("#bottom")[0].scrollIntoView();
@@ -98,8 +107,66 @@ const GAME = {
         $(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, GAME.mouseClick);
         GAME.init();
         GAME.started = true;
-        //GAME.level = "Demo";
-        //GAME.levelStart();
+        GAME.level = "Demo";
+        GAME.levelStart();
+    },
+    levelStart() {
+        GAME.initLevel(GAME.level);
+        WebGL.GAME.setFirstPerson();
+        WebGL.renderScene($MAP.map);
+    },
+    newDungeon(level) {
+        MAP_TOOLS.unpack(level);
+    },
+    buildWorld(level) {
+        console.warn("building world, level", level);
+        SPAWN_TOOLS.spawn(level);
+        MAP[level].world = WORLD.build(MAP[level].map);
+        $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
+    },
+    setWorld(level, decalsAreSet = false) {
+        console.log("setting world");
+        console.time("setWorld");
+
+        const textureData = {
+            wall: TEXTURE[$("#walltexture")[0].value],
+            floor: TEXTURE[$("#floortexture")[0].value],
+        };
+
+        WebGL.updateShaders();
+        WebGL.init('webgl', MAP[level].world, textureData, HERO.player, decalsAreSet);
+        console.timeEnd("setWorld");
+    },
+    initLevel(level) {
+        this.newDungeon(level);
+        const start_dir = MAP[level].map.startPosition.vector;
+        let start_grid = MAP[level].map.startPosition.grid;
+        start_grid = Vector3.from_Grid(Grid.toCenter(start_grid), 0.6);
+        HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
+        //WebGL.CONFIG.set("first_person", false);
+
+        WebGL.init_required_IAM($MAP.map, HERO);
+        GAME.setCameraView();
+        this.buildWorld(level);
+        this.setWorld(level);
+        console.info("GAME init completed");
+    },
+     setCameraView() {
+        WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
+        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.9, new Vector3(0, -0.5, 0), 1, 70);
+        
+        switch (WebGL.CONFIG.cameraType) {
+            case "first_person":
+                WebGL.hero.player.associateExternalCamera(WebGL.hero.firstPersonCamera);
+                WebGL.setCamera(WebGL.hero.firstPersonCamera);
+                break;
+            case "third_person":
+                WebGL.hero.player.associateExternalCamera(WebGL.hero.topCamera);
+                WebGL.setCamera(WebGL.hero.topCamera);
+                break;
+            default:
+                throw "WebGL.CONFIG.cameraType error";
+        }
     },
     setup() {
         console.log("GAME SETUP started");
@@ -113,7 +180,7 @@ const GAME = {
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
         $("#buttons").append("<input type='button' id='arena' value='Arena'>");
-        $("#buttons").append("<input type='button' id='maze' value='Maze'>");
+        //$("#buttons").append("<input type='button' id='maze' value='Maze'>");
         $("#buttons").append("<input type='button' id='export' value='Export'>");
         $("#buttons").append("<input type='button' id='import' value='Import'>");
         $("#buttons").append("<input type='button' id='copy' value='Copy to Clipboard'>");
@@ -125,6 +192,50 @@ const GAME = {
         $("#fill_value").append(`<option value="${MAPDICT.HOLE}">Hole</option>`);
         $("#fill_value").append(`<option value="${MAPDICT.WALL}">Wall</option>`);
 
+        //textures
+        for (const prop of TEXTURE_LIST) {
+            $("#walltexture").append(`<option value="${prop}">${prop}</option>`);
+            $("#floortexture").append(`<option value="${prop}">${prop}</option>`);
+            //$("#ceiltexture").append(`<option value="${prop}">${prop}</option>`);
+            $("#texture_decal").append(`<option value="${prop}">${prop}</option>`);
+        }
+
+        LAYER.wallcanvas = $("#wallcanvas")[0].getContext("2d");
+        LAYER.floorcanvas = $("#floorcanvas")[0].getContext("2d");
+        //LAYER.ceilcanvas = $("#ceilcanvas")[0].getContext("2d");
+        LAYER.texturecanvas = $("#texturecanvas")[0].getContext("2d");
+
+        GAME.updateTextures();
+        $("#walltexture").change(GAME.repaintTextures);
+        $("#floortexture").change(GAME.repaintTextures);
+        //$("#ceiltexture").change(GAME.repaintTextures);
+        $("#texture_decal").change(GAME.repaintTextures);
+        console.log("GAME SETUP completed");
+    },
+    getResolution(texture) {
+        return [texture.width, texture.height];
+    },
+    updateTextures() {
+        const wallTexture = TEXTURE[$("#walltexture")[0].value];
+        const floorTexture = TEXTURE[$("#floortexture")[0].value];
+        //const ceilTexture = TEXTURE[$("#ceiltexture")[0].value];
+        const textureTexture = TEXTURE[$("#texture_decal")[0].value];
+        ENGINE.resizeAndFill(LAYER.wallcanvas, wallTexture, 320);
+        ENGINE.resizeAndFill(LAYER.floorcanvas, floorTexture, 320);
+        //ENGINE.resizeAndFill(LAYER.ceilcanvas, ceilTexture, 320);
+        ENGINE.resizeAndFill(LAYER.texturecanvas, textureTexture, INI.CANVAS_RESOLUTION);
+        const ids = ["wall_resolution", "floor_resolution"];
+        for (const [i, pTexture] of [wallTexture, floorTexture].entries()) {
+            let res = GAME.getResolution(pTexture);
+            $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
+        }
+        if (GAME.started) GAME.levelStart(); //
+    },
+    repaintTextures() {
+        GAME.updateTextures();
+        if ($("#selector input[name=renderer]:checked").val() === "texture") {
+            GAME.texture();
+        }
     },
     updateWH() {
         if (isNaN(parseInt($("#verticalGrid").val(), 10))) $("#verticalGrid").val(32);
