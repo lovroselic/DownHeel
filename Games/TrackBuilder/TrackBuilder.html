@@ -67,7 +67,7 @@
                             <input type="radio" name="renderer" value="block" checked="checked"> Block <br />
                             <input type="checkbox" id="corr" value="corr" name="corr"> Draw corridor gridline<br />
                             <input type="checkbox" id="grid" value="grid" name="grid" checked="checked"> Main grid<br />
-                            <input type="checkbox" id="coord" value="coord" name="coord" >
+                            <input type="checkbox" id="coord" value="coord" name="coord">
                             Coordinates
                             <input type="checkbox" id="all_coord" value="all_coord" name="all_coord">All
                             <br />
@@ -117,7 +117,39 @@
                             WebGL: <span id="webgl_version"></span><br>
                         </fieldset>
 
+                        <fieldset>
+                            <legend>
+                                Direction
+                            </legend>
 
+                            Seed:
+                            <input id="dir_seed" type="text" size="10" maxlength="16" value="666"><br />
+                            Amplitude:
+                            <input id="dir_amp" type="text" size="5" maxlength="8" value="3.0"><br />
+                            Wavelength:
+                            <input id="dir_wl" type="text" size="5" maxlength="8" value="32"> <br />
+                            Persistence:
+                            <input id="dir_persist" type="text" size="5" maxlength="8" value="0.5"><br />
+                            Lacunarity:
+                            <input id="dir_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
+                            Bias deg:
+                            <input id="dir_bias" type="text" size="5" maxlength="8" value="0.0"><br />
+                            Octaves:
+                            <input id="dir_octaves" type="text" size="3" maxlength="3" value="3"><br />
+                            Smoothing:
+                            <select id="dir_smooth">
+                                <option value="cosine">Cosine</option>
+                                <option value="smoothstep">Smoothstep</option>
+                                <option value="smootherstep" selected>Smootherstep</option>
+                            </select>
+                            <br />
+
+                            <input type="button" id="dir_generate" value="Generate direction noise">
+                            <br />
+
+                            <span id="dir_stats">No direction noise yet.</span>
+
+                        </fieldset>
 
                     </div>
                 </div>
@@ -317,10 +349,10 @@
                         <textarea id="exp" style="width: 1200px; height: 256px;">
 Demo : {
 name: "Demo",
-data: '{"width":"7","height":"7","depth":1,"map":"BB3AA4BB2AA2BAA6BB6ABB3ABABB3ABB6ABB5$BA"}',
+data: '{"width":128,"height":3,"depth":1,"map":"AA384$"}',
 wall: "RockWall_SDXL_003",
 floor: "RockWall_SDXL_003",
-start: '[17,1]',
+start: '[128,5]',
 }
                         </textarea>
                     </fieldset>
@@ -352,7 +384,7 @@ start: '[17,1]',
     <script src="/External/jquery-3.6.0.min.js"></script>
     <script src="/External/gl-matrix-min.js" type="text/javascript"></script>
     <!-- JS -->
-    <script src="/Code/JS/Library/Engine/Prototype_5_02.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/Prototype_5_03.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/LS_Matrix_1_04.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/ENGINE_5_01.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/GRID_4_02.js" type="text/javascript"></script>
@@ -361,6 +393,8 @@ start: '[17,1]',
     <script src='/Code/JS/Library/Engine/IndexArrayManagers_4_01.js'></script>
     <script src="/Code/JS/Library/Engine/WebGL_2_01.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/Lights_and_materials_1_05.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/Perlin_1_01.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/TERRAIN_1_02.js" type="text/javascript"></script>
     <script src="/Assets/Definitions/DownHeel/assets_DownHeel.js" type="text/javascript"></script>
     <script src="/Assets/Definitions/DownHeel/Monsters_DownHeel.js" type="text/javascript"></script>
     <script src="/Assets/Definitions/TrackBuilder/MAP_forTrackBuilder.js" type="text/javascript"></script>

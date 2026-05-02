@@ -18,10 +18,10 @@ const INI = {
 const MAP = {
     Demo: {
         name: "Demo",
-        data: '{"width":7,"height":7,"depth":1,"map":"BB3AA4BB2AA2BAA6BB6ABB3ABABB3ABB6ABB5$BA"}',
+        data: '{"width":128,"height":3,"depth":1,"map":"AA384$"}',
         wall: "RockWall_SDXL_003",
         floor: "RockWall_SDXL_003",
-        start: '[17,1]',
+        start: '[128,5]',
     }
 };
 
@@ -47,7 +47,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.1.2",
+    VERSION: "0.1.3",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -186,9 +186,12 @@ const GAME = {
         GAME.updateWH();
 
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
+
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["pacgrid", "wall", "grid", "hint", "coord", "click"], null);
+        ENGINE.addBOX("DIRECTION", 2048, 128, ["direction"], null);
+        ENGINE.addBOX("WIDTH", 2048, 128, ["width"], null);
+        ENGINE.addBOX("SLOPE", 2048, 128, ["slope"], null);
         ENGINE.addBOX("WEBGL", 800, 600, ["3d_webgl"], null);
-        ENGINE.addBOX("DEBUG", 320, 200, ["debug"], null);
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
         $("#buttons").append("<input type='button' id='export' value='Export'>");
@@ -304,6 +307,14 @@ const GAME = {
                     break;
             }
         });
+
+        /** noise functions */
+
+        $("#dir_generate").click(function () {
+            DIRECTION_NOISE.preview();
+        });
+
+        DIRECTION_NOISE.preview();
 
         console.log("GAME SETUP completed");
     },
@@ -778,8 +789,239 @@ floor: "${$("#floortexture")[0].value}",
         }
     },
     resizeGL_window() {
-        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 16}px`)
+        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * (128)}px`)
     },
+    parseFloatSafe(value, fallback) {
+        const n = parseFloat(value);
+        return Number.isFinite(n) ? n : fallback;
+    },
+
+    parseIntSafe(value, fallback) {
+        const n = parseInt(value, 10);
+        return Number.isFinite(n) ? n : fallback;
+    },
+    roundValue(value, decimals = 3) {
+        const scale = 10 ** decimals;
+        return Math.round(value * scale) / scale;
+    },
+    getMapWidth() {
+        if ($MAP && $MAP.width) {
+            return parseInt($MAP.width, 10) || 128;
+        }
+
+        return parseInt($("#horizontalGrid").val(), 10) || 128;
+    },
+    getGridPx() {
+        return parseInt($("#gridsize").val(), 10) || 16;
+    },
+};
+
+const DIRECTION_NOISE = {
+    DEFAULTS: {
+        seed: 666,
+        amplitude: 3.0,                                 // max deviation around bias, in degrees
+        wavelength: 32,
+        octaves: 3,
+        persistence: 0.5,
+        lacunarity: 2.0,
+        biasDeg: 0.0,
+        smooth: "smootherstep",
+        minDeg: -45,
+        maxDeg: 45,
+        decimals: 3
+    },
+    readParams() {
+        const d = this.DEFAULTS;
+        const seed = GAME.parseIntSafe($("#dir_seed").val(), d.seed);
+        const amplitude = GAME.parseFloatSafe($("#dir_amp").val(), d.amplitude);
+        const wavelength = GAME.parseFloatSafe($("#dir_wl").val(), d.wavelength);
+        const persistence = GAME.parseFloatSafe($("#dir_persist").val(), d.persistence);
+        const lacunarity = GAME.parseFloatSafe($("#dir_lacunarity").val(), d.lacunarity);
+        const biasDeg = GAME.parseFloatSafe($("#dir_bias").val(), d.biasDeg);
+        const smooth = $("#dir_smooth").val() || d.smooth;
+        const octaves = GAME.parseIntSafe($("#dir_octaves").val(), d.octaves);
+
+        return {
+            seed: seed,
+            amplitude: Math.clamp(amplitude, 0, 45),
+            wavelength: Math.clamp(wavelength, 1, 512),
+            octaves: Math.clamp(octaves, 1, 8),
+            persistence: Math.clamp(persistence, 0, 1),
+            lacunarity: Math.clamp(lacunarity, 1.01, 8),
+            biasDeg: Math.clamp(biasDeg, -45, 45),
+            smooth: smooth,
+            minDeg: d.minDeg,
+            maxDeg: d.maxDeg,
+            decimals: d.decimals
+        };
+    },
+    rawToDegrees(raw, params) {
+        /*
+            raw comes from PERLIN as -0.5 ... +0.5
+
+            raw * 2 gives -1.0 ... +1.0
+
+            amplitude = maximum direction deviation around bias
+            biasDeg   = center direction
+
+        */
+
+        let deg = params.biasDeg + raw * 2 * params.amplitude;
+        deg = Math.clamp(deg, params.minDeg, params.maxDeg);
+
+        return GAME.roundValue(deg, params.decimals);
+    },
+    generateValues(width = null, params = null) {
+        const W = width || GAME.getMapWidth();
+        const P = params || this.readParams();
+
+        const raw = PERLIN.generateFractalNoise1D({
+            width: W,
+            seed: P.seed,
+            wavelength: P.wavelength,
+            octaves: P.octaves,
+            persistence: P.persistence,
+            lacunarity: P.lacunarity,
+            smooth: P.smooth
+        });
+
+        return raw.map(v => this.rawToDegrees(v, P));
+    },
+    build(width = null, params = null) {
+        const W = width || GAME.getMapWidth();
+        const P = params || this.readParams();
+
+        return {
+            units: "degrees",
+            min: P.minDeg,
+            max: P.maxDeg,
+            values: this.generateValues(W, P)
+        };
+    },
+    stats(values) {
+        if (!values || values.length === 0) {
+            return {
+                min: 0,
+                max: 0,
+                avg: 0,
+                absMax: 0
+            };
+        }
+
+        let min = Infinity;
+        let max = -Infinity;
+        let sum = 0;
+        let absMax = 0;
+
+        for (const v of values) {
+            min = Math.min(min, v);
+            max = Math.max(max, v);
+            sum += v;
+            absMax = Math.max(absMax, Math.abs(v));
+        }
+
+        return {
+            min: min,
+            max: max,
+            avg: sum / values.length,
+            absMax: absMax
+        };
+    },
+    updateStats(directionData) {
+        if (!directionData || !directionData.values) {
+            $("#dir_stats").html("No direction noise yet.");
+            return;
+        }
+
+        const s = this.stats(directionData.values);
+
+        $("#dir_stats").html(
+            `min: ${s.min.toFixed(3)}&deg;, ` +
+            `max: ${s.max.toFixed(3)}&deg;, ` +
+            `avg: ${s.avg.toFixed(3)}&deg;, ` +
+            `samples: ${directionData.values.length}`
+        );
+    },
+    draw(directionData) {
+        if (!directionData || !directionData.values) return;
+
+        const CTX = LAYER.direction;
+        const values = directionData.values;
+        //console.info("directionData.values", values);
+        const gridPx = GAME.getGridPx();
+        const mapWidth = values.length;
+
+        const W = mapWidth * gridPx;
+        const H = 128;
+
+        ENGINE.clearLayer("direction");
+        ENGINE.fillLayer("direction", "#101010");
+
+        const midY = Math.floor(H / 2);
+        const minDeg = directionData.min ?? -45;
+        const maxDeg = directionData.max ?? 45;
+        const legalAbs = Math.max(Math.abs(minDeg), Math.abs(maxDeg), 1);
+        const s = this.stats(values);
+
+        // Auto-scale to the generated curve, but keep at least 1 degree visible range.
+        const maxAbs = Math.min(legalAbs, Math.max(s.absMax * 1.15, 1.0));
+
+        // subtle horizontal guide lines
+        const guideCol = "#242424";
+        ENGINE.drawLine(CTX, new Point(0, H * 0.15), new Point(W, H * 0.15), guideCol, 1);
+        ENGINE.drawLine(CTX, new Point(0, H * 0.85), new Point(W, H * 0.85), guideCol, 1);
+
+        // zero line
+        ENGINE.drawLine(CTX, new Point(0, midY), new Point(W, midY), "#666", 1);
+
+        // vertical grid, aligned to map columns
+        const vGridCol = "#202020";
+
+        for (let x = 0; x <= mapWidth; x++) {
+            const px = x * gridPx;
+            ENGINE.drawLine(CTX, new Point(px, 0), new Point(px, H), vGridCol, 1);
+        }
+
+        // curve
+        CTX.strokeStyle = "#2ACBE8";
+        CTX.lineWidth = 1;
+        CTX.beginPath();
+
+        for (let i = 0; i < values.length; i++) {
+            const x = i * gridPx + gridPx * 0.5;
+            const y = midY - values[i] / maxAbs * (H * 0.42);
+
+            console.warn(i, x, y);
+
+            if (i === 0) CTX.moveTo(x, y);
+            else CTX.lineTo(x, y);
+        }
+
+        CTX.stroke();
+
+        // dots
+        CTX.fillStyle = "#FFFFFF";
+
+        for (let i = 0; i < values.length; i++) {
+            const x = i * gridPx + gridPx * 0.5;
+            const y = midY - values[i] / maxAbs * (H * 0.42);
+            CTX.pixelAt(x - 1, y - 1);
+        }
+
+        // labels
+        CTX.fillStyle = "#DDD";
+        CTX.font = "12px Consolas, monospace";
+        CTX.fillText(`Direction: ${values.length} samples, preview scale +/-${maxAbs.toFixed(2)} deg`, 8, 14);
+        CTX.fillText(`+${maxAbs.toFixed(2)} deg`, 8, 28);
+        CTX.fillText(`0 deg`, 8, midY - 4);
+        CTX.fillText(`-${maxAbs.toFixed(2)} deg`, 8, H - 8);
+    },
+    preview(width = null) {
+        const direction = this.build(width);
+        this.draw(direction);
+        this.updateStats(direction);
+        return direction;
+    }
 };
 
 $(function () {

@@ -1,4 +1,4 @@
-/* LS CSS v0.9.1 */
+/* LS CSS v0.9.2 */
 
 @charset "utf-8";
 
@@ -367,7 +367,6 @@ a.nav-link.bright-white:hover {
 .LS_title {
     font-family: LaughingSkull;
     font-weight: 300;
-    /* font-size: 96px; */
     font-size: 5rem;
     letter-spacing: 2px;
     text-shadow: 1px 1px #666;
@@ -435,6 +434,11 @@ a.nav-link.bright-white:hover {
 
 /* Games compatibility and specifics */
 
+/*#game {
+    position: relative;
+    overflow: visible;
+}*/
+
 .win_black {
     background: linear-gradient(90deg, #000, #222);
     border-radius: 13px;
@@ -445,7 +449,6 @@ a.nav-link.bright-white:hover {
     margin-right: auto;
     max-width: calc(100% - 3rem);
 }
-
 
 .win {
     background: #222;

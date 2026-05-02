@@ -6,7 +6,7 @@
 console.clear();
 
 const LIB = {
-    VERSION: "5.02",
+    VERSION: "5.03",
     CSS: "color: #EFE",
     log: function () {
         console.log(`%cPrototype LIB ${LIB.VERSION} loaded`, LIB.CSS);
@@ -15,7 +15,8 @@ const LIB = {
 
 /*
 Prototype and helpful functions library
-as used by LS
+as used by LS;
+yes, I am aware this is a bad practice, but it feels sooooo good;
 
 changelog:
 5.00: new fresh version, 3D grids vectors
@@ -24,6 +25,8 @@ changelog:
 5.02: roundRect  fiasco corrected, renamed roundRect to roundRectLegacy
     : ctx.drawLine
     : ctx.linePath
+5.03: Math.clamp
+    : Math.lerp
 */
 
 (function () {
@@ -332,6 +335,14 @@ Math.roundFloat = function (num, decimalPlaces) {
 
 Math.frac = function (num) {
     return num - Math.trunc(num);
+}
+
+Math.clamp = function (value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+Math.lerp = function (a, b, t) {
+    return a * (1 - t) + b * t;
 }
 
 CanvasRenderingContext2D.prototype.pixelAt = function (x, y, size = 1) {
