@@ -47,7 +47,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.1.3",
+    VERSION: "0.1.4",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -309,12 +309,13 @@ const GAME = {
         });
 
         /** noise functions */
+        GAME.ensureTerrain();
 
         $("#dir_generate").click(function () {
-            DIRECTION_NOISE.preview();
+            NOISE_FUNCTION.direction_noise_preview();
         });
 
-        DIRECTION_NOISE.preview();
+        NOISE_FUNCTION.direction_noise_preview();
 
         console.log("GAME SETUP completed");
     },
@@ -795,7 +796,6 @@ floor: "${$("#floortexture")[0].value}",
         const n = parseFloat(value);
         return Number.isFinite(n) ? n : fallback;
     },
-
     parseIntSafe(value, fallback) {
         const n = parseInt(value, 10);
         return Number.isFinite(n) ? n : fallback;
@@ -808,16 +808,32 @@ floor: "${$("#floortexture")[0].value}",
         if ($MAP && $MAP.width) {
             return parseInt($MAP.width, 10) || 128;
         }
-
         return parseInt($("#horizontalGrid").val(), 10) || 128;
     },
     getGridPx() {
         return parseInt($("#gridsize").val(), 10) || 16;
     },
+    ensureTerrain() {
+        if (!$MAP.map.terrain) {
+            $MAP.map.terrain = {};
+        }
+
+        if (!$MAP.map.terrain.direction) {
+            $MAP.map.terrain.direction = {};
+        }
+
+        if (!$MAP.map.terrain.width) {
+            $MAP.map.terrain.width = {};
+        }
+
+        if (!$MAP.map.terrain.slope) {
+            $MAP.map.terrain.slope = {};
+        }
+    },
 };
 
-const DIRECTION_NOISE = {
-    DEFAULTS: {
+const NOISE_FUNCTION = {
+    DIRECTION_NOISE_DEFAULTS: {
         seed: 666,
         amplitude: 3.0,                                 // max deviation around bias, in degrees
         wavelength: 32,
@@ -830,8 +846,8 @@ const DIRECTION_NOISE = {
         maxDeg: 45,
         decimals: 3
     },
-    readParams() {
-        const d = this.DEFAULTS;
+    readDirectionParams() {
+        const d = this.DIRECTION_NOISE_DEFAULTS;
         const seed = GAME.parseIntSafe($("#dir_seed").val(), d.seed);
         const amplitude = GAME.parseFloatSafe($("#dir_amp").val(), d.amplitude);
         const wavelength = GAME.parseFloatSafe($("#dir_wl").val(), d.wavelength);
@@ -858,22 +874,18 @@ const DIRECTION_NOISE = {
     rawToDegrees(raw, params) {
         /*
             raw comes from PERLIN as -0.5 ... +0.5
-
             raw * 2 gives -1.0 ... +1.0
-
             amplitude = maximum direction deviation around bias
             biasDeg   = center direction
-
         */
 
         let deg = params.biasDeg + raw * 2 * params.amplitude;
         deg = Math.clamp(deg, params.minDeg, params.maxDeg);
-
         return GAME.roundValue(deg, params.decimals);
     },
-    generateValues(width = null, params = null) {
+    generateDirectionValues(width = null, params = null) {
         const W = width || GAME.getMapWidth();
-        const P = params || this.readParams();
+        const P = params || this.readDirectionParams();
 
         const raw = PERLIN.generateFractalNoise1D({
             width: W,
@@ -887,15 +899,20 @@ const DIRECTION_NOISE = {
 
         return raw.map(v => this.rawToDegrees(v, P));
     },
-    build(width = null, params = null) {
+    buildDirections(width = null, params = null) {
         const W = width || GAME.getMapWidth();
-        const P = params || this.readParams();
+        const P = params || this.readDirectionParams();
+
+        const values = this.generateDirectionValues(W, P);
+        $MAP.map.terrain.direction.parameters = P;
+        $MAP.map.terrain.direction.values = values;
+
+        console.error("MAP now", $MAP.map);
 
         return {
             units: "degrees",
-            min: P.minDeg,
-            max: P.maxDeg,
-            values: this.generateValues(W, P)
+            parameters: P,
+            values: values,
         };
     },
     stats(values) {
@@ -927,7 +944,7 @@ const DIRECTION_NOISE = {
             absMax: absMax
         };
     },
-    updateStats(directionData) {
+    updateDirectionStats(directionData) {
         if (!directionData || !directionData.values) {
             $("#dir_stats").html("No direction noise yet.");
             return;
@@ -942,45 +959,42 @@ const DIRECTION_NOISE = {
             `samples: ${directionData.values.length}`
         );
     },
-    draw(directionData) {
-        if (!directionData || !directionData.values) return;
+    drawBackground(layer, gridPx, W, H, midY, mapWidth) {
+        const CTX = LAYER[layer];
+        ENGINE.clearLayer(layer);
+        ENGINE.fillLayer(layer, "#101010");
 
-        const CTX = LAYER.direction;
-        const values = directionData.values;
-        //console.info("directionData.values", values);
-        const gridPx = GAME.getGridPx();
-        const mapWidth = values.length;
-
-        const W = mapWidth * gridPx;
-        const H = 128;
-
-        ENGINE.clearLayer("direction");
-        ENGINE.fillLayer("direction", "#101010");
-
-        const midY = Math.floor(H / 2);
-        const minDeg = directionData.min ?? -45;
-        const maxDeg = directionData.max ?? 45;
-        const legalAbs = Math.max(Math.abs(minDeg), Math.abs(maxDeg), 1);
-        const s = this.stats(values);
-
-        // Auto-scale to the generated curve, but keep at least 1 degree visible range.
-        const maxAbs = Math.min(legalAbs, Math.max(s.absMax * 1.15, 1.0));
-
-        // subtle horizontal guide lines
         const guideCol = "#242424";
         ENGINE.drawLine(CTX, new Point(0, H * 0.15), new Point(W, H * 0.15), guideCol, 1);
         ENGINE.drawLine(CTX, new Point(0, H * 0.85), new Point(W, H * 0.85), guideCol, 1);
-
-        // zero line
         ENGINE.drawLine(CTX, new Point(0, midY), new Point(W, midY), "#666", 1);
 
-        // vertical grid, aligned to map columns
         const vGridCol = "#202020";
 
         for (let x = 0; x <= mapWidth; x++) {
             const px = x * gridPx;
             ENGINE.drawLine(CTX, new Point(px, 0), new Point(px, H), vGridCol, 1);
         }
+
+    },
+    drawDirections(directionData) {
+        if (!directionData || !directionData.values) return;
+
+        const CTX = LAYER.direction;
+        const gridPx = GAME.getGridPx();
+        const values = directionData.values;
+        const mapWidth = values.length;
+        const W = mapWidth * gridPx;
+        const H = 128;
+        const midY = Math.floor(H / 2);
+
+        this.drawBackground("direction", gridPx, W, H, midY, mapWidth);
+
+        const minDeg = directionData.min ?? -45;
+        const maxDeg = directionData.max ?? 45;
+        const legalAbs = Math.max(Math.abs(minDeg), Math.abs(maxDeg), 1);
+        const s = this.stats(values);
+        const maxAbs = Math.min(legalAbs, Math.max(s.absMax * 1.15, 1.0));                      // Auto-scale to the generated curve, but keep at least 1 degree visible range.
 
         // curve
         CTX.strokeStyle = "#2ACBE8";
@@ -990,9 +1004,6 @@ const DIRECTION_NOISE = {
         for (let i = 0; i < values.length; i++) {
             const x = i * gridPx + gridPx * 0.5;
             const y = midY - values[i] / maxAbs * (H * 0.42);
-
-            console.warn(i, x, y);
-
             if (i === 0) CTX.moveTo(x, y);
             else CTX.lineTo(x, y);
         }
@@ -1016,10 +1027,10 @@ const DIRECTION_NOISE = {
         CTX.fillText(`0 deg`, 8, midY - 4);
         CTX.fillText(`-${maxAbs.toFixed(2)} deg`, 8, H - 8);
     },
-    preview(width = null) {
-        const direction = this.build(width);
-        this.draw(direction);
-        this.updateStats(direction);
+    direction_noise_preview(width = null) {
+        const direction = this.buildDirections(width);
+        this.drawDirections(direction);
+        this.updateDirectionStats(direction);
         return direction;
     }
 };
