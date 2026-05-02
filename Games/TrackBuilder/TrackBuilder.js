@@ -47,7 +47,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.1.6",
+    VERSION: "0.2.0",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -317,6 +317,10 @@ const GAME = {
 
         $("#width_generate").click(function () {
             NOISE_FUNCTION.width_noise_preview();
+        });
+
+        $("#slope_generate").click(function () {
+            NOISE_FUNCTION.slope_noise_preview();
         });
 
         console.log("GAME SETUP completed");
@@ -691,6 +695,7 @@ const GAME = {
             GAME.ensureTerrain();
             NOISE_FUNCTION.direction_noise_preview();
             NOISE_FUNCTION.width_noise_preview();
+            NOISE_FUNCTION.slope_noise_preview();
 
             console.log("GAME.init ->map:", $MAP.map);
             GAME.render();
@@ -866,6 +871,50 @@ const NOISE_FUNCTION = {
         maxWidth: 2.0,
         decimals: 3
     },
+    SLOPE_NOISE_DEFAULTS: {
+        seed: 888,
+        amplitude: 18.0,                                // max deviation around bias, in degrees
+        wavelength: 16,
+        octaves: 3,
+        persistence: 0.65,
+        lacunarity: 2.0,
+        biasSlope: 18.0,
+        smooth: "smootherstep",
+        minSlope: 3.0,
+        maxSlope: 45.0,
+        decimals: 3
+    },
+    readSlopeParams() {
+        const d = this.SLOPE_NOISE_DEFAULTS;
+
+        const seed = GAME.parseIntSafe($("#slope_seed").val(), d.seed);
+        const amplitude = GAME.parseFloatSafe($("#slope_amp").val(), d.amplitude);
+        const wavelength = GAME.parseFloatSafe($("#slope_wl").val(), d.wavelength);
+        const persistence = GAME.parseFloatSafe($("#slope_persist").val(), d.persistence);
+        const lacunarity = GAME.parseFloatSafe($("#slope_lacunarity").val(), d.lacunarity);
+        const biasSlope = GAME.parseFloatSafe($("#slope_bias").val(), d.biasSlope);
+        const minSlope = GAME.parseFloatSafe($("#slope_min").val(), d.minSlope);
+        const maxSlope = GAME.parseFloatSafe($("#slope_max").val(), d.maxSlope);
+        const smooth = $("#slope_smooth").val() || d.smooth;
+        const octaves = GAME.parseIntSafe($("#slope_octaves").val(), d.octaves);
+
+        const safeMin = Math.clamp(Math.min(minSlope, maxSlope), 0.1, 44.9);
+        const safeMax = Math.clamp(Math.max(minSlope, maxSlope), safeMin + 0.1, 45.0);
+
+        return {
+            seed: seed,
+            amplitude: Math.clamp(amplitude, 0, 45),
+            wavelength: Math.clamp(wavelength, 1, 512),
+            octaves: Math.clamp(octaves, 1, 8),
+            persistence: Math.clamp(persistence, 0, 1),
+            lacunarity: Math.clamp(lacunarity, 1.01, 8),
+            biasSlope: Math.clamp(biasSlope, safeMin, safeMax),
+            smooth: smooth,
+            minSlope: safeMin,
+            maxSlope: safeMax,
+            decimals: d.decimals
+        };
+    },
     readWidthParams() {
         const d = this.WIDTH_NOISE_DEFAULTS;
 
@@ -921,6 +970,20 @@ const NOISE_FUNCTION = {
             maxDeg: d.maxDeg,
             decimals: d.decimals
         };
+    },
+    rawToSlope(raw, params) {
+        /*
+            raw comes from PERLIN as -0.5 ... +0.5
+            raw * 2 gives -1.0 ... +1.0
+    
+            Slope is always positive/downhill.
+            amplitude = max slope deviation around biasSlope
+            biasSlope = average downhill angle
+        */
+
+        let slope = params.biasSlope + raw * 2 * params.amplitude;
+        slope = Math.clamp(slope, params.minSlope, params.maxSlope);
+        return GAME.roundValue(slope, params.decimals);
     },
     rawToWidth(raw, params) {
         /*
@@ -992,6 +1055,24 @@ const NOISE_FUNCTION = {
             parameters: P,
             values: values
         };
+    },
+    buildSlopes(width = null, params = null) {
+        const W = width || GAME.getMapWidth();
+        const P = params || this.readSlopeParams();
+
+        const values = this.generateSlopeValues(W, P);
+        $MAP.map.terrain.slope.parameters = P;
+        $MAP.map.terrain.slope.values = values;
+
+        const slopeData = {
+            units: "degrees_down",
+            min: P.minSlope,
+            max: P.maxSlope,
+            parameters: P,
+            values: values
+        };
+
+        return slopeData;
     },
     stats(values) {
         if (!values || values.length === 0) {
@@ -1201,6 +1282,97 @@ const NOISE_FUNCTION = {
         this.drawWidths(widthData);
         this.updateWidthStats(widthData);
         return widthData;
+    },
+    generateSlopeValues(width = null, params = null) {
+        const W = width || GAME.getMapWidth();
+        const P = params || this.readSlopeParams();
+
+        const raw = PERLIN.generateFractalNoise1D({
+            width: W,
+            seed: P.seed,
+            wavelength: P.wavelength,
+            octaves: P.octaves,
+            persistence: P.persistence,
+            lacunarity: P.lacunarity,
+            smooth: P.smooth
+        });
+
+        return raw.map(v => this.rawToSlope(v, P));
+    },
+    updateSlopeStats(slopeData) {
+        if (!slopeData || !slopeData.values) {
+            $("#slope_stats").html("No slope noise yet.");
+            return;
+        }
+
+        const s = this.stats(slopeData.values);
+
+        $("#slope_stats").html(
+            `min: ${s.min.toFixed(3)}&deg;, ` +
+            `max: ${s.max.toFixed(3)}&deg;, ` +
+            `avg: ${s.avg.toFixed(3)}&deg;, ` +
+            `samples: ${slopeData.values.length}`
+        );
+    },
+    drawSlopes(slopeData) {
+        if (!slopeData || !slopeData.values) return;
+
+        const CTX = LAYER.slope;
+        const gridPx = GAME.getGridPx();
+        const values = slopeData.values;
+        const mapWidth = values.length;
+        const W = mapWidth * gridPx;
+        const H = 128;
+        const midY = Math.floor(H / 2);
+
+        this.drawBackground("slope", gridPx, W, H, midY, mapWidth);
+
+        const minSlope = slopeData.min ?? 3.0;
+        const maxSlope = slopeData.max ?? 45.0;
+        const range = Math.max(maxSlope - minSlope, 0.001);
+
+        // curve
+        CTX.strokeStyle = "#FFB347";
+        CTX.lineWidth = 1;
+        CTX.beginPath();
+
+        for (let i = 0; i < values.length; i++) {
+            const x = i * gridPx + gridPx * 0.5;
+
+            // steep at top, shallow at bottom
+            const normalized = (values[i] - minSlope) / range;
+            const y = H * 0.85 - normalized * (H * 0.70);
+
+            if (i === 0) CTX.moveTo(x, y);
+            else CTX.lineTo(x, y);
+        }
+
+        CTX.stroke();
+
+        // dots
+        CTX.fillStyle = "#FFFFFF";
+
+        for (let i = 0; i < values.length; i++) {
+            const x = i * gridPx + gridPx * 0.5;
+            const normalized = (values[i] - minSlope) / range;
+            const y = H * 0.85 - normalized * (H * 0.70);
+
+            CTX.pixelAt(x - 1, y - 1);
+        }
+
+        // labels
+        CTX.fillStyle = "#DDD";
+        CTX.font = "12px Consolas, monospace";
+        CTX.fillText(`Slope: ${values.length} samples`, 8, 14);
+        CTX.fillText(`${maxSlope.toFixed(2)} deg`, 8, 28);
+        CTX.fillText(`${((minSlope + maxSlope) * 0.5).toFixed(2)} deg`, 8, midY - 4);
+        CTX.fillText(`${minSlope.toFixed(2)} deg`, 8, H - 8);
+    },
+    slope_noise_preview(width = null) {
+        const slopeData = this.buildSlopes(width);
+        this.drawSlopes(slopeData);
+        this.updateSlopeStats(slopeData);
+        return slopeData;
     },
 };
 

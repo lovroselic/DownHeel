@@ -118,40 +118,6 @@
                             WebGL: <span id="webgl_version"></span><br>
                         </fieldset>
 
-                        <fieldset>
-                            <legend>
-                                Direction noise
-                            </legend>
-
-                            Seed:
-                            <input id="dir_seed" type="text" size="10" maxlength="16" value="666"><br />
-                            Amplitude:
-                            <input id="dir_amp" type="text" size="5" maxlength="8" value="3.0"><br />
-                            Wavelength:
-                            <input id="dir_wl" type="text" size="5" maxlength="8" value="32"> <br />
-                            Persistence:
-                            <input id="dir_persist" type="text" size="5" maxlength="8" value="0.5"><br />
-                            Lacunarity:
-                            <input id="dir_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
-                            Bias deg:
-                            <input id="dir_bias" type="text" size="5" maxlength="8" value="0.0"><br />
-                            Octaves:
-                            <input id="dir_octaves" type="text" size="3" maxlength="3" value="3"><br />
-                            Smoothing:
-                            <select id="dir_smooth">
-                                <option value="cosine">Cosine</option>
-                                <option value="smoothstep">Smoothstep</option>
-                                <option value="smootherstep" selected>Smootherstep</option>
-                            </select>
-                            <br />
-
-                            <input type="button" id="dir_generate" value="Generate direction noise">
-                            <br />
-
-                            <span id="dir_stats">No direction noise yet.</span>
-
-                        </fieldset>
-
                     </div>
                 </div>
 
@@ -190,8 +156,6 @@
                             <input type="radio" name="painter" value="cleargrid"> Clear grid <br />
                         </fieldset>
 
-
-
                         <fieldset>
                             <legend>
                                 Lights
@@ -210,51 +174,6 @@
                             </div>
                         </fieldset>
 
-                        <fieldset>
-                            <legend>
-                                Width noise
-                            </legend>
-
-                            Seed:
-                            <input id="width_seed" type="text" size="10" maxlength="16" value="777"><br />
-
-                            Amplitude:
-                            <input id="width_amp" type="text" size="5" maxlength="8" value="1.5"><br />
-
-                            Wavelength:
-                            <input id="width_wl" type="text" size="5" maxlength="8" value="16"><br />
-
-                            Octaves:
-                            <input id="width_octaves" type="text" size="3" maxlength="3" value="3"><br />
-
-                            Persistence:
-                            <input id="width_persist" type="text" size="5" maxlength="8" value="0.5"><br />
-
-                            Lacunarity:
-                            <input id="width_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
-
-                            Bias width:
-                            <input id="width_bias" type="text" size="5" maxlength="8" value="1"><br />
-
-                            Min width:
-                            <input id="width_min" type="text" size="5" maxlength="8" value="0.5"><br />
-
-                            Max width:
-                            <input id="width_max" type="text" size="5" maxlength="8" value="2.0"><br />
-
-                            Smoothing:
-                            <select id="width_smooth">
-                                <option value="cosine">Cosine</option>
-                                <option value="smoothstep">Smoothstep</option>
-                                <option value="smootherstep" selected>Smootherstep</option>
-                            </select>
-                            <br />
-
-                            <input type="button" id="width_generate" value="Generate width noise">
-                            <br />
-
-                            <span id="width_stats">No width noise yet.</span>
-                        </fieldset>
                     </div>
                 </div>
 
@@ -320,8 +239,140 @@
                                 </div>
                             </div>
                         </fieldset>
-
                     </div>
+                </div>
+            </div>
+
+            <hr>
+            <div class="row">
+                <div class="col-4">
+                    <fieldset>
+                        <legend>
+                            Direction noise
+                        </legend>
+
+                        Seed:
+                        <input id="dir_seed" type="text" size="10" maxlength="16" value="666"><br />
+                        Amplitude:
+                        <input id="dir_amp" type="text" size="5" maxlength="8" value="3.0"><br />
+                        Wavelength:
+                        <input id="dir_wl" type="text" size="5" maxlength="8" value="32"> <br />
+                        Persistence:
+                        <input id="dir_persist" type="text" size="5" maxlength="8" value="0.5"><br />
+                        Lacunarity:
+                        <input id="dir_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
+                        Bias deg:
+                        <input id="dir_bias" type="text" size="5" maxlength="8" value="0.0"><br />
+                        Octaves:
+                        <input id="dir_octaves" type="text" size="3" maxlength="3" value="3"><br />
+                        Smoothing:
+                        <select id="dir_smooth">
+                            <option value="cosine">Cosine</option>
+                            <option value="smoothstep">Smoothstep</option>
+                            <option value="smootherstep" selected>Smootherstep</option>
+                        </select>
+                        <br />
+
+                        <input type="button" id="dir_generate" value="Generate direction noise">
+                        <br />
+
+                        <span id="dir_stats">No direction noise yet.</span>
+
+                    </fieldset>
+                </div>
+                <div class="col-4">
+                    <fieldset>
+                        <legend>
+                            Width noise
+                        </legend>
+
+                        Seed:
+                        <input id="width_seed" type="text" size="10" maxlength="16" value="777"><br />
+
+                        Amplitude:
+                        <input id="width_amp" type="text" size="5" maxlength="8" value="1.5"><br />
+
+                        Wavelength:
+                        <input id="width_wl" type="text" size="5" maxlength="8" value="16"><br />
+
+                        Octaves:
+                        <input id="width_octaves" type="text" size="3" maxlength="3" value="3"><br />
+
+                        Persistence:
+                        <input id="width_persist" type="text" size="5" maxlength="8" value="0.5"><br />
+
+                        Lacunarity:
+                        <input id="width_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
+
+                        Bias width:
+                        <input id="width_bias" type="text" size="5" maxlength="8" value="1"><br />
+
+                        Min width:
+                        <input id="width_min" type="text" size="5" maxlength="8" value="0.5"><br />
+
+                        Max width:
+                        <input id="width_max" type="text" size="5" maxlength="8" value="2.0"><br />
+
+                        Smoothing:
+                        <select id="width_smooth">
+                            <option value="cosine">Cosine</option>
+                            <option value="smoothstep">Smoothstep</option>
+                            <option value="smootherstep" selected>Smootherstep</option>
+                        </select>
+                        <br />
+
+                        <input type="button" id="width_generate" value="Generate width noise">
+                        <br />
+
+                        <span id="width_stats">No width noise yet.</span>
+                    </fieldset>
+                </div>
+                <div class="col-4">
+                    <fieldset>
+                        <legend>
+                            Slope noise
+                        </legend>
+
+                        Seed:
+                        <input id="slope_seed" type="text" size="10" maxlength="16" value="888"><br />
+
+                        Amplitude:
+                        <input id="slope_amp" type="text" size="5" maxlength="8" value="18.0"><br />
+
+                        Wavelength:
+                        <input id="slope_wl" type="text" size="5" maxlength="8" value="16"><br />
+
+                        Octaves:
+                        <input id="slope_octaves" type="text" size="3" maxlength="3" value="3"><br />
+
+                        Persistence:
+                        <input id="slope_persist" type="text" size="5" maxlength="8" value="0.65"><br />
+
+                        Lacunarity:
+                        <input id="slope_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
+
+                        Bias slope:
+                        <input id="slope_bias" type="text" size="5" maxlength="8" value="18.0"><br />
+
+                        Min slope:
+                        <input id="slope_min" type="text" size="5" maxlength="8" value="3.0"><br />
+
+                        Max slope:
+                        <input id="slope_max" type="text" size="5" maxlength="8" value="45.0"><br />
+
+                        Smoothing:
+                        <select id="slope_smooth">
+                            <option value="cosine">Cosine</option>
+                            <option value="smoothstep">Smoothstep</option>
+                            <option value="smootherstep" selected>Smootherstep</option>
+                        </select>
+                        <br />
+
+                        <input type="button" id="slope_generate" value="Generate slope noise">
+                        <br />
+
+                        <span id="slope_stats">No slope noise yet.</span>
+                    </fieldset>
                 </div>
             </div>
 
