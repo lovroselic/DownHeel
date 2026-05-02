@@ -4,6 +4,7 @@
 <head>
     <link href="/CSS/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="/CSS/LaughingStyle.css" rel="stylesheet" type="text/css">
+    <link href="/CSS/TrackBuilder.css" rel="stylesheet" type="text/css">
     <title>TrackBuilder</title>
 
 </head>
@@ -119,7 +120,7 @@
 
                         <fieldset>
                             <legend>
-                                Direction
+                                Direction noise
                             </legend>
 
                             Seed:
@@ -207,6 +208,52 @@
                                     <canvas id="lightcanvas" width="256" height="256"></canvas>
                                 </div>
                             </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>
+                                Width noise
+                            </legend>
+
+                            Seed:
+                            <input id="width_seed" type="text" size="10" maxlength="16" value="777"><br />
+
+                            Amplitude:
+                            <input id="width_amp" type="text" size="5" maxlength="8" value="1.5"><br />
+
+                            Wavelength:
+                            <input id="width_wl" type="text" size="5" maxlength="8" value="16"><br />
+
+                            Octaves:
+                            <input id="width_octaves" type="text" size="3" maxlength="3" value="3"><br />
+
+                            Persistence:
+                            <input id="width_persist" type="text" size="5" maxlength="8" value="0.5"><br />
+
+                            Lacunarity:
+                            <input id="width_lacunarity" type="text" size="5" maxlength="8" value="2.0"><br />
+
+                            Bias width:
+                            <input id="width_bias" type="text" size="5" maxlength="8" value="1"><br />
+
+                            Min width:
+                            <input id="width_min" type="text" size="5" maxlength="8" value="0.5"><br />
+
+                            Max width:
+                            <input id="width_max" type="text" size="5" maxlength="8" value="2.0"><br />
+
+                            Smoothing:
+                            <select id="width_smooth">
+                                <option value="cosine">Cosine</option>
+                                <option value="smoothstep">Smoothstep</option>
+                                <option value="smootherstep" selected>Smootherstep</option>
+                            </select>
+                            <br />
+
+                            <input type="button" id="width_generate" value="Generate width noise">
+                            <br />
+
+                            <span id="width_stats">No width noise yet.</span>
                         </fieldset>
                     </div>
                 </div>

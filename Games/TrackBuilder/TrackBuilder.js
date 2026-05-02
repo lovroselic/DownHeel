@@ -47,7 +47,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.1.5",
+    VERSION: "0.1.6",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -315,7 +315,9 @@ const GAME = {
             NOISE_FUNCTION.direction_noise_preview();
         });
 
-        NOISE_FUNCTION.direction_noise_preview();
+        $("#width_generate").click(function () {
+            NOISE_FUNCTION.width_noise_preview();
+        });
 
         console.log("GAME SETUP completed");
     },
@@ -685,6 +687,11 @@ const GAME = {
             $MAP.map = FREE_MAP3D.create($MAP.width, $MAP.height, 1, null, MAP_TOOLS.INI.GA_BYTE_SIZE);
             $MAP.map.GA.fill(MAPDICT.EMPTY);
             $MAP.init();
+
+            GAME.ensureTerrain();
+            NOISE_FUNCTION.direction_noise_preview();
+            NOISE_FUNCTION.width_noise_preview();
+
             console.log("GAME.init ->map:", $MAP.map);
             GAME.render();
         }
@@ -846,6 +853,50 @@ const NOISE_FUNCTION = {
         maxDeg: 45,
         decimals: 3
     },
+    WIDTH_NOISE_DEFAULTS: {
+        seed: 777,
+        amplitude: 1.5,                                  // max deviation around bias, in width units
+        wavelength: 16,
+        octaves: 3,
+        persistence: 0.5,
+        lacunarity: 2.0,
+        biasWidth: 1.0,
+        smooth: "smootherstep",
+        minWidth: 0.5,
+        maxWidth: 2.0,
+        decimals: 3
+    },
+    readWidthParams() {
+        const d = this.WIDTH_NOISE_DEFAULTS;
+
+        const seed = GAME.parseIntSafe($("#width_seed").val(), d.seed);
+        const amplitude = GAME.parseFloatSafe($("#width_amp").val(), d.amplitude);
+        const wavelength = GAME.parseFloatSafe($("#width_wl").val(), d.wavelength);
+        const persistence = GAME.parseFloatSafe($("#width_persist").val(), d.persistence);
+        const lacunarity = GAME.parseFloatSafe($("#width_lacunarity").val(), d.lacunarity);
+        const biasWidth = GAME.parseFloatSafe($("#width_bias").val(), d.biasWidth);
+        const minWidth = GAME.parseFloatSafe($("#width_min").val(), d.minWidth);
+        const maxWidth = GAME.parseFloatSafe($("#width_max").val(), d.maxWidth);
+        const smooth = $("#width_smooth").val() || d.smooth;
+        const octaves = GAME.parseIntSafe($("#width_octaves").val(), d.octaves);
+
+        const safeMin = Math.max(0.1, Math.min(minWidth, maxWidth));
+        const safeMax = Math.max(safeMin, Math.max(minWidth, maxWidth));
+
+        return {
+            seed: seed,
+            amplitude: Math.clamp(amplitude, 0, 32),
+            wavelength: Math.clamp(wavelength, 1, 512),
+            octaves: Math.clamp(octaves, 1, 8),
+            persistence: Math.clamp(persistence, 0, 1),
+            lacunarity: Math.clamp(lacunarity, 1.01, 8),
+            biasWidth: Math.clamp(biasWidth, safeMin, safeMax),
+            smooth: smooth,
+            minWidth: safeMin,
+            maxWidth: safeMax,
+            decimals: d.decimals
+        };
+    },
     readDirectionParams() {
         const d = this.DIRECTION_NOISE_DEFAULTS;
         const seed = GAME.parseIntSafe($("#dir_seed").val(), d.seed);
@@ -870,6 +921,19 @@ const NOISE_FUNCTION = {
             maxDeg: d.maxDeg,
             decimals: d.decimals
         };
+    },
+    rawToWidth(raw, params) {
+        /*
+            raw comes from PERLIN as -0.5 ... +0.5
+            raw * 2 gives -1.0 ... +1.0
+    
+            amplitude = max width deviation around biasWidth
+            biasWidth = center/default track width
+        */
+
+        let width = params.biasWidth + raw * 2 * params.amplitude;
+        width = Math.clamp(width, params.minWidth, params.maxWidth);
+        return GAME.roundValue(width, params.decimals);
     },
     rawToDegrees(raw, params) {
         /*
@@ -907,12 +971,26 @@ const NOISE_FUNCTION = {
         $MAP.map.terrain.direction.parameters = P;
         $MAP.map.terrain.direction.values = values;
 
-        //console.error("MAP now", $MAP.map);
-
         return {
             units: "degrees",
             parameters: P,
             values: values,
+        };
+    },
+    buildWidths(width = null, params = null) {
+        const W = width || GAME.getMapWidth();
+        const P = params || this.readWidthParams();
+
+        const values = this.generateWidthValues(W, P);
+        $MAP.map.terrain.width.parameters = P;
+        $MAP.map.terrain.width.values = values;
+
+        return {
+            units: "grid",
+            min: P.minWidth,
+            max: P.maxWidth,
+            parameters: P,
+            values: values
         };
     },
     stats(values) {
@@ -959,12 +1037,27 @@ const NOISE_FUNCTION = {
             `samples: ${directionData.values.length}`
         );
     },
+    updateWidthStats(widthData) {
+        if (!widthData || !widthData.values) {
+            $("#width_stats").html("No width noise yet.");
+            return;
+        }
+
+        const s = this.stats(widthData.values);
+
+        $("#width_stats").html(
+            `min: ${s.min.toFixed(3)}, ` +
+            `max: ${s.max.toFixed(3)}, ` +
+            `avg: ${s.avg.toFixed(3)}, ` +
+            `samples: ${widthData.values.length}`
+        );
+    },
     drawBackground(layer, gridPx, W, H, midY, mapWidth) {
         const CTX = LAYER[layer];
         ENGINE.clearLayer(layer);
         ENGINE.fillLayer(layer, "#101010");
 
-        const guideCol = "#242424";
+        const guideCol = "#444";
         ENGINE.drawLine(CTX, new Point(0, H * 0.15), new Point(W, H * 0.15), guideCol, 1);
         ENGINE.drawLine(CTX, new Point(0, H * 0.85), new Point(W, H * 0.85), guideCol, 1);
         ENGINE.drawLine(CTX, new Point(0, midY), new Point(W, midY), "#666", 1);
@@ -1032,7 +1125,83 @@ const NOISE_FUNCTION = {
         this.drawDirections(direction);
         this.updateDirectionStats(direction);
         return direction;
-    }
+    },
+    generateWidthValues(width = null, params = null) {
+        const W = width || GAME.getMapWidth();
+        const P = params || this.readWidthParams();
+
+        const raw = PERLIN.generateFractalNoise1D({
+            width: W,
+            seed: P.seed,
+            wavelength: P.wavelength,
+            octaves: P.octaves,
+            persistence: P.persistence,
+            lacunarity: P.lacunarity,
+            smooth: P.smooth
+        });
+
+        return raw.map(v => this.rawToWidth(v, P));
+    },
+    drawWidths(widthData) {
+        if (!widthData || !widthData.values) return;
+
+        const CTX = LAYER.width;
+        const gridPx = GAME.getGridPx();
+        const values = widthData.values;
+        const mapWidth = values.length;
+        const W = mapWidth * gridPx;
+        const H = 128;
+        const midY = Math.floor(H / 2);
+
+        this.drawBackground("width", gridPx, W, H, midY, mapWidth);
+
+        const minWidth = widthData.min ?? 1.5;
+        const maxWidth = widthData.max ?? 6.0;
+        const range = Math.max(maxWidth - minWidth, 0.001);
+
+        // curve
+        CTX.strokeStyle = "#A7F070";
+        CTX.lineWidth = 1;
+        CTX.beginPath();
+
+        for (let i = 0; i < values.length; i++) {
+            const x = i * gridPx + gridPx * 0.5;
+
+            // max width at top, min width at bottom
+            const normalized = (values[i] - minWidth) / range;
+            const y = H * 0.85 - normalized * (H * 0.70);
+
+            if (i === 0) CTX.moveTo(x, y);
+            else CTX.lineTo(x, y);
+        }
+
+        CTX.stroke();
+
+        // dots
+        CTX.fillStyle = "#FFFFFF";
+
+        for (let i = 0; i < values.length; i++) {
+            const x = i * gridPx + gridPx * 0.5;
+            const normalized = (values[i] - minWidth) / range;
+            const y = H * 0.85 - normalized * (H * 0.70);
+
+            CTX.pixelAt(x - 1, y - 1);
+        }
+
+        // labels
+        CTX.fillStyle = "#DDD";
+        CTX.font = "12px Consolas, monospace";
+        CTX.fillText(`Width: ${values.length} samples`, 8, 14);
+        CTX.fillText(`${maxWidth.toFixed(2)}`, 8, 28);
+        CTX.fillText(`${((minWidth + maxWidth) * 0.5).toFixed(2)}`, 8, midY - 4);
+        CTX.fillText(`${minWidth.toFixed(2)}`, 8, H - 8);
+    },
+    width_noise_preview(width = null) {
+        const widthData = this.buildWidths(width);
+        this.drawWidths(widthData);
+        this.updateWidthStats(widthData);
+        return widthData;
+    },
 };
 
 $(function () {
