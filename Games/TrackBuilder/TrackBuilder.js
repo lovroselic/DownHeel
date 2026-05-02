@@ -47,7 +47,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.1.4",
+    VERSION: "0.1.5",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -907,7 +907,7 @@ const NOISE_FUNCTION = {
         $MAP.map.terrain.direction.parameters = P;
         $MAP.map.terrain.direction.values = values;
 
-        console.error("MAP now", $MAP.map);
+        //console.error("MAP now", $MAP.map);
 
         return {
             units: "degrees",
