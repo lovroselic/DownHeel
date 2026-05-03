@@ -47,7 +47,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.2.0",
+    VERSION: "0.3.0",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -417,6 +417,7 @@ const GAME = {
         ENGINE.readMouse(event);
         let x = Math.floor(ENGINE.mouseX / ENGINE.gameWIDTH * $MAP.width);
         let y = Math.floor(ENGINE.mouseY / ENGINE.gameHEIGHT * $MAP.height);
+        const dimension = 1;
 
         const radio = $("#paint input[name=painter]:checked").val();
         let GA = $MAP.map.GA;
@@ -693,9 +694,7 @@ const GAME = {
             $MAP.init();
 
             GAME.ensureTerrain();
-            NOISE_FUNCTION.direction_noise_preview();
-            NOISE_FUNCTION.width_noise_preview();
-            NOISE_FUNCTION.slope_noise_preview();
+            NOISE_FUNCTION.generate_terrain();
 
             console.log("GAME.init ->map:", $MAP.map);
             GAME.render();
@@ -737,6 +736,8 @@ floor: "${$("#floortexture")[0].value}",
                 roomExport += `${list}: '${JSON.stringify($MAP.map[list])}',\n`;
             }
         }
+
+        roomExport += `terrain: '${JSON.stringify($MAP.map.terrain)}',\n`;
         roomExport += `}`;
         $("#exp").val(roomExport);
     },
@@ -775,7 +776,7 @@ floor: "${$("#floortexture")[0].value}",
             $MAP.map[prop] = JSON.parse(value) || [];
         }
 
-        console.log("$MAP.map", $MAP.map);
+
         $MAP.width = Import.width;
         $MAP.height = Import.height;
         $MAP.depth = 1;
@@ -785,12 +786,19 @@ floor: "${$("#floortexture")[0].value}",
         $("#horizontalGrid").trigger("change");
         $("#verticalGrid").trigger("change");
 
+        const terrain = ImportText.extractGroup(/terrain\:\s?\'(.*)\'/);
+        $MAP.map.terrain = JSON.parse(terrain);
+        NOISE_FUNCTION.writeParsToForm();
+        NOISE_FUNCTION.generate_terrain();
+
         GAME.updateWH();
         ENGINE.resizeBOX("ROOM");
         GAME.resizeGL_window();
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
         $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
         GAME.render();
+
+        console.info("$MAP.map", $MAP.map);
     },
     async copyToClipboard() {
         let copyText = $("#exp")[0];
@@ -972,40 +980,16 @@ const NOISE_FUNCTION = {
         };
     },
     rawToSlope(raw, params) {
-        /*
-            raw comes from PERLIN as -0.5 ... +0.5
-            raw * 2 gives -1.0 ... +1.0
-    
-            Slope is always positive/downhill.
-            amplitude = max slope deviation around biasSlope
-            biasSlope = average downhill angle
-        */
-
         let slope = params.biasSlope + raw * 2 * params.amplitude;
         slope = Math.clamp(slope, params.minSlope, params.maxSlope);
         return GAME.roundValue(slope, params.decimals);
     },
     rawToWidth(raw, params) {
-        /*
-            raw comes from PERLIN as -0.5 ... +0.5
-            raw * 2 gives -1.0 ... +1.0
-    
-            amplitude = max width deviation around biasWidth
-            biasWidth = center/default track width
-        */
-
         let width = params.biasWidth + raw * 2 * params.amplitude;
         width = Math.clamp(width, params.minWidth, params.maxWidth);
         return GAME.roundValue(width, params.decimals);
     },
     rawToDegrees(raw, params) {
-        /*
-            raw comes from PERLIN as -0.5 ... +0.5
-            raw * 2 gives -1.0 ... +1.0
-            amplitude = maximum direction deviation around bias
-            biasDeg   = center direction
-        */
-
         let deg = params.biasDeg + raw * 2 * params.amplitude;
         deg = Math.clamp(deg, params.minDeg, params.maxDeg);
         return GAME.roundValue(deg, params.decimals);
@@ -1373,6 +1357,58 @@ const NOISE_FUNCTION = {
         this.drawSlopes(slopeData);
         this.updateSlopeStats(slopeData);
         return slopeData;
+    },
+    writeDirectionParams(params) {
+        if (!params) return;
+
+        $("#dir_seed").val(params.seed);
+        $("#dir_amp").val(params.amplitude);
+        $("#dir_wl").val(params.wavelength);
+        $("#dir_octaves").val(params.octaves);
+        $("#dir_persist").val(params.persistence);
+        $("#dir_lacunarity").val(params.lacunarity);
+        $("#dir_bias").val(params.biasDeg);
+        $("#dir_smooth").val(params.smooth);
+    },
+
+    writeWidthParams(params) {
+        if (!params) return;
+
+        $("#width_seed").val(params.seed);
+        $("#width_amp").val(params.amplitude);
+        $("#width_wl").val(params.wavelength);
+        $("#width_octaves").val(params.octaves);
+        $("#width_persist").val(params.persistence);
+        $("#width_lacunarity").val(params.lacunarity);
+        $("#width_bias").val(params.biasWidth);
+        $("#width_min").val(params.minWidth);
+        $("#width_max").val(params.maxWidth);
+        $("#width_smooth").val(params.smooth);
+    },
+
+    writeSlopeParams(params) {
+        if (!params) return;
+
+        $("#slope_seed").val(params.seed);
+        $("#slope_amp").val(params.amplitude);
+        $("#slope_wl").val(params.wavelength);
+        $("#slope_octaves").val(params.octaves);
+        $("#slope_persist").val(params.persistence);
+        $("#slope_lacunarity").val(params.lacunarity);
+        $("#slope_bias").val(params.biasSlope);
+        $("#slope_min").val(params.minSlope);
+        $("#slope_max").val(params.maxSlope);
+        $("#slope_smooth").val(params.smooth);
+    },
+    generate_terrain() {
+        this.direction_noise_preview();
+        this.width_noise_preview();
+        this.slope_noise_preview();
+    },
+    writeParsToForm() {
+        this.writeDirectionParams($MAP.map.terrain.direction.parameters);
+        this.writeWidthParams($MAP.map.terrain.width.parameters);
+        this.writeSlopeParams($MAP.map.terrain.slope.parameters);
     },
 };
 
