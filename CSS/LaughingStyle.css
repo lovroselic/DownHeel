@@ -1,4 +1,4 @@
-/* LS CSS v0.9.2 */
+/* LS CSS v0.9.3 */
 
 @charset "utf-8";
 
@@ -16,7 +16,7 @@
 
 @font-face {
     font-family: 'Arcade';
-    src: url("/Assets/Fonts/Arcade Classic.ttf");
+    src: url("/Assets/Fonts/ArcadeClassic.ttf");
     font-display: swap;
 }
 
@@ -52,7 +52,7 @@
 
 @font-face {
     font-family: "Carolingia";
-    src: url("/Assets/Fonts/carolingia.ttf");
+    src: url("/Assets/Fonts/carolingia_fixed.ttf");
     font-display: swap;
 }
 
@@ -659,6 +659,12 @@ h2.INV {
 
 .TXX {
     font-family: 'CPU';
+    font-size: 2.5em;
+    text-shadow: 1px 1px #666;
+}
+
+.DOWNHEEL {
+    font-family: 'Carolingia';
     font-size: 2.5em;
     text-shadow: 1px 1px #666;
 }

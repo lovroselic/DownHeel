@@ -11,6 +11,10 @@
 
 LoadFonts = [
 
+    { srcName: "C64_Pro-STYLE.ttf", name: "C64" },
+    { srcName: "ArcadeClassic.ttf", name: "Arcade" },
+    { srcName: "carolingia_fixed.ttf", name: "Carolingia" },
+    { srcName: "CPU.ttf", name: "CPU" },
 ];
 
 LoadTextures = [
@@ -37,7 +41,7 @@ LoadTextures = [
     //objects
 
     //title
-
+    { srcName: "Title/DownHeel_title_768.webp", name: "Title" },
 
     //explosions
     //{ srcName: "ObjectTextures/Explosion2.webp", name: "Explosion2" },
@@ -74,6 +78,9 @@ LoadModels = [
     "ThePrincess.gltf",
 ];
 
-//LoadSprites = [];
+LoadSprites = [
+    { srcName: "UI/AvatarPrincess200w.webp", name: "Avatar" },
+    { srcName: "UI/Heart64.webp", name: "Heart" },
+];
 
 console.log("%cAssets for DownHeel ready.", "color: orange");
