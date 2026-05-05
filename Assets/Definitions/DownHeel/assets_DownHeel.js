@@ -10,7 +10,7 @@
 /** END */
 
 LoadFonts = [
-    
+
 ];
 
 LoadTextures = [
@@ -18,9 +18,21 @@ LoadTextures = [
     { srcName: "Shading/Fire_color_map_512.webp", name: "Fire_color_map" },
     { srcName: "Shading/fire_noise_512.webp", name: "Fire_noise" },
 
-     /**wall, floor, ceil */
+    /**wall, floor, ceil */
     { srcName: "Wall/RockWall_SDXL_003.jpg", name: "RockWall_SDXL_003" },
-   
+
+    { srcName: "Wall/Snow_001.jpg", name: "Snow_001" },
+    { srcName: "Wall/Snow_002.jpg", name: "Snow_002" },
+    { srcName: "Wall/Snow_003.jpg", name: "Snow_003" },
+    { srcName: "Wall/Snow_004.jpg", name: "Snow_004" },
+    { srcName: "Wall/Snow_005.jpg", name: "Snow_005" },
+    { srcName: "Wall/Snow_006.jpg", name: "Snow_006" },
+    { srcName: "Wall/Snow_007.jpg", name: "Snow_007" },
+    { srcName: "Wall/Snow_008.jpg", name: "Snow_008" },
+    { srcName: "Wall/Snow_009.jpg", name: "Snow_009" },
+    { srcName: "Wall/Snow_010.jpg", name: "Snow_010" },
+    { srcName: "Wall/Snow_011.jpg", name: "Snow_011" },
+
 
     //objects
 
@@ -42,7 +54,7 @@ LoadTextures = [
 ];
 
 LoadAudio = [
-    //{ srcName: "LaughingSkull - Ex Nihilo.mp3", name: "Title" },
+    { srcName: "LaughingSkull - Anomalous Anomalies.mp3", name: "Title" },
 
     //action sounds
     //{ srcName: "Explosion1.mp3", name: "Explosion" },
