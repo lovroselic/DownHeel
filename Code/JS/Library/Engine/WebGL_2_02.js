@@ -38,7 +38,7 @@
  */
 
 const WebGL = {
-    VERSION: "2.01",
+    VERSION: "2.02",
     CSS: "color: gold",
     CTX: null,
     VERBOSE: false,                                     // default: false
@@ -2394,6 +2394,7 @@ class $3D_player {
         let nextPos3 = this.pos.translate(dir, length); //3D - Vector3
         let nextPos = Vector3.to_FP_Grid(nextPos3);
         let bump = this.usingStaircase(nextPos);
+
         if (bump !== null) {
             bump.interact();
             return;
@@ -2409,12 +2410,13 @@ class $3D_player {
             if (WebGL.CONFIG.prevent_movement_in_exlusion_grids) {
                 check = this.GA.forwardPositionIsEmpty(nextPos, Dir2D, this.r, this.depth);
             } else {
-                check = this.GA.entityNotInWall(nextPos, Dir2D, this.r, this.depth);                                //this shouild be now obsolete
+                check = this.GA.entityNotInWall(nextPos, Dir2D, this.r, this.depth);                                //this shouild be now obsolete - it's not
             }
             if (check) {
                 nextPos3.set_y(this.minY + this.heigth + this.depth);                                               //reset from climbing, if applicable 
                 return this.setPos(nextPos3);
-            }
+            } else return;
+
         }
 
         return this.blockClimb(nextPos3, Dir2D, nextPos, elevation);
@@ -2516,6 +2518,7 @@ class $3D_player {
         return distance < touchDistance;
     }
     respond(lapsedTime) {
+        console.info("RESPOND", this.mode);
         if (this.actionModes.includes(this.mode)) return;               //action must not be interrupted
         if (this.isJumping || this.isFalling) return;                   //powerless
 

@@ -17,7 +17,7 @@ known bugs:
 */
 
 const GRID = {
-    VERSION: "4.02",
+    VERSION: "4.03",
     CSS: "color: #0AA",
     SETTING: {
         ALLOW_CROSS: false,
@@ -145,30 +145,23 @@ const GRID = {
         return this.coordToGrid(point.x, point.y);
     },
     grid(CTX = LAYER.grid) {
-        var x = 0;
-        var y = 0;
-        CTX.strokeStyle = "#AAA";
-        //horizonal lines
-        do {
-            y += ENGINE.INI.GRIDPIX;
-            CTX.beginPath();
-            CTX.setLineDash([1, 3]);
-            CTX.moveTo(x, y);
-            CTX.lineTo(CTX.canvas.width, y);
-            CTX.closePath();
-            CTX.stroke();
-        } while (y <= CTX.canvas.height);
-        //vertical lines
-        y = 0;
-        do {
-            x += ENGINE.INI.GRIDPIX;
-            CTX.beginPath();
-            CTX.setLineDash([1, 3]);
-            CTX.moveTo(x, y);
-            CTX.lineTo(x, CTX.canvas.height);
-            CTX.closePath();
-            CTX.stroke();
-        } while (x <= CTX.canvas.width);
+        const gp = ENGINE.INI.GRIDPIX;
+        const dash = 4;
+        CTX.fillStyle = "#AAA";
+
+        // horizontal dotted lines
+        for (let y = gp; y < CTX.canvas.height; y += gp) {
+            for (let x = 0; x < CTX.canvas.width; x += dash) {
+                CTX.fillRect(x, y, 1, 1);
+            }
+        }
+
+        // vertical dotted lines
+        for (let x = gp; x < CTX.canvas.width; x += gp) {
+            for (let y = 0; y < CTX.canvas.height; y += dash) {
+                CTX.fillRect(x, y, 1, 1);
+            }
+        }
     },
     paintCoord(layer, dungeon, all = false) {
         ENGINE.clearLayer(layer);

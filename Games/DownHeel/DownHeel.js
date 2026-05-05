@@ -51,7 +51,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.1.0",
+    VERSION: "0.1.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -105,7 +105,7 @@ const PRG = {
         ENGINE.titleHEIGHT = 96;
         ENGINE.bottomHEIGHT = 80;
         ENGINE.bottomWIDTH = ENGINE.titleWIDTH;
-        //MAP_TOOLS.INI.FOG = false;
+        MAP_TOOLS.INI.FOG = false;
 
         $("#bottom").css("margin-top", ENGINE.gameHEIGHT + ENGINE.titleHEIGHT + ENGINE.bottomHEIGHT);
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 2 * ENGINE.sideWIDTH + 4);
@@ -124,7 +124,6 @@ const PRG = {
             WebGL.VERBOSE = true;
             ENGINE.verbose = true;
             MAP_TOOLS.INI.VERBOSE = true;
-            //MINIMAP.verbose();
         }
     },
     start() {
@@ -164,7 +163,14 @@ const HERO = {
         TURN.subtitle(txt);
     },
     concludeAction() {
+        if (!this.player.actionModes.includes(this.player.mode)) {
+            this.player.setMode("idle");
+        }
+        if (WebGL.CONFIG.firstperson && !this.player.lookingAround && Math.abs(this.player.camera.direction_offset.y) > 0) {
+            this.player.resetCamera();
+        }
 
+        this.player.lookingAround = false;
     },
     applyDamage(damage) {
         HERO.health = Math.max(HERO.health - damage, 0);
@@ -219,7 +225,6 @@ const HERO = {
         GAME.restarted = true;
         MAP[GAME.level].map.storage.clear();
     },
-
     restore() {
         this.health = this.maxHealth;
         TITLE.health();
@@ -232,6 +237,9 @@ const HERO = {
     },
     cancelFlight() {
 
+    },
+    shoot() {
+        //do nothing
     },
 };
 
@@ -274,7 +282,20 @@ const GAME = {
 
         GAME.levelStart();
     },
-    deathPlaceDecals: [],
+    WebGL_settings() {
+        WebGL.setAmbientStrength(10);
+        WebGL.setDiffuseStrength(50);
+        //WebGL.HERO_AS_INNER = true;
+        //WebGL.INI.BACKGROUND_ALPHA = 0.0;
+        WebGL.USE_SHADOW = false;
+        WebGL.USE_INTERACTION = false;
+        //WebGL.INI.HERO_HEIGHT = 0;
+        WebGL.INI.HERO_HEIGHT = WebGL.INI.HERO_HEIGHT;
+        WebGL.FIRST_PERSON_DUAL_DISPLAY = true;
+        WebGL.NO_TOP_CEILING = true;
+        WebGL.VIEWS_ALLOWED = new Set([1, 3]);
+        WebGL.GAME.setViewButtons();
+    },
     levelStart() {
         console.log("starting level", GAME.level);
         WebGL.playerList.clear();                           //requred for restart after resurrection
@@ -292,10 +313,7 @@ const GAME = {
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
-        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.9, new Vector3(0, -0.5, 0), 1, 70);
-        WebGL.hero.topCameraLowAngle = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.13, new Vector3(0, -0.35, 0), 0.70);
-        WebGL.hero.overheadCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 2.5, new Vector3(0, -1, 0), 1, 80);
-        WebGL.hero.orto_overheadCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 4, new Vector3(0, -1, 0), 0.4, 80);
+        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.13, new Vector3(0, -0.35, 0), 0.70);
 
         switch (WebGL.CONFIG.cameraType) {
             case "first_person":
@@ -306,14 +324,7 @@ const GAME = {
                 WebGL.hero.player.associateExternalCamera(WebGL.hero.topCamera);
                 WebGL.setCamera(WebGL.hero.topCamera);
                 break;
-            case "top_down":
-                WebGL.hero.player.associateExternalCamera(WebGL.hero.overheadCamera);
-                WebGL.setCamera(WebGL.hero.overheadCamera);
-                break;
-            case "orto_top_down":
-                WebGL.hero.player.associateExternalCamera(WebGL.hero.orto_overheadCamera);
-                WebGL.setCamera(WebGL.hero.orto_overheadCamera);
-                break;
+
             default:
                 throw "WebGL.CONFIG.cameraType error";
         }
@@ -368,10 +379,10 @@ const GAME = {
     async setup() {
         console.log("GAME SETUP started");
         $("#conv").remove();
-        WebGL.GAME.setViewButtons();   //allow different views
         await GAME.initializeImageData();
         const totalPixels = SPRITE.Avatar.width * SPRITE.Avatar.height;
         IMAGE_DATA.INDICES.set(3, "Avatar", totalPixels, IMAGE_DATA.Avatar.data);
+        GAME.WebGL_settings();
     },
     async initializeImageData() {
         await BITMAP.store(SPRITE.Avatar, "Avatar");
@@ -419,9 +430,9 @@ const GAME = {
         if (ENGINE.GAME.stopAnimation) return;
         const date = Date.now();
         //HERO.player.updateJump(lapsedTime);
-        //HERO.player.animateAction();
+        HERO.player.animateAction();
         EXPLOSION3D.manage(date);
-        //GAME.respond(lapsedTime);
+        GAME.respond(lapsedTime);
         ENGINE.TIMERS.update();
         GAME.frameDraw(lapsedTime);
         HERO.concludeAction();
@@ -441,10 +452,6 @@ const GAME = {
         if (DEBUG._2D_display) {
             const map = MAP[GAME.level].map;
             ENGINE.BLOCKGRID3D.draw(map, HERO.player.depth);
-            MISSILE3D.draw();
-            ENTITY3D.drawVector2D();
-            DYNAMIC_ITEM3D.drawVector2D();
-            //WebGL.visualizeTexture3DSlice(map.occlusionMap, map.width, map.height, map.depth, 0, LAYER.debug); //debug
             GRID.paintCoord3D("coord", MAP[GAME.level].map, HERO.player.depth);
         }
     },
@@ -608,7 +615,7 @@ const TITLE = {
         ENGINE.GAME.ANIMATION.next(GAME.runTitle);
     },
     clearAllLayers() {
-        ENGINE.layersToClear = new Set(["text",
+        ENGINE.layersToClear = new Set(["text", "grid", "coord",
             "sideback", "button", "title", "FPS", "info", "subtitle", "health",
             "bottomText"]);
         ENGINE.clearLayerStack();

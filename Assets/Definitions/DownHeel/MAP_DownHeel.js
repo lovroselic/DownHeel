@@ -13,7 +13,7 @@ console.log("%cMAP for DownHeel loaded.", "color: #888");
 const MAP = {
     1: {
         name: "Generic room name",
-        data: '{"width":"128","height":"3","depth":1,"map":"AA122BB2AA256$AA4"}',
+        data: '{"width":"128","height":"3","depth":1,"map":"AA121BB2AA251$AA10"}',
         wall: "RockWall_SDXL_003",
         floor: "Snow_002",
         start: '[128,5]',

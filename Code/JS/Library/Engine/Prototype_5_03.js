@@ -1137,9 +1137,9 @@ class MasterGridClass3D {
 class Grid3D extends MasterGridClass3D {
     constructor(x = 0, y = 0, z = 0) {
         super();
-        this.x = Math.trunc(x);
-        this.y = Math.trunc(y);
-        this.z = Math.trunc(z);
+        this.x = Math.floor(x);
+        this.y = Math.floor(y);
+        this.z = Math.floor(z);
     }
     static toGrid(grid) {
         return new Grid(grid.x, grid.y);
