@@ -51,7 +51,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.1.1",
+    VERSION: "0.1.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -237,9 +237,6 @@ const HERO = {
     },
     cancelFlight() {
 
-    },
-    shoot() {
-        //do nothing
     },
 };
 
@@ -494,41 +491,12 @@ const GAME = {
         }
 
         //controls
-        if (map[ENGINE.KEY.map.left]) {
-            TITLE.stack.scrollIndex--;
-            TITLE.stack.scrollIndex = Math.max(0, TITLE.stack.scrollIndex);
-            TITLE.scrolls();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.left] = false;
-            return;
-        }
-        if (map[ENGINE.KEY.map.right]) {
-            TITLE.stack.scrollIndex++;
-            TITLE.stack.scrollIndex = Math.min(HERO.inventory.scroll.size() - 1, TITLE.stack.scrollIndex);
-            TITLE.scrolls();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.right] = false;
-            return;
-        }
-        if (map[ENGINE.KEY.map.enter]) {
-            if (HERO.inventory.scroll.size() === 0) return;
-            let scroll = HERO.inventory.scroll.remove(TITLE.stack.scrollIndex);
-            scroll.action();
-            TITLE.scrolls();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.enter] = false;
-        }
-        if (map[ENGINE.KEY.map.ctrl]) {
-            HERO.shoot();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.ctrl] = false; //NO repeat
-
-        }
+        
         if (map[ENGINE.KEY.map.up]) { }
         if (map[ENGINE.KEY.map.down]) { }
         if (map[ENGINE.KEY.map.space]) {
             HERO.player.attack();
             ENGINE.GAME.keymap[ENGINE.KEY.map.space] = false; //NO repeat
-        }
-        if (map[ENGINE.KEY.map.shift]) {
-            HERO.requestJump();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.shift] = false;
         }
 
         return;

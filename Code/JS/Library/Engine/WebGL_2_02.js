@@ -2254,7 +2254,7 @@ class $3D_player {
         if (hit.health <= 0) hit.die("attack");
     }
     miss() {
-        AUDIO.SwordMiss.play();
+        if (AUDIO.SwordMiss) AUDIO.SwordMiss.play();
     }
     hit() {
         const attackLength = 0.5;
