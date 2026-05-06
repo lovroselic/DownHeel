@@ -754,6 +754,9 @@ const WebGL = {
                 uMaterialDiffuseColor: gl.getUniformLocation(this[prog].program, 'uMaterial.diffuseColor'),
                 uMaterialSpecularColor: gl.getUniformLocation(this[prog].program, 'uMaterial.specularColor'),
                 uMaterialShininess: gl.getUniformLocation(this[prog].program, 'uMaterial.shininess'),
+                uMaterialRoughness: gl.getUniformLocation(this[prog].program, 'uMaterial.roughness'),
+                uMaterialMetallic: gl.getUniformLocation(this[prog].program, 'uMaterial.metallic'),
+                uMaterialFresnelStrength: gl.getUniformLocation(this[prog].program, 'uMaterial.fresnelStrength'),
                 uOcclusionMap: gl.getUniformLocation(this[prog].program, "uOcclusionMap"),
                 uGridSize: gl.getUniformLocation(this[prog].program, "uGridSize")
             };
@@ -867,6 +870,9 @@ const WebGL = {
                 uMaterialDiffuseColor: gl.getUniformLocation(shaderProgram, 'uMaterial.diffuseColor'),
                 uMaterialSpecularColor: gl.getUniformLocation(shaderProgram, 'uMaterial.specularColor'),
                 uMaterialShininess: gl.getUniformLocation(shaderProgram, 'uMaterial.shininess'),
+                uMaterialRoughness: gl.getUniformLocation(shaderProgram, 'uMaterial.roughness'),
+                uMaterialMetallic: gl.getUniformLocation(shaderProgram, 'uMaterial.metallic'),
+                uMaterialFresnelStrength: gl.getUniformLocation(shaderProgram, 'uMaterial.fresnelStrength'),
                 uOcclusionMap: gl.getUniformLocation(shaderProgram, "uOcclusionMap"),
                 uGridSize: gl.getUniformLocation(shaderProgram, "uGridSize"),
                 innerAmbientStrength: gl.getUniformLocation(shaderProgram, "innerAmbientStrength"),
@@ -1024,6 +1030,9 @@ const WebGL = {
         gl.uniform3fv(this.program.uniformLocations.uMaterialDiffuseColor, MATERIAL.wall.diffuseColor);
         gl.uniform3fv(this.program.uniformLocations.uMaterialSpecularColor, MATERIAL.wall.specularColor);
         gl.uniform1f(this.program.uniformLocations.uMaterialShininess, MATERIAL.wall.shininess);
+        gl.uniform1f(this.program.uniformLocations.uMaterialRoughness, MATERIAL.wall.roughness);
+        gl.uniform1f(this.program.uniformLocations.uMaterialMetallic, MATERIAL.wall.metallic);
+        gl.uniform1f(this.program.uniformLocations.uMaterialFresnelStrength, MATERIAL.wall.fresnelStrength);
 
         let { lights, lightColors, lightDirections } = this.computeLights();
 
@@ -1061,6 +1070,10 @@ const WebGL = {
         gl.uniform3fv(this.model_program.uniforms.uMaterialDiffuseColor, MATERIAL.wall.diffuseColor);
         gl.uniform3fv(this.model_program.uniforms.uMaterialSpecularColor, MATERIAL.wall.specularColor);
         gl.uniform1f(this.model_program.uniforms.uMaterialShininess, MATERIAL.wall.shininess);
+        gl.uniform1f(this.model_program.uniforms.uMaterialRoughness, MATERIAL.wall.roughness);
+        gl.uniform1f(this.model_program.uniforms.uMaterialMetallic, MATERIAL.wall.metallic);
+        gl.uniform1f(this.model_program.uniforms.uMaterialFresnelStrength, MATERIAL.wall.fresnelStrength);
+
 
         //3D occlusion map for models
         gl.activeTexture(gl.TEXTURE1); // Use texture unit 1
@@ -1896,11 +1909,14 @@ const WORLD = {
 /** Classes */
 
 class Material {
-    constructor(ambient, diffuse, specular, shininess) {
+    constructor(ambient, diffuse, specular, shininess, roughness = 0.65, metallic = 0, fresnelStrength = 0) {
         this.ambientColor = ambient;
         this.diffuseColor = diffuse;
         this.specularColor = specular;
         this.shininess = 128.0 * Math.min(Math.max(shininess, 0.001), 1.0);
+        this.roughness = roughness;
+        this.metallic = metallic;
+        this.fresnelStrength = fresnelStrength;
     }
 }
 
@@ -2518,7 +2534,6 @@ class $3D_player {
         return distance < touchDistance;
     }
     respond(lapsedTime) {
-        console.info("RESPOND", this.mode);
         if (this.actionModes.includes(this.mode)) return;               //action must not be interrupted
         if (this.isJumping || this.isFalling) return;                   //powerless
 
@@ -2592,7 +2607,9 @@ class $3D_player {
         gl.uniform3fv(WebGL.model_program.uniforms.uMaterialDiffuseColor, this.material.diffuseColor);
         gl.uniform3fv(WebGL.model_program.uniforms.uMaterialSpecularColor, this.material.specularColor);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialShininess, this.material.shininess);
-
+        gl.uniform1f(WebGL.model_program.uniforms.uMaterialRoughness, this.material.roughness);
+        gl.uniform1f(WebGL.model_program.uniforms.uMaterialMetallic, this.material.metallic);
+        gl.uniform1f(WebGL.model_program.uniforms.uMaterialFresnelStrength, this.material.fresnelStrength);
 
         const mScaleMatrix = glMatrix.mat4.create();
         glMatrix.mat4.fromScaling(mScaleMatrix, this.scale);
@@ -2908,6 +2925,9 @@ class Drawable_object {
         gl.uniform3fv(uniforms.uMaterialDiffuseColor, this.material.diffuseColor);
         gl.uniform3fv(uniforms.uMaterialSpecularColor, this.material.specularColor);
         gl.uniform1f(uniforms.uMaterialShininess, this.material.shininess);
+        gl.uniform1f(uniforms.uMaterialRoughness, this.material.roughness);
+        gl.uniform1f(uniforms.uMaterialMetallic, this.material.metallic);
+        gl.uniform1f(uniforms.uMaterialFresnelStrength, this.material.fresnelStrength);
     }
     drawObject(gl) {
         const program = WebGL.program.program;
@@ -4664,6 +4684,9 @@ class $3D_Entity {
         gl.uniform3fv(WebGL.model_program.uniforms.uMaterialDiffuseColor, this.material.diffuseColor);
         gl.uniform3fv(WebGL.model_program.uniforms.uMaterialSpecularColor, this.material.specularColor);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialShininess, this.material.shininess);
+         gl.uniform1f(WebGL.model_program.uniforms.uMaterialRoughness, this.material.roughness);
+        gl.uniform1f(WebGL.model_program.uniforms.uMaterialMetallic, this.material.metallic);
+        gl.uniform1f(WebGL.model_program.uniforms.uMaterialFresnelStrength, this.material.fresnelStrength);
 
         //scale
         const mScaleMatrix = glMatrix.mat4.create();

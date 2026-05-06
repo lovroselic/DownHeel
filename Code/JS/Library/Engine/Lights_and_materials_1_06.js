@@ -17,15 +17,15 @@ const LIGHT_COLORS = {
     standardFaint: new Float32Array([0.56, 0.54, 0.49]),            // Very faint, subtle background tone
     standardVeryFaint: new Float32Array([0.48, 0.46, 0.42]),        // softer, calmer, gently dimmed
     standardUltraFaint: new Float32Array([0.40, 0.38, 0.35]),       // extremely subdued, subtle background
-    standardRedish: new Float32Array([0.95, 0.88, 0.80]),   
+    standardRedish: new Float32Array([0.95, 0.88, 0.80]),
     standardYellow: new Float32Array([0.88, 0.83, 0.65]),           // Slightly yellow-tinted, bright and warm
     standardYellowDim: new Float32Array([0.78, 0.72, 0.55]),        // Moderately dimmed yellowish tint
     standardYellowSoft: new Float32Array([0.68, 0.62, 0.47]),       // Gentle soft yellow glow
     standardYellowFaint: new Float32Array([0.58, 0.53, 0.40]),      // Subtle, faint yellowish ambiance
-    dim: new Float32Array([0.45, 0.45, 0.40]),  
-    dimRed: new Float32Array([0.50, 0.225, 0.035]), 
-    fire: new Float32Array([0.94, 0.50, 0.07]), 
-    fireNew: new Float32Array([0.90, 0.45, 0.10]),  
+    dim: new Float32Array([0.45, 0.45, 0.40]),
+    dimRed: new Float32Array([0.50, 0.225, 0.035]),
+    fire: new Float32Array([0.94, 0.50, 0.07]),
+    fireNew: new Float32Array([0.90, 0.45, 0.10]),
     fireSoft: new Float32Array([0.80, 0.40, 0.12]),                 // gentler flame, suitable for candles or torches
     fireDim: new Float32Array([0.68, 0.34, 0.10]),                  // muted, dim flame for subtle ambiance
     fireplace: new Float32Array([0.80, 0.40, 0.12]),
@@ -83,12 +83,14 @@ const LIGHT_COLORS = {
 
     //strong remote sources
     sun: new Float32Array([80 * 0.85, 80 * 0.78, 80 * 0.65]),
+    mediumSun: new Float32Array([40 * 0.85, 40 * 0.78, 40 * 0.65]),
+    weakSun: new Float32Array([22 * 0.85, 22 * 0.78, 21 * 0.65]),
 };
 
 /** Materials */
 
 const MATERIAL = {
-    VERSION: "1.04",
+    VERSION: "1.06",
     wall: new Material(LIGHT_COLORS.gray, LIGHT_COLORS.lightgray, LIGHT_COLORS.darkgray, 0.8),
     marble: new Material(LIGHT_COLORS.gray, LIGHT_COLORS.lightgray, LIGHT_COLORS.darkgray, 0.85),
     standard: new Material(LIGHT_COLORS.standard, LIGHT_COLORS.standard, LIGHT_COLORS.standard, 0.125),
@@ -111,6 +113,7 @@ const MATERIAL = {
     orangeShine: new Material(LIGHT_COLORS.orange, LIGHT_COLORS.orange, LIGHT_COLORS.orange, 0.99),
     pinkShine: new Material(LIGHT_COLORS.pink, LIGHT_COLORS.pink, LIGHT_COLORS.pink, 0.99),
     steel: new Material(LIGHT_COLORS.steelAmbient, LIGHT_COLORS.steelDiffuse, LIGHT_COLORS.steelSpecular, 0.85),
+    princess: new Material(LIGHT_COLORS.standard, LIGHT_COLORS.standard, LIGHT_COLORS.standard, 0.15, 0.10, 0, 0.3),
 };
 console.log(`%cMATERIAL v${MATERIAL.VERSION} loaded.`, "color: #888");
 if (ENGINE.verbose) console.table(MATERIAL);

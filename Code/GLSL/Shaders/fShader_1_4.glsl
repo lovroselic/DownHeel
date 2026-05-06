@@ -1,8 +1,9 @@
 #version 300 es
 ///fShader///
 /*
-* v1.3 (patched)
-* Taxxon - lighting space/sign consistency fixes
+* v1.4 (patched)
+* DownHeel - specular fixes
+* debugging functions removed, check 1.3 or earlier for them
 */
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -18,10 +19,27 @@ struct Material {
     vec3 diffuseColor;
     vec3 specularColor;
     float shininess;
+
+    // roughness:
+    //   0.05 = very shiny
+    //   0.25 = leather / satin
+    //   0.65 = neutral old-material fallback
+    //   0.90 = matte cloth
+    //
+    // metallic:
+    //   0.0 = normal material
+    //   1.0 = metal
+    //
+    // fresnelStrength:
+    //   0.0 = disabled / neutral
+    //   0.15 - 0.35 = useful shiny edge boost
+
+    float roughness;
+    float metallic;
+    float fresnelStrength;
 };
 
 const int N_LIGHTS = 1;                                         // replaced before compiling
-//float illumination;
 
 uniform vec3 uPointLights[N_LIGHTS];
 uniform vec3 uLightColors[N_LIGHTS];
@@ -44,6 +62,10 @@ in vec2 vTextureCoord;
 //bloody hardcoded constants
 const vec3 innerLightColor = vec3(1.0f, 1.0f, 1.0f);
 const vec3 GLOBAL_AMBIENT = vec3(0.05f);
+
+const float DEFAULT_ROUGHNESS = 0.65f;
+const float MIN_ROUGHNESS = 0.04f;
+
 const float PL_AmbientStrength = 9.99f;                          //9.99
 const float PL_DiffuseStrength = 50.0f;                          //50.0
 const float PL_SpecularStrength = 5.0f;                          //2.5
@@ -74,6 +96,7 @@ out vec4 fragColor;
 // ----------------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------------
+float getMaterialRoughness();
 
 vec3 CalcLight(
     vec3 lightPosition,
@@ -85,61 +108,86 @@ vec3 CalcLight(
     vec3 ambientColor,
     vec3 diffuseColor,
     vec3 specularColor,
+    float roughness,
+    float metallic,
+    float fresnelStrength,
     float ambientStrength,
     float diffuseStrength,
     float specularStrength,
     int inner,
-    vec3 lightDirection
+    vec3 lightDirection,
+    vec3 baseColor,
+    out vec3 specularOut
 );
 
 bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination);
 bool isOccluded(vec3 position3D);
-vec3 worldToNormalizedTexCoord3D(vec3 position3D);
 bool isOmniDirectional(vec3 dir);
-
-//debuggers - don't remove !
-vec3 debugDisplay(bool occluded);
-vec3 illuminationDisplay(float illumination);
-vec3 occlusionDisplay(bool occluded);
-vec3 RayDebug(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination);
 
 // ----------------------------------------------------------------------------
 
 void main(void) {
-    vec3 ambientColor = uMaterial.ambientColor;
-    vec3 diffuseColor = uMaterial.diffuseColor;
-    vec3 specularColor = uMaterial.specularColor;
-    float shininess = uMaterial.shininess;
-
-    vec3 norm = normalize(v_normal);
-    vec3 viewDir = normalize(uCameraPos - FragPos);
-
-    // "Inner" light from camera position 
-    vec3 innerLight = CalcLight(uCameraPos, FragPos, viewDir, norm, innerLightColor, shininess, ambientColor, diffuseColor, specularColor, innerAmbientStrength, innerDiffuseStrength, innerSpecularStrength, 1, viewDir);
-
-    vec3 PL_output = vec3(0.0f);
-    for (int i = 0; i < N_LIGHTS; i++) {
-        if (uPointLights[i].x < 0.0f)
-            continue;
-
-        PL_output += CalcLight(uPointLights[i], FragPos, viewDir, norm, uLightColors[i], shininess, ambientColor, diffuseColor, specularColor, PL_AmbientStrength, PL_DiffuseStrength, PL_SpecularStrength, 0, uLightDirections[i]);
-    }
-
-    vec3 light = innerLight + PL_output;
-
     vec4 texelColor = texture(uSampler, vTextureCoord);
     if (texelColor.a < IGNORE_ALPHA)
         discard;
 
-    // fragColor = vec4(texelColor.rgb * light, texelColor.a);
-    fragColor = vec4(texelColor.rgb * max(light, GLOBAL_AMBIENT), texelColor.a);
+    vec3 baseColor = texelColor.rgb;
 
-    // Debug option - don't delete!!!
-    // fragColor = vec4(normalize(v_normal) * 0.5 + 0.5, 1.0);
-    // fragColor = vec4(texture(uSampler, vTextureCoord).rgb, 1.0);
-    // fragColor = vec4(light, 1.0);
-    // fragColor = vec4(uMaterial.diffuseColor, 1.0);
+    vec3 ambientColor = uMaterial.ambientColor;
+    vec3 diffuseColor = uMaterial.diffuseColor;
+    vec3 specularColor = uMaterial.specularColor;
+    float shininess = uMaterial.shininess;
+    float roughness = getMaterialRoughness();
+    float metallic = uMaterial.metallic;
+    float fresnelStrength = uMaterial.fresnelStrength;
+
+    vec3 norm = normalize(v_normal);
+    vec3 viewDir = normalize(uCameraPos - FragPos);
+
+    vec3 specularTotal = vec3(0.0f);
+    vec3 specularPart = vec3(0.0f);
+
+    // "Inner" light from camera position 
+    vec3 innerLight = CalcLight(uCameraPos, FragPos, viewDir, norm, innerLightColor, shininess, ambientColor, diffuseColor, specularColor, roughness, metallic, fresnelStrength, innerAmbientStrength, innerDiffuseStrength, innerSpecularStrength, 1, viewDir, baseColor, specularPart);
+
+    specularTotal += specularPart;
+
+    vec3 PL_output = vec3(0.0f);
+
+    for (int i = 0; i < N_LIGHTS; i++) {
+
+        if (uPointLights[i].x < 0.0f)
+            continue;
+
+        PL_output += CalcLight(uPointLights[i], FragPos, viewDir, norm, uLightColors[i], shininess, ambientColor, diffuseColor, specularColor, roughness, metallic, fresnelStrength, PL_AmbientStrength, PL_DiffuseStrength, PL_SpecularStrength, 0, uLightDirections[i], baseColor, specularPart);
+
+        specularTotal += specularPart;
+    }
+
+    vec3 nonSpecularLight = innerLight + PL_output;
+
+    // Texture color affects ambient/diffuse.
+    // Specular is added separately so shiny highlights remain visible.
+    vec3 diffuseFinal = baseColor * max(nonSpecularLight, GLOBAL_AMBIENT);
+    vec3 finalColor = diffuseFinal + specularTotal;
+
+    fragColor = vec4(clamp(finalColor, 0.0f, 1.0f), texelColor.a);
 }
+
+// ----------------------------------------------------------------------------
+// Material helpers
+// ----------------------------------------------------------------------------
+
+float getMaterialRoughness() {
+    if (uMaterial.roughness <= 0.0f)
+        return DEFAULT_ROUGHNESS;
+
+    return clamp(uMaterial.roughness, MIN_ROUGHNESS, 1.0f);
+}
+
+// ----------------------------------------------------------------------------
+// Lighting
+// ----------------------------------------------------------------------------
 
 vec3 CalcLight(
     vec3 lightPosition,
@@ -151,21 +199,27 @@ vec3 CalcLight(
     vec3 ambientColor,
     vec3 diffuseColor,
     vec3 specularColor,
+    float roughness,
+    float metallic,
+    float fresnelStrength,
     float ambientStrength,
     float diffuseStrength,
     float specularStrength,
     int inner,
-    vec3 lightDirection
+    vec3 lightDirection,
+    vec3 baseColor,
+    out vec3 specularOut
 ) {
 
-    if (inner == 0) lightPosition.y -= LIGHT_POS_Y_OFFSET;
+    specularOut = vec3(0.0f);
+
+    if (inner == 0)
+        lightPosition.y -= LIGHT_POS_Y_OFFSET;
 
     float lightPosDistance = distance(lightPosition, FragPos);
     vec3 lightToFrag = normalize(FragPos - lightPosition);                    // lightToFrag: light -> fragment (incoming direction)
     vec3 fragToLight = -lightToFrag;                                            // fragToLight: fragment -> light (Lambert)
-
     vec3 dirLight = normalize(lightDirection);                               // for directional cone checks (if not omni)
-
     float invDistance = 1.0f / (lightPosDistance + EPSILON);
     float attenuation = invDistance / (ATTNF + ATTNF2 * lightPosDistance);
 
@@ -187,15 +241,10 @@ vec3 CalcLight(
     }
 
     // Occlusion (only meaningful for non-inner light)
-    bool occluded = Raycast3D(lightPosition, FragPos, illumination);
-
-    // Debug helpers
-    //bool occluded = false;
-    // return debugDisplay(occluded);
-    // return illuminationDisplay(illumination);
-    // return occlusionDisplay(isOccluded(RayDebug(lightPosition, FragPos, illumination)));
-    // return occlusionDisplay(occluded);
-
+    bool occluded = false;
+    if (inner == 0) {
+        occluded = Raycast3D(lightPosition, FragPos, illumination);
+    }
     bool isLight = (lightPosDistance < DISTANCE_LIGHT);
 
     // -------------------- ambient --------------------
@@ -210,24 +259,44 @@ vec3 CalcLight(
     float diffLight = max(dot(normal, fragToLight), 0.0f);
     float diffView = max(dot(normal, viewDir), 0.0f);
     float diff = 0.95f * diffLight + 0.05f * diffView;
-    //float diff = diffLight;
 
     vec3 diffuselight = pointLightColor * diff * diffuseStrength * attenuation * diffuseColor;
+    diffuselight *= 1.0f - metallic * 0.65f;
 
     // -------------------- specular --------------------
-    // reflect() expects the incoming vector pointing *towards* the surface, i.e. light->frag.
-    vec3 reflectDir = reflect(lightToFrag, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
-    vec3 specularLight = pointLightColor * spec * specularStrength * attenuation * specularColor;
+    // Blinn-Phong using half vector.
+    float gloss = 1.0f - roughness;
+
+    float maxSpecPower = max(shininess, 8.0f);
+    float specPower = mix(8.0f, maxSpecPower, gloss);
+
+    vec3 halfDir = normalize(fragToLight + viewDir);
+    float NoH = max(dot(normal, halfDir), 0.0f);
+    float spec = pow(NoH, specPower);
+    float NoV = max(dot(normal, viewDir), 0.0f);                            // Fresnel edge shine.
+    float fresnel = pow(1.0f - NoV, 5.0f) * fresnelStrength;
+
+    vec3 nonMetalSpecColor = specularColor;                                           // Non-metal highlights are mostly specularColor.
+    vec3 metalSpecColor = baseColor * specularColor;                                  // Metal highlights are tinted toward the base texture color.
+    vec3 finalSpecColor = mix(nonMetalSpecColor, metalSpecColor, metallic);
+
+    float specAmount = (spec + fresnel * gloss) * gloss;                              // Keep matte materials from sparkling.
+    float lightFacing = step(0.0001f, diffLight);
+    specAmount *= lightFacing;
+
+    vec3 specularLight = pointLightColor * specAmount * specularStrength * attenuation * finalSpecColor;
 
     // -------------------- illumination reductions / occlusion --------------------
     if (illumination < ILLUMINATION_CUTOFF) {
         if (isLight) {
             float invlightDistance = 1.0f / max(lightPosDistance, EPSILON);
             float attenuationHalo = invlightDistance / (HATTNF + HATTNF2 * lightPosDistance);
-            diffuselight *= PL_DIFUSSE_LIGHT_HALO_REDUCTION * attenuationHalo;
+            float haloReduction = PL_DIFUSSE_LIGHT_HALO_REDUCTION * attenuationHalo;
+            diffuselight *= haloReduction;
+            specularLight *= haloReduction;
         } else {
             diffuselight *= PL_DIFUSSE_ILLUMINATION_REDUCTION;
+            specularLight *= PL_DIFUSSE_ILLUMINATION_REDUCTION;
         }
 
         if (lightPosDistance > IGNORED_ATTN_DISTANCE) {
@@ -237,7 +306,9 @@ vec3 CalcLight(
         return PL_AMBIENT_OCCLUSION * ambientLight + PL_DIFFUSE_OCCLUSION * diffuselight;
     }
 
-    return clamp(ambientLight + diffuselight + specularLight, 0.0f, MAXLIGHT);
+    // -------------------- returns  --------------------
+    specularOut = clamp(specularLight, 0.0f, MAXLIGHT);                  // Specular is returned separately via out parameter.
+    return clamp(ambientLight + diffuselight, 0.0f, MAXLIGHT);
 }
 
 // -------------------------- Raycasting / occlusion --------------------------
@@ -249,13 +320,10 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
         return false;
 
     vec3 dirNorm = direction / dirLen;
-
     vec3 step = vec3(direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f), direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f), direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f));
-
     float illumination2 = (illumination + EPSILON) * (illumination + EPSILON);
 
-    // pull back continuously
-    vec3 cellTarget = floor(rayTarget3D - dirNorm * INTO_WALL * illumination2);
+    vec3 cellTarget = floor(rayTarget3D - dirNorm * INTO_WALL * illumination2);                         // pull back continuously
 
     // walk cells
     rayOrigin3D = rayOrigin3D + dirNorm * RAY_ORIGIN_BIAS;
@@ -315,7 +383,7 @@ bool isOccluded(vec3 position3D) {
 
     // swap y/z to match texture layout
     ivec3 texel = ivec3(cell.x, cell.z, cell.y);
-    ivec3 size  = ivec3(uGridSize);
+    ivec3 size = ivec3(uGridSize);
 
     if (any(lessThan(texel, ivec3(0))) || any(greaterThanEqual(texel, size))) {
         return false;
@@ -325,36 +393,6 @@ bool isOccluded(vec3 position3D) {
     return occ >= 0.5f;
 }
 
-vec3 worldToNormalizedTexCoord3D(vec3 position3D) {
-    // need to swap z and y
-    return vec3(position3D.x / uGridSize.x, position3D.z / uGridSize.y, position3D.y / uGridSize.z);
-}
-
 bool isOmniDirectional(vec3 dir) {
     return length(dir) < 0.01f;
-}
-
-// -------------------------- DEBUG helpers ----------------------------
-
-vec3 debugDisplay(bool occluded) {
-    if (occluded)
-        return vec3(1.0f, 0.0f, 0.0f);
-    return vec3(0.0f, 1.0f, 0.0f);
-}
-
-vec3 occlusionDisplay(bool occluded) {
-    if (occluded)
-        return vec3(0.5f, 0.0f, 0.0f);
-    return vec3(0.0f, 0.1f, 0.0f);
-}
-
-vec3 illuminationDisplay(float illumination) {
-    return vec3(0.0f, illumination, 0.0f);
-}
-
-vec3 RayDebug(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
-    vec3 direction = rayTarget3D - rayOrigin3D;
-    float illumination2 = (illumination + EPSILON) * (illumination + EPSILON);
-    vec3 adjustedTarget = rayTarget3D + normalize(direction) * INTO_WALL * illumination2;
-    return adjustedTarget;
 }

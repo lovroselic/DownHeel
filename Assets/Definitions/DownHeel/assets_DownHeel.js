@@ -39,6 +39,7 @@ LoadTextures = [
 
 
     //objects
+    { srcName: "ObjectTextures/BluePrincess.webp", name: "BluePrincess" },
 
     //title
     { srcName: "Title/DownHeel_title_768.webp", name: "Title" },
@@ -66,7 +67,7 @@ LoadAudio = [
 ];
 
 LoadShaders = [
-    'vShader_1_2.glsl', 'fShader_1_3.glsl', 'pick_vShader_1_0.glsl', 'pick_fShader_1_0.glsl',
+    'vShader_1_2.glsl', 'fShader_1_4.glsl', 'pick_vShader_1_0.glsl', 'pick_fShader_1_0.glsl',
     'particle_render_fShader_1_1.glsl', 'particle_render_vShader_1_0.glsl', 'particle_transform_fShader_1_0.glsl', 'particle_transform_vShader_1_1.glsl',
     'model_vShader_1_2.glsl', 'fire_transform_vShader_1_0.glsl', 'fire_render_fShader_1_0.glsl',
     'shadow_vShader_1_0.glsl', 'shadow_fShader_1_0.glsl'

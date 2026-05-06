@@ -18,7 +18,7 @@
  */
 
 const LS_matrix = {
-    VERSION: "1.4",
+    VERSION: "1.5",
     CSS: "color: red",
 };
 
@@ -150,6 +150,7 @@ class Vector3 {
         return this.x * vector.x + this.y * vector.y + this.z * vector.z;
     }
     scaleVec3(vec3) {
+        if (vec3.constructor.name === "Vector3") vec3 = vec3.array;                   //support arrays and Vector3
         let x = this.x * vec3[0];
         let y = this.y * vec3[1];
         let z = this.z * vec3[2];

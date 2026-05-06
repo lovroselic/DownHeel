@@ -20,7 +20,7 @@ const HERO_TYPE = {
         texture: "BluePrincess",
         scale: 1.82 / 2 ** 2,
         rotateToNorth: Math.PI,
-        material: MATERIAL.standard,
+        material: MATERIAL.princess,
         moveSpeed: 2.0
     }
 };
