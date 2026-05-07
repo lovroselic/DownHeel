@@ -192,6 +192,8 @@ const GAME = {
         ENGINE.addBOX("DIRECTION", 2048, 128, ["direction"], null);
         ENGINE.addBOX("WIDTH", 2048, 128, ["width"], null);
         ENGINE.addBOX("SLOPE", 2048, 128, ["slope"], null);
+        ENGINE.addBOX("SURFACE", 2048, 128, ["surface"], null);
+        //ENGINE.addBOX("SIDE_SLOPE", 2048, 128, ["sideslope"], null);
         ENGINE.addBOX("WEBGL", 800, 600, ["3d_webgl"], null);
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
@@ -600,6 +602,26 @@ const GAME = {
             $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
             GAME.drawOcclusionMap();
         }
+
+        GAME.renderQuadMap();
+    },
+    renderQuadMap() {
+        GAME.createQuadMap();
+    },
+    createQuadMap() {
+        console.log("\n");
+        console.log("--- creating quadMap ---");
+        console.log("*".repeat(100));
+
+        const GA =  $MAP.map.GA;
+        const terrain = $MAP.map.terrain;
+        const QM = QUAD_MAP.create(GA, terrain);
+        console.log("QM", QM);
+
+
+
+        console.log("*".repeat(100));
+        console.log("\n");
     },
     stack: {
         fillCount: 0,

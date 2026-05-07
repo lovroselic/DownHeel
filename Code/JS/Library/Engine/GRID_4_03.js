@@ -10,7 +10,7 @@
 
 /*
 TODO:
-    - updated in Connect4, copy to HTH! use same version
+   
   
 known bugs:
 

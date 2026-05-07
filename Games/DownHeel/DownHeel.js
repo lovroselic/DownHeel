@@ -48,12 +48,13 @@ const INI = {
     SCREEN_BORDER: 256,
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
-    SUN_HEIGHT_FACTOR: 7.5, //7.5
+    SUN_VECTOR: [1, 50, 1],
+    //SUN_HEIGHT_FACTOR: 7.5, //7.5
     //JUMP_POWER: 1.55,                    // jump distance in grid units 1.55 default
 };
 
 const PRG = {
-    VERSION: "0.2.0",
+    VERSION: "0.2.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -240,9 +241,11 @@ const HERO = {
     cancelFlight() {
 
     },
-     /*requestJump() {
-        this.player.requestJump(this.jumpPower);
-    },*/
+    updateSunPosition() {
+        //assuming single sun
+        const sun = SUN3D.POOL[0];
+        sun.pos = this.player.pos.scaleVec3(INI.SUN_VECTOR);
+    },
 };
 
 /**
@@ -346,12 +349,7 @@ const GAME = {
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
 
         GAME.setCameraView();
-    
-        let SUN_HEIGHT_FACTOR = 50;
-        let SUN_VECTOR = [1, SUN_HEIGHT_FACTOR, 1];
-        
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(SUN_VECTOR), LIGHT_COLORS.sun);
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(SUN_VECTOR), LIGHT_COLORS.weakSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
@@ -439,11 +437,11 @@ const GAME = {
     run(lapsedTime) {
         if (ENGINE.GAME.stopAnimation) return;
         const date = Date.now();
-        //HERO.player.updateJump(lapsedTime);
         HERO.player.animateAction();
         EXPLOSION3D.manage(date);
         GAME.respond(lapsedTime);
         ENGINE.TIMERS.update();
+        HERO.updateSunPosition();
         GAME.frameDraw(lapsedTime);
         HERO.concludeAction();
         if (HERO.dead) IAM.checkIfProcessesComplete([EXPLOSION3D], HERO.death);
@@ -509,10 +507,7 @@ const GAME = {
             HERO.player.attack();
             ENGINE.GAME.keymap[ENGINE.KEY.map.space] = false; //NO repeat
         }
-        /*if (map[ENGINE.KEY.map.shift]) {
-            HERO.requestJump();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.shift] = false;
-        }*/
+
         return;
     },
     FPS(lapsedTime) {
