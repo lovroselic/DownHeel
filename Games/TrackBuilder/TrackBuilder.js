@@ -192,8 +192,8 @@ const GAME = {
         ENGINE.addBOX("DIRECTION", 2048, 128, ["direction"], null);
         ENGINE.addBOX("WIDTH", 2048, 128, ["width"], null);
         ENGINE.addBOX("SLOPE", 2048, 128, ["slope"], null);
-        ENGINE.addBOX("SURFACE", 2048, 128, ["surface"], null);
-        //ENGINE.addBOX("SIDE_SLOPE", 2048, 128, ["sideslope"], null);
+        ENGINE.addBOX("SURFACE", 2048, 256, ["surface"], null);
+        ENGINE.addBOX("SIDE_SLOPE", 2048, 768, ["sideslope"], null);
         ENGINE.addBOX("WEBGL", 800, 600, ["3d_webgl"], null);
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
@@ -316,14 +316,17 @@ const GAME = {
 
         $("#dir_generate").click(function () {
             NOISE_FUNCTION.direction_noise_preview();
+            GAME.render();
         });
 
         $("#width_generate").click(function () {
             NOISE_FUNCTION.width_noise_preview();
+            GAME.render();
         });
 
         $("#slope_generate").click(function () {
             NOISE_FUNCTION.slope_noise_preview();
+            GAME.render();
         });
 
         console.log("GAME SETUP completed");
@@ -606,22 +609,10 @@ const GAME = {
         GAME.renderQuadMap();
     },
     renderQuadMap() {
-        GAME.createQuadMap();
-    },
-    createQuadMap() {
-        console.log("\n");
-        console.log("--- creating quadMap ---");
-        console.log("*".repeat(100));
-
-        const GA =  $MAP.map.GA;
-        const terrain = $MAP.map.terrain;
-        const QM = QUAD_MAP.create(GA, terrain);
-        console.log("QM", QM);
-
-
-
-        console.log("*".repeat(100));
-        console.log("\n");
+        const QM = QUAD_MAP.create($MAP.map.GA, $MAP.map.terrain);
+        $MAP.map.quadMap = QM;
+        QUAD_MAP.paintTopDown(QM, "surface");
+        QUAD_MAP.paintSideSlope(QM, "sideslope");
     },
     stack: {
         fillCount: 0,
@@ -833,7 +824,7 @@ floor: "${$("#floortexture")[0].value}",
         }
     },
     resizeGL_window() {
-        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * (128)}px`)
+        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * (128) + 256 + 768}px`)
     },
     parseFloatSafe(value, fallback) {
         const n = parseFloat(value);
