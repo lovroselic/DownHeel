@@ -7,7 +7,7 @@
 
 /** features to parse MazEditor outputs */
 const MAP_TOOLS = {
-    VERSION: "2.01",
+    VERSION: "2.02",
     CSS: "color: #F9A",
     properties: ['start', 'decals', 'lights', 'gates', 'keys', 'monsters', 'scrolls', 'potions', 'gold', 'skills', 'containers',
         'shrines', 'doors', 'triggers', 'entities', 'objects', 'traps', 'oracles', 'movables', 'trainers', 'interactors', 'lairs',
@@ -94,6 +94,10 @@ const MAP_TOOLS = {
         if (!this.MAP[level].name) {
             this.MAP[level].name = `Room - ${level}`;
         }
+
+        /** terrain data */
+        if (this.MAP[level].terrain) this.MAP[level].terrain = JSON.parse(this.MAP[level].terrain);
+
         /** initialize global map proterties */
         const SG = this.MAP[level].sg || null;
         this.MAP[level].map.sg = SG;

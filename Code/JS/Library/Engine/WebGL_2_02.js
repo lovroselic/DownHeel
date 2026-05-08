@@ -1790,6 +1790,65 @@ const WORLD = {
         this[type].textureCoordinates.push(...textureCoordinates);
         this[type].vertexNormals.push(...vertexNormals);
     },
+    addSurfaceQuad(positions, type = "floor", E = ELEMENT.TOP_FACE) {
+        const base = this[type].positions.length / 3;
+        const indices = E.indices.map(i => i + base);
+        const textureCoordinates = E.textureCoordinates.slice();
+        let vertexNormals = E.vertexNormals.slice();
+
+        this[type].positions.push(...positions);
+        this[type].indices.push(...indices);
+        this[type].textureCoordinates.push(...textureCoordinates);
+        this[type].vertexNormals.push(...vertexNormals);
+
+    },
+    buildSurfaceBasedWorld(map) {
+        const GA = map.GA;
+        WORLD.GA = GA;
+        const QM = map.quadMap.map;
+        console.time("WorldBuilding");
+        this.init();
+
+        for (let [index, value] of GA.map.entries()) {
+            let grid = GA.indexToGrid(index);
+
+            switch (value) {
+                case MAPDICT.EMPTY:
+                    this.addSurfaceQuad(QM[index].array);
+                    break;
+                case MAPDICT.WALL:
+                    //to do
+                    break;
+                default:
+                    console.error("surface world building unexpected GA value error", value, "grid", grid);
+            }
+        }
+
+
+        /** map indices */
+        {
+            let L = 0;
+            for (let type of this.objectTypes) {
+                this[type].indices = this[type].indices.map(e => e + L);
+                L += this[type].positions.length / 3;
+            }
+        }
+
+        /** globalize */
+        for (let BT of this.bufferTypes) {
+            this[BT] = [];
+            for (let OT of this.objectTypes) {
+                this[BT] = this[BT].concat(this[OT][BT]);
+            }
+        }
+
+        const offset = this.create_offset('indices');
+        const positionOffset = this.create_offset('positions');
+
+        console.timeEnd("WorldBuilding");
+        console.log("--------------------------------");
+        return new World(this.positions, this.indices, this.textureCoordinates, this.vertexNormals, offset, positionOffset);
+    },
     build(map) {
         const GA = map.GA;
         const TE = map.TextureExclusion;
@@ -4684,7 +4743,7 @@ class $3D_Entity {
         gl.uniform3fv(WebGL.model_program.uniforms.uMaterialDiffuseColor, this.material.diffuseColor);
         gl.uniform3fv(WebGL.model_program.uniforms.uMaterialSpecularColor, this.material.specularColor);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialShininess, this.material.shininess);
-         gl.uniform1f(WebGL.model_program.uniforms.uMaterialRoughness, this.material.roughness);
+        gl.uniform1f(WebGL.model_program.uniforms.uMaterialRoughness, this.material.roughness);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialMetallic, this.material.metallic);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialFresnelStrength, this.material.fresnelStrength);
 

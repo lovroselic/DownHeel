@@ -661,6 +661,9 @@ const GAME = {
     <span style="background-color: ${colorVectorToRGB_String(material.diffuseColor)}">Diffuse: ${colorVectorToHex(material.diffuseColor)}</span><br/>
     <span style="background-color: ${colorVectorToRGB_String(material.specularColor)}">Specular: ${colorVectorToHex(material.specularColor)}</span><br/>
     <span>Shininess: ${material.shininess}</span><br/>
+    <span>Roughness: ${material.roughness}</span><br/>
+    <span>Metallic: ${material.metallic}</span><br/>
+    <span>FresnelStrength: ${material.fresnelStrength}</span><br/>
     `;
         $("#material-details").html(html);
     },

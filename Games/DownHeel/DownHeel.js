@@ -54,7 +54,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.2.2",
+    VERSION: "0.2.3",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -370,10 +370,12 @@ const GAME = {
         console.timeEnd("setWorld");
     },
     buildWorld(level) {
-        if (DEBUG.VERBOSE) console.info(" ******** building world, room/dungeon/level:", level, "ressurection", HERO.ressurection, "restart", GAME.restarted);
+        if (DEBUG.VERBOSE) console.info(" ******** building world, room/dungeon/level:", level, "restart", GAME.restarted);
         WebGL.init_required_IAM(MAP[level].map, HERO);
         SPAWN_TOOLS.spawn(level);
-        MAP[level].world = WORLD.build(MAP[level].map);
+        MAP[level].map.quadMap = QUAD_MAP.create(MAP[level].map.GA, MAP[level].terrain);
+        //MAP[level].world = WORLD.build(MAP[level].map);
+        MAP[level].world = WORLD.buildSurfaceBasedWorld(MAP[level].map);
     },
     newDungeon(level) {
         MAP_TOOLS.unpack(level);
