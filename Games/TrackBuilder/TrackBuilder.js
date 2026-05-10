@@ -48,7 +48,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.3.1",
+    VERSION: "0.3.2",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -194,6 +194,7 @@ const GAME = {
         ENGINE.addBOX("SLOPE", 2048, 128, ["slope"], null);
         ENGINE.addBOX("SURFACE", 2048, 256, ["surface"], null);
         ENGINE.addBOX("SIDE_SLOPE", 2048, 768, ["sideslope"], null);
+        ENGINE.addBOX("ZMAP", 2048, 256, ["zmap"], null);
         ENGINE.addBOX("WEBGL", 800, 600, ["3d_webgl"], null);
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
@@ -613,6 +614,9 @@ const GAME = {
         $MAP.map.quadMap = QM;
         QUAD_MAP.paintTopDown(QM, "surface");
         QUAD_MAP.paintSideSlope(QM, "sideslope");
+        $MAP.map.zMap = QUAD_MAP.create_zMap($MAP.map.quadMap);
+        console.warn("$MAP.map.zMap", $MAP.map.zMap);
+        QUAD_MAP.paintZMap($MAP.map.zMap, "zmap");
     },
     stack: {
         fillCount: 0,
@@ -827,7 +831,7 @@ floor: "${$("#floortexture")[0].value}",
         }
     },
     resizeGL_window() {
-        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * (128) + 256 + 768}px`)
+        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * 128 + 2 * 256 + 768}px`)
     },
     parseFloatSafe(value, fallback) {
         const n = parseFloat(value);

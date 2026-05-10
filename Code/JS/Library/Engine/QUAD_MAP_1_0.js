@@ -23,6 +23,9 @@ known bugs:
 const QUAD_MAP = {
     VERSION: "1.0",
     CSS: "color: #0C8",
+    INI: {
+        TILING_RESOLUTION: 10,
+    },
     create(GA, terrain) {
         const H = GA.height;
         const W = GA.width;
@@ -425,6 +428,108 @@ const QUAD_MAP = {
             CTX.fillText(`finish`, canvas.width - cfg.padding - 48, canvas.height - cfg.padding - 6);
         }
     },
+    create_zMap(QM) {
+        const TR = this.INI.TILING_RESOLUTION;
+        const minX = Math.floor(QM.min.x);
+        const minY = Math.floor(QM.min.y);
+        const sizeX = Math.ceil(QM.max.x) - minX;
+        const sizeY = Math.ceil(QM.max.y) - minY;
+        const xSize = sizeX * TR;
+        const ySize = sizeY * TR;
+        const zMap_array = new Float32Array(xSize * ySize);
+        zMap_array.fill(Infinity);
+
+        for (const node of QM.map) {
+            const yA_top = (node.beforeYTop - minY) * TR;
+            const yA_bottom = (node.beforeYBottom - minY) * TR;
+            const yB_top = (node.afterYTop - minY) * TR;
+            const yB_bottom = (node.afterYBottom - minY) * TR;
+
+            for (let t = 0; t < TR; t++) {
+                const x = node.beforeX * TR + t;
+                const T = (t + 0.5) / TR;
+                const yBegin = Math.max(0, Math.floor(Math.lerp(yA_top, yB_top, T)));
+                const yEnd = Math.min(ySize, Math.ceil(Math.lerp(yA_bottom, yB_bottom, T)));
+                const z = Math.lerp(node.beforeZ, node.afterZ, T);
+                for (let y = yBegin; y < yEnd; y++) {
+                    let index = x + y * xSize;
+                    zMap_array[index] = z;
+                }
+            }
+        }
+        const zMap = new ZMap(zMap_array, QM.max, QM.min, xSize, ySize, minX, minY, TR);
+        return zMap;
+    },
+    paintZMap(zMap, layer = "zmap", options = {}) {
+        const CTX = LAYER[layer];
+        const canvas = CTX.canvas;
+
+        const cfg = {
+            background: "#000000",
+            text: "#DDE0DD",
+            drawLabels: true,
+
+            // dark -> bright blue
+            dark: [0, 8, 28],
+            bright: [42, 203, 232],
+
+            ...options
+        };
+
+        const CW = canvas.width;
+        const CH = canvas.height;
+
+        const xSize = zMap.xSize;
+        const ySize = zMap.ySize;
+
+        const minZ = zMap.min.z;
+        const maxZ = zMap.max.z;
+        const zRange = Math.max(maxZ - minZ, 0.000001);
+
+        const img = CTX.createImageData(CW, CH);
+        const data = img.data;
+
+        // initialize whole image to opaque black
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+            data[i + 3] = 255;
+        }
+
+        for (let py = 0; py < CH; py++) {
+            const zy = Math.floor(py / CH * ySize);
+
+            for (let px = 0; px < CW; px++) {
+                const zx = Math.floor(px / CW * xSize);
+                const z = zMap.map[zMap.index(zx, zy)];
+
+                if (z === Infinity) continue;   // stays black
+
+                const t = Math.clamp((z - minZ) / zRange, 0, 1);
+
+                const r = Math.round(Math.lerp(cfg.dark[0], cfg.bright[0], t));
+                const g = Math.round(Math.lerp(cfg.dark[1], cfg.bright[1], t));
+                const b = Math.round(Math.lerp(cfg.dark[2], cfg.bright[2], t));
+
+                const i = (px + py * CW) * 4;
+                data[i] = r;
+                data[i + 1] = g;
+                data[i + 2] = b;
+                data[i + 3] = 255;
+            }
+        }
+
+        CTX.putImageData(img, 0, 0);
+
+        if (cfg.drawLabels) {
+            CTX.fillStyle = cfg.text;
+            CTX.font = "12px Consolas, monospace";
+            CTX.fillText(`ZMap: ${xSize} x ${ySize}, canvas ${CW} x ${CH}`, 8, 14);
+            CTX.fillText(`Z range: ${minZ.toFixed(2)} ... ${maxZ.toFixed(2)}`, 8, 28);
+            CTX.fillText(`black = outside slope`, 8, 42);
+        }
+    },
 };
 
 //END
@@ -456,5 +561,33 @@ class QuadNode {
             afterX, afterZ, afterYBottom,
             beforeX, beforeZ, beforeYBottom
         ]);
+    }
+}
+
+class ZMap {
+    constructor(map, max, min, xSize, ySize, minX, minY, resolution) {
+        this.map = map;
+        this.max = max;
+        this.min = min;
+        this.xSize = xSize;
+        this.ySize = ySize;
+        this.minX = minX;
+        this.minY = minY;
+        this.resolution = resolution;
+    }
+
+    index(ix, iy) {
+        return ix + iy * this.xSize;
+    }
+
+    getZ(worldX, worldY) {
+        const ix = Math.floor((worldX - this.minX) * this.resolution);
+        const iy = Math.floor((worldY - this.minY) * this.resolution);
+        if (ix < 0 || ix >= this.xSize || iy < 0 || iy >= this.ySize) return Infinity;
+        return this.map[this.index(ix, iy)];
+    }
+
+    isOnSurface(worldX, worldY) {
+        return this.getZ(worldX, worldY) !== Infinity;
     }
 }
