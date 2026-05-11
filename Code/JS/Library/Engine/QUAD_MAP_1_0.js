@@ -562,6 +562,12 @@ class QuadNode {
             beforeX, beforeZ, beforeYBottom
         ]);
     }
+    getSurfaceCenter() {
+        const A = Math.lerp(this.beforeYTop, this.beforeYBottom, 0.5);
+        const B = Math.lerp(this.afterYTop, this.afterYBottom, 0.5);
+        const y = Math.lerp(A, B, 0.5);
+        return new FP_Grid(this.beforeX + 0.5, y);
+    }
 }
 
 class ZMap {
@@ -575,18 +581,15 @@ class ZMap {
         this.minY = minY;
         this.resolution = resolution;
     }
-
     index(ix, iy) {
         return ix + iy * this.xSize;
     }
-
     getZ(worldX, worldY) {
         const ix = Math.floor((worldX - this.minX) * this.resolution);
         const iy = Math.floor((worldY - this.minY) * this.resolution);
         if (ix < 0 || ix >= this.xSize || iy < 0 || iy >= this.ySize) return Infinity;
         return this.map[this.index(ix, iy)];
     }
-
     isOnSurface(worldX, worldY) {
         return this.getZ(worldX, worldY) !== Infinity;
     }

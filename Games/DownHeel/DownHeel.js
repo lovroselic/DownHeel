@@ -23,7 +23,7 @@ const DEBUG = {
     AUTO_TEST: false,
     FPS: true,
     VERBOSE: true,
-    _2D_display: true,
+    _2D_display: false,
     INVINCIBLE: false,
     keys: true,
     max17: false,
@@ -48,13 +48,13 @@ const INI = {
     SCREEN_BORDER: 256,
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
-    SUN_VECTOR: [1, 50, 1],
+    SUN_VECTOR: Vector3.from_array([0, 50, 0]),
     //SUN_HEIGHT_FACTOR: 7.5, //7.5
     //JUMP_POWER: 1.55,                    // jump distance in grid units 1.55 default
 };
 
 const PRG = {
-    VERSION: "0.3.0",
+    VERSION: "0.3.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -244,7 +244,7 @@ const HERO = {
     updateSunPosition() {
         //assuming single sun
         const sun = SUN3D.POOL[0];
-        sun.pos = this.player.pos.scaleVec3(INI.SUN_VECTOR);
+        sun.pos = this.player.pos.add(INI.SUN_VECTOR);
     },
 };
 
@@ -302,6 +302,7 @@ const GAME = {
         WebGL.NO_TOP_CEILING = true;
         WebGL.VIEWS_ALLOWED = new Set([1, 3]);
         WebGL.GAME.setViewButtons();
+        WebGL.CONFIG.setMovementMode("surface");
     },
     levelStart() {
         console.log("starting level", GAME.level);
@@ -343,13 +344,16 @@ const GAME = {
         WebGL.setContext('webgl');
         this.buildWorld(level);
 
-        let start_dir = MAP[level].map.startPosition.vector;
-        let start_grid = MAP[level].map.startPosition.grid;
-        start_grid = new Vector3(start_grid.x + 0.5, start_grid.z + HERO.height, start_grid.y + 0.5);
+        const map = MAP[level].map;
+        let start_dir = map.startPosition.vector;
+        let start_index = map.GA.gridToIndex(map.startPosition.grid);
+        let start_quad = map.quadMap.map[start_index];
+        let start_grid = start_quad.getSurfaceCenter();
+        start_grid = new Vector3(start_grid.x, HERO.height, start_grid.y); 
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
 
         GAME.setCameraView();
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.sun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
@@ -374,7 +378,7 @@ const GAME = {
         WebGL.init_required_IAM(MAP[level].map, HERO);
         SPAWN_TOOLS.spawn(level);
         MAP[level].map.quadMap = QUAD_MAP.create(MAP[level].map.GA, MAP[level].terrain);
-        //MAP[level].world = WORLD.build(MAP[level].map);
+        MAP[level].map.zMap = QUAD_MAP.create_zMap(MAP[level].map.quadMap);
         MAP[level].world = WORLD.buildSurfaceBasedWorld(MAP[level].map);
     },
     newDungeon(level) {
@@ -594,7 +598,7 @@ const TITLE = {
         ENGINE.GAME.ANIMATION.next(GAME.runTitle);
     },
     clearAllLayers() {
-        ENGINE.layersToClear = new Set(["text", "grid", "coord",
+        ENGINE.layersToClear = new Set(["text",
             "sideback", "button", "title", "FPS", "info", "subtitle", "health",
             "bottomText"]);
         ENGINE.clearLayerStack();

@@ -129,6 +129,15 @@ const WebGL = {
         },
         ignoreHoles() {
             this.holesSupported = false;
+        },
+        movementMode: "basic",
+        setMovementMode(mode) {
+            if (["basic", "surface"].includes(mode)) {
+                WebGL.CONFIG.movementMode = mode;
+                if (WebGL.VERBOSE) console.info("WebGL Movement mode:", WebGL.CONFIG.movementMode);
+                return;
+            }
+            console.error("Wrong movement mode:", mode, ". Keeping default 'basic'");
         }
     },
     programs_compiled: false,
@@ -2427,6 +2436,7 @@ class $3D_player {
         this.map = map;
         this.GA = this.map.GA;
         this.enemyIA = this.map.enemyIA;
+        if (map.zMap) this.ZM = this.map.zMap;
     }
     setR(r) {
         this.r = r;
@@ -2458,11 +2468,40 @@ class $3D_player {
     move(reverse, lapsedTime) {
         let dir = this.dir;
         if (reverse) dir = dir.reverse2D();
-        this._applyMove_(lapsedTime, dir);
+        this._route_movement(lapsedTime, dir);
     }
     strafe(rotDirection, lapsedTime) {
         let dir = Vector3.from_2D_dir(this.dir.rotate2D((rotDirection * Math.PI) / 2), this.dir.y);
-        this._applyMove_(lapsedTime, dir);
+        this._route_movement(lapsedTime, dir);
+    }
+    _route_movement(lapsedTime, dir) {
+        switch (WebGL.CONFIG.movementMode) {
+            case "basic":
+                this._applyMove_(lapsedTime, dir);
+                break;
+            case "surface":
+                this._apply_surface_move(lapsedTime, dir);
+                break;
+            default:
+                throw new Error("WebGL movementMode error", WebGL.CONFIG.movementMode);
+        }
+    }
+    _apply_surface_move(lapsedTime, dir) {
+        //console.info("_apply_surface_move", lapsedTime, dir);
+        let length = (lapsedTime / 1000) * this.moveSpeed;
+        let nextPos3 = this.pos.translate(dir, length); //3D - Vector3
+        //console.log("nextPos3", nextPos3, length);
+
+        //check if next surface tile is non-ininity
+        let z = this.ZM.getZ(nextPos3.x, nextPos3.z);
+        //console.log("z", z);
+        if (z === Infinity) return this._out_of_surface();
+        nextPos3.set_y(this.minY + this.heigth + z);
+        return this.setPos(nextPos3);
+        //throw "debug";
+    }
+    _out_of_surface() {
+        console.log("OOS");
     }
     _applyMove_(lapsedTime, dir) {
         let length = (lapsedTime / 1000) * this.moveSpeed;
