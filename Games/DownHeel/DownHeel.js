@@ -49,12 +49,13 @@ const INI = {
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
     SUN_VECTOR: Vector3.from_array([0, 50, 0]),
+    HERO_HEIGHT: 0.15,
     //SUN_HEIGHT_FACTOR: 7.5, //7.5
     //JUMP_POWER: 1.55,                    // jump distance in grid units 1.55 default
 };
 
 const PRG = {
-    VERSION: "0.3.1",
+    VERSION: "0.3.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -156,7 +157,7 @@ const PRG = {
 const HERO = {
     construct() {
         this.player = null;
-        this.height = WebGL.INI.HERO_HEIGHT;
+        this.height = INI.HERO_HEIGHT;
         this.maxHealth = INI.HERO_HEALTH;
         this.restore();
     },
@@ -297,7 +298,7 @@ const GAME = {
         WebGL.USE_SHADOW = false;
         WebGL.USE_INTERACTION = false;
         //WebGL.INI.HERO_HEIGHT = 0;
-        WebGL.INI.HERO_HEIGHT = WebGL.INI.HERO_HEIGHT;
+        WebGL.INI.HERO_HEIGHT = INI.HERO_HEIGHT;
         WebGL.FIRST_PERSON_DUAL_DISPLAY = true;
         WebGL.NO_TOP_CEILING = true;
         WebGL.VIEWS_ALLOWED = new Set([1, 3]);
@@ -345,12 +346,16 @@ const GAME = {
         this.buildWorld(level);
 
         const map = MAP[level].map;
+        //console.log("map", map);
         let start_dir = map.startPosition.vector;
         let start_index = map.GA.gridToIndex(map.startPosition.grid);
         let start_quad = map.quadMap.map[start_index];
         let start_grid = start_quad.getSurfaceCenter();
-        start_grid = new Vector3(start_grid.x, HERO.height, start_grid.y); 
+        let z = map.zMap.getZ(start_grid.x, start_grid.y);
+        //console.warn("HERO.height + z", HERO.height, HERO.height + z, z);
+        start_grid = new Vector3(start_grid.x, HERO.height + z, start_grid.y);
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
+        //console.warn("HERO.player.heigth", HERO.player.heigth);
 
         GAME.setCameraView();
         SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.sun);

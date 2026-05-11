@@ -18,7 +18,7 @@ const HERO_TYPE = {
         name: "ThePrincess",
         model: "Princess",
         texture: "BluePrincess",
-        scale: 1.82 / 2 ** 2,
+        scale: 2.0 / 2 ** 4,
         rotateToNorth: Math.PI,
         material: MATERIAL.princess,
         moveSpeed: 2.0
