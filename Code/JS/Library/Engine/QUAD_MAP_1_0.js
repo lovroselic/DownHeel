@@ -455,7 +455,7 @@ const QUAD_MAP = {
                 for (let y = yBegin; y < yEnd; y++) {
                     let index = x + y * xSize;
                     if (GA.map[i] === MAPDICT.EMPTY) {
-                        zMap_array[index] = z;
+                        zMap_array[index] = z;                                                                      // only empty grids are passable
                     }
                 }
             }

@@ -1594,6 +1594,12 @@ const WORLD = {
         let resolution = 2 ** (Math.ceil(Math.log2(maxDimension)));
         return Math.max(resolution, WebGL.INI.MIN_RESOLUTION);
     },
+    _appendGeometry(type, positions, indices, textureCoordinates, vertexNormals) {
+        this[type].positions.push(...positions);
+        this[type].indices.push(...indices);
+        this[type].textureCoordinates.push(...textureCoordinates);
+        this[type].vertexNormals.push(...vertexNormals);
+    },
     addPic(decal, type) {
         const expandables = ["crest", "portal", "lair", "light"];
         let resolution = WebGL.INI.DEFAULT_RESOLUTION;
@@ -1712,17 +1718,14 @@ const WORLD = {
 
         //indices
         indices = indices.map(e => e + (this[type].positions.length / 3));
-
-        this[type].positions.push(...positions);
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
+        /*this[type].positions.push(...positions);
         this[type].indices.push(...indices);
         this[type].textureCoordinates.push(...textureCoordinates);
-        this[type].vertexNormals.push(...vertexNormals);
+        this[type].vertexNormals.push(...vertexNormals);*/
 
     },
     addCube(Y, grid, type, prune = null, scale = null) {
-        /*if (GRID.same3D(grid, new Grid3D(20, 6, 0))) {
-            console.error("\ndebug add cube", Y, grid, type, prune, scale, "WebGL.PRUNE", WebGL.PRUNE);
-        }*/
         if (!WebGL.PRUNE) return this.addElement(ELEMENT.CUBE, Y, grid, type);                                          //draws complete cube, no questions asked
 
         const GA = WORLD.GA;
@@ -1735,19 +1738,12 @@ const WORLD = {
             if (face === prune) continue;                                                                               //has texture decal, so let's prune it
             const checkGrid = grid.add(dir);
 
-            /*if (GRID.same3D(grid, new Grid3D(20, 6, 0))) {
-                console.info("..grid", grid, "checkGrid", checkGrid, "dir", dir);
-                console.info("...", "");
-            }*/
-
             if (GA.isDoor(checkGrid)) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);                                                              //doors
             else if (Y == -1 && dir.z === 0 && GA.isHole(checkGrid)) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);                               //visible sub floor supports for holes
             else if (!GA.isOutOfBounds(grid) && GA.isOutOfBounds(checkGrid) && dir.z === 1) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);        //visible quads - top 
             else if (!(GA.isOutOfBounds(checkGrid) || (GA.isWall(checkGrid)))) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);                     //visible quads
             else if (dir.y === 1 && GA.isOutOfBounds(checkGrid) && GA.isWall(grid)) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);                //axonometric support, outer side
             else if (Y == -1 && dir.z === 0 && GA.isOutOfBounds(checkGrid)) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);                        // visible side supports for 3rd person isometric view, out ouf bound faces below 0
-
-            //else if (GA.isWall(grid) && GA.isHole(checkGrid) && dir.z === 0) this.addElement(ELEMENT[this.cubeFaces[index]], Y, grid, WORLD.faceTypes[index], scale);    //debug
         }
 
         grid.z = rememberZ;                                                                                             //revert to initial z value
@@ -1761,46 +1757,20 @@ const WORLD = {
         const baseY = Math.min(quadNode.beforeZ, quadNode.afterZ);
 
         for (let p = 0; p < positions.length; p += 3) {
-            const localX = positions[p];       // 0 or 1
-            const localY = positions[p + 1];   // 0 or 1
-            const localZ = positions[p + 2];   // 0 or 1
+            const localX = positions[p];                                                    // 0 or 1
+            const localY = positions[p + 1];                                                // 0 or 1
+            const localZ = positions[p + 2];                                                // 0 or 1
 
-            /*
-                X:
-                cube x 0 -> quad beforeX
-                cube x 1 -> quad afterX
-            */
-            positions[p] = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);
+            positions[p] = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);            // X:
+            positions[p + 1] = baseY + localY * height;                                     // Y: Start at lower side of this slope segment.  Cube rises upward by height.
 
-            /*
-                Y:
-                OpenGL vertical coordinate.
-                Start at lower side of this slope segment.
-                Cube rises upward by height.
-            */
-            positions[p + 1] = baseY + localY * height;
-
-            /*
-                Z:
-                OpenGL lateral coordinate.
-                This follows the quad's skewed top/bottom sides.
-    
-                localZ 0 -> top side
-                localZ 1 -> bottom side
-    
-                localX controls whether we use before edge or after edge.
-            */
             const beforeSideZ = Math.lerp(quadNode.beforeYTop, quadNode.beforeYBottom, localZ);
             const afterSideZ = Math.lerp(quadNode.afterYTop, quadNode.afterYBottom, localZ);
-            positions[p + 2] = Math.lerp(beforeSideZ, afterSideZ, localX);
+            positions[p + 2] = Math.lerp(beforeSideZ, afterSideZ, localX);                  //Z: OpenGL lateral.  This follows the quad's skewed top/bottom sides. localZ 0 -> top,  localZ 1 -> bottom , localX controls before edge or after edge.
         }
 
         indices = indices.map(e => e + (this[type].positions.length / 3));
-
-        this[type].positions.push(...positions);
-        this[type].indices.push(...indices);
-        this[type].textureCoordinates.push(...textureCoordinates);
-        this[type].vertexNormals.push(...vertexNormals);
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     addBlockWall(Y, grid, type) {
         return this.addElement(ELEMENT.BLOCKWALL, Y, grid, type);
@@ -1826,13 +1796,8 @@ const WORLD = {
             positions[p + 2] += grid.y;
         }
 
-        //indices
         indices = indices.map(e => e + (this[type].positions.length / 3));
-
-        this[type].positions.push(...positions);
-        this[type].indices.push(...indices);
-        this[type].textureCoordinates.push(...textureCoordinates);
-        this[type].vertexNormals.push(...vertexNormals);
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     reserveObject(E, type) {
         let positions = E.positions.slice();
@@ -1840,25 +1805,16 @@ const WORLD = {
         let textureCoordinates = E.textureCoordinates.slice();
         let vertexNormals = E.vertexNormals.slice();
 
-        //indices
         indices = indices.map(e => e + (this[type].positions.length / 3));
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
 
-        this[type].positions.push(...positions);
-        this[type].indices.push(...indices);
-        this[type].textureCoordinates.push(...textureCoordinates);
-        this[type].vertexNormals.push(...vertexNormals);
     },
     addSurfaceQuad(positions, type = "floor", E = ELEMENT.TOP_FACE) {
         const base = this[type].positions.length / 3;
         const indices = E.indices.map(i => i + base);
         const textureCoordinates = E.textureCoordinates.slice();
         let vertexNormals = E.vertexNormals.slice();
-
-        this[type].positions.push(...positions);
-        this[type].indices.push(...indices);
-        this[type].textureCoordinates.push(...textureCoordinates);
-        this[type].vertexNormals.push(...vertexNormals);
-
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     buildSurfaceBasedWorld(map) {
         const GA = map.GA;
@@ -2538,18 +2494,17 @@ class $3D_player {
         }
     }
     _apply_surface_move(lapsedTime, dir) {
-        //console.info("_apply_surface_move", lapsedTime, dir);
         let length = (lapsedTime / 1000) * this.moveSpeed;
-        let nextPos3 = this.pos.translate(dir, length); //3D - Vector3
-        //console.log("nextPos3", nextPos3, length);
+        let nextPos3 = this.pos.translate(dir, length);                                     //3D - Vector3
 
-        //check if next surface tile is non-ininity
-        let z = this.ZM.getZ(nextPos3.x, nextPos3.z);
-        //console.log("z", z);
-        if (z === Infinity) return this._out_of_surface();
-        nextPos3.set_y(this.minY + this.heigth + z);
+        let checks = this.GA.Vector3_pointsAroundEntity(nextPos3, dir, this.r);
+        for (const check of checks) {
+            let z = this.ZM.getZ(check.x, check.z);
+            if (z === Infinity) return this._out_of_surface();
+        }
+
+        nextPos3.set_y(this.minY + this.heigth + this.ZM.getZ(nextPos3.x, nextPos3.z));
         return this.setPos(nextPos3);
-        //throw "debug";
     }
     _out_of_surface() {
         console.log("OOS");

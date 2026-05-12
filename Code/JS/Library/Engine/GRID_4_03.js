@@ -1165,6 +1165,14 @@ class GA_Dimension_Agnostic_Methods {
         }
         return checks;
     }
+    Vector3_pointsAroundEntity(pos, dir, r, resolution = 4){
+        let checks = [];
+        const increment = (2 * Math.PI) / resolution;
+        for (let theta = 0; theta < 2 * Math.PI; theta += increment) {
+            checks.push(pos.translate(dir.rotateY(theta), r));
+        }
+        return checks;
+    }
     forwardPointsFrontEntity(pos, dir, r, resolution = GRID.SETTING.FORWARD_CIRCLE_RESOLUTION) {
         let checks = [pos];
         const increment = (GRID.SETTING.FORWARD_CIRCLE_CHECK_ANGLE) / resolution;

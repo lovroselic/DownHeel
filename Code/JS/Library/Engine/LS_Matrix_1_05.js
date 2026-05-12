@@ -110,6 +110,9 @@ class Vector3 {
         let FPV = new FP_Vector(this.x, this.z);
         return FPV.rotate(rad);
     }
+    rotateY(rad) {
+        return Vector3.from_2D_dir(this.rotate2D(rad), this.y);
+    }
     reverse2D() {
         return Vector3.from_2D_dir(this.rotate2D(Math.PI), this.y);
     }
