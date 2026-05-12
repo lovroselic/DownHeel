@@ -96,6 +96,7 @@ const WebGL = {
         DIFFUSE_LIGHT_STRENGTH: 25.0,
         SPECULAR_LIGHT_STRENGTH: 5.0,
         BACKGROUND_ALPHA: 1.0,
+        SURFACE_WALL_HEIGHT: 2.0,
     },
     CONFIG: {
         firstperson: true,
@@ -1595,6 +1596,7 @@ const WORLD = {
         return Math.max(resolution, WebGL.INI.MIN_RESOLUTION);
     },
     _appendGeometry(type, positions, indices, textureCoordinates, vertexNormals) {
+        indices = indices.map(e => e + (this[type].positions.length / 3));
         this[type].positions.push(...positions);
         this[type].indices.push(...indices);
         this[type].textureCoordinates.push(...textureCoordinates);
@@ -1716,14 +1718,7 @@ const WORLD = {
             positions[p + 2] += decal.grid.y;
         }
 
-        //indices
-        indices = indices.map(e => e + (this[type].positions.length / 3));
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
-        /*this[type].positions.push(...positions);
-        this[type].indices.push(...indices);
-        this[type].textureCoordinates.push(...textureCoordinates);
-        this[type].vertexNormals.push(...vertexNormals);*/
-
     },
     addCube(Y, grid, type, prune = null, scale = null) {
         if (!WebGL.PRUNE) return this.addElement(ELEMENT.CUBE, Y, grid, type);                                          //draws complete cube, no questions asked
@@ -1748,7 +1743,7 @@ const WORLD = {
 
         grid.z = rememberZ;                                                                                             //revert to initial z value
     },
-    addSurfaceCube(quadNode, height = 2.0, type = "wall", E = ELEMENT.CUBE) {
+    addSurfaceCube(quadNode, height = WebGL.INI.SURFACE_WALL_HEIGHT, type = "wall", E = ELEMENT.CUBE) {
         let positions = E.positions.slice();
         let indices = E.indices.slice();
         let textureCoordinates = E.textureCoordinates.slice();
@@ -1757,19 +1752,17 @@ const WORLD = {
         const baseY = Math.min(quadNode.beforeZ, quadNode.afterZ);
 
         for (let p = 0; p < positions.length; p += 3) {
-            const localX = positions[p];                                                    // 0 or 1
-            const localY = positions[p + 1];                                                // 0 or 1
-            const localZ = positions[p + 2];                                                // 0 or 1
+            const localX = positions[p];                                                        // 0 or 1
+            const localY = positions[p + 1];                                                    // 0 or 1
+            const localZ = positions[p + 2];                                                    // 0 or 1
 
-            positions[p] = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);            // X:
-            positions[p + 1] = baseY + localY * height;                                     // Y: Start at lower side of this slope segment.  Cube rises upward by height.
-
+            positions[p] = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);                // X:
+            positions[p + 1] = baseY + localY * height;                                         // Y: Start at lower side of this slope segment.  Cube rises upward by height.
             const beforeSideZ = Math.lerp(quadNode.beforeYTop, quadNode.beforeYBottom, localZ);
             const afterSideZ = Math.lerp(quadNode.afterYTop, quadNode.afterYBottom, localZ);
-            positions[p + 2] = Math.lerp(beforeSideZ, afterSideZ, localX);                  //Z: OpenGL lateral.  This follows the quad's skewed top/bottom sides. localZ 0 -> top,  localZ 1 -> bottom , localX controls before edge or after edge.
+            positions[p + 2] = Math.lerp(beforeSideZ, afterSideZ, localX);                      //Z: OpenGL lateral.  This follows the quad's skewed top/bottom sides. localZ 0 -> top,  localZ 1 -> bottom , localX controls before edge or after edge.
         }
 
-        indices = indices.map(e => e + (this[type].positions.length / 3));
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     addBlockWall(Y, grid, type) {
@@ -1796,7 +1789,6 @@ const WORLD = {
             positions[p + 2] += grid.y;
         }
 
-        indices = indices.map(e => e + (this[type].positions.length / 3));
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     reserveObject(E, type) {
@@ -1804,22 +1796,63 @@ const WORLD = {
         let indices = E.indices.slice();
         let textureCoordinates = E.textureCoordinates.slice();
         let vertexNormals = E.vertexNormals.slice();
-
-        indices = indices.map(e => e + (this[type].positions.length / 3));
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
 
     },
     addSurfaceQuad(positions, type = "floor", E = ELEMENT.TOP_FACE) {
-        const base = this[type].positions.length / 3;
-        const indices = E.indices.map(i => i + base);
+        let indices = E.indices.slice();
         const textureCoordinates = E.textureCoordinates.slice();
         let vertexNormals = E.vertexNormals.slice();
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
+    },
+    addUpperSurfaceWallFront(quadNode, E = ELEMENT.FRONT_FACE, height = WebGL.INI.SURFACE_WALL_HEIGHT, type = "wall") {
+        this._addUpperSurfaceWallEdge(quadNode, "front", E, height, type);
+    },
+    addUpperSurfaceWallBack(quadNode, E = ELEMENT.BACK_FACE, height = WebGL.INI.SURFACE_WALL_HEIGHT, type = "wall") {
+        this._addUpperSurfaceWallEdge(quadNode, "back", E, height, type);
+    },
+    _addUpperSurfaceWallEdge(quadNode, edge, E, height = WebGL.INI.SURFACE_WALL_HEIGHT, type = "wall") {
+        let positions = E.positions.slice();
+        let indices = E.indices.slice();
+        let textureCoordinates = E.textureCoordinates.slice();
+        let vertexNormals = E.vertexNormals.slice();
+
+        let beforeY;
+        let afterY;
+
+        switch (edge) {
+            case "front":
+            case "top":
+                beforeY = quadNode.beforeYTop;
+                afterY = quadNode.afterYTop;
+                break;
+
+            case "back":
+            case "bottom":
+                beforeY = quadNode.beforeYBottom;
+                afterY = quadNode.afterYBottom;
+                break;
+
+            default:
+                throw `Unknown surface wall edge: ${edge}`;
+        }
+
+        for (let p = 0; p < positions.length; p += 3) {
+            const localX = positions[p];       // 0 -> beforeX, 1 -> afterX
+            const localY = positions[p + 1];   // 0 -> surface, 1 -> wall top
+
+            positions[p] = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);        // X: along the segment
+            const surfaceY = Math.lerp(quadNode.beforeZ, quadNode.afterZ, localX);      // Y: vertical height, following slope surface
+            positions[p + 1] = surfaceY + localY * height;
+            positions[p + 2] = Math.lerp(beforeY, afterY, localX);                      // Z: lateral edge position
+        }
+
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     buildSurfaceBasedWorld(map) {
         const GA = map.GA;
         WORLD.GA = GA;
-        const QM = map.quadMap.map;
+        const QM = map.quadMap;
 
         console.time("WorldBuilding");
         this.init();
@@ -1829,11 +1862,13 @@ const WORLD = {
 
             switch (value) {
                 case MAPDICT.EMPTY:
-                    this.addSurfaceQuad(QM[index].array);
+                    this.addSurfaceQuad(QM.map[index].array);
+                    if (QM.indexOutOfBounds(index - QM.W)) this.addUpperSurfaceWallFront(QM.map[index]);
+                    if (QM.indexOutOfBounds(index + QM.W)) this.addUpperSurfaceWallBack(QM.map[index]);
                     break;
                 case MAPDICT.WALL:
                     console.info("index, value", index, value);
-                    this.addSurfaceCube(QM[index]);
+                    this.addSurfaceCube(QM.map[index]);
                     break;
                 default:
                     console.error("surface world building unexpected GA value error", value, "grid", grid);

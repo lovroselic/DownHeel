@@ -547,6 +547,9 @@ class QuadMap {
         this.W = W;
         this.H = H;
     }
+    indexOutOfBounds(index) {
+        return index < 0 || index >= this.map.length;
+    }
 }
 
 class QuadNode {
