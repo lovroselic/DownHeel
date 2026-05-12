@@ -48,14 +48,15 @@ const INI = {
     SCREEN_BORDER: 256,
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
-    SUN_VECTOR: Vector3.from_array([0, 50, 0]),
+    //SUN_VECTOR: Vector3.from_array([0, 50, 0]),
+    SUN_VECTOR: Vector3.from_array([-0.5, 50, 0]),
     HERO_HEIGHT: 0.15,
     //SUN_HEIGHT_FACTOR: 7.5, //7.5
     //JUMP_POWER: 1.55,                    // jump distance in grid units 1.55 default
 };
 
 const PRG = {
-    VERSION: "0.3.2",
+    VERSION: "0.3.3",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -322,7 +323,8 @@ const GAME = {
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
-        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.13, new Vector3(0, -0.35, 0), 0.70);
+        //WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.13, new Vector3(0, -0.35, 0), 0.70);
+        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.5, new Vector3(0, -0.35, 0), 0.80);
 
         switch (WebGL.CONFIG.cameraType) {
             case "first_person":
@@ -383,7 +385,7 @@ const GAME = {
         WebGL.init_required_IAM(MAP[level].map, HERO);
         SPAWN_TOOLS.spawn(level);
         MAP[level].map.quadMap = QUAD_MAP.create(MAP[level].map.GA, MAP[level].terrain);
-        MAP[level].map.zMap = QUAD_MAP.create_zMap(MAP[level].map.quadMap);
+        MAP[level].map.zMap = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA);
         MAP[level].world = WORLD.buildSurfaceBasedWorld(MAP[level].map);
     },
     newDungeon(level) {

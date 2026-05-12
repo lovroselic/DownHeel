@@ -85,7 +85,7 @@ const QUAD_MAP = {
             prevWidth = widthVal;
         }
 
-        const QM = new QuadMap(QM_map, [W, maxY, 0], [0, minY, minZ]);
+        const QM = new QuadMap(QM_map, [W, maxY, 0], [0, minY, minZ], W, H);
         return QM;
     },
     paintTopDown(QM, layer = "surface", options = {}) {
@@ -428,7 +428,8 @@ const QUAD_MAP = {
             CTX.fillText(`finish`, canvas.width - cfg.padding - 48, canvas.height - cfg.padding - 6);
         }
     },
-    create_zMap(QM) {
+    create_zMap(QM, GA) {
+        console.warn("GA", GA);
         const TR = this.INI.TILING_RESOLUTION;
         const minX = Math.floor(QM.min.x);
         const minY = Math.floor(QM.min.y);
@@ -439,7 +440,7 @@ const QUAD_MAP = {
         const zMap_array = new Float32Array(xSize * ySize);
         zMap_array.fill(Infinity);
 
-        for (const node of QM.map) {
+        for (const [i, node] of QM.map.entries()) {
             const yA_top = (node.beforeYTop - minY) * TR;
             const yA_bottom = (node.beforeYBottom - minY) * TR;
             const yB_top = (node.afterYTop - minY) * TR;
@@ -453,7 +454,9 @@ const QUAD_MAP = {
                 const z = Math.lerp(node.beforeZ, node.afterZ, T);
                 for (let y = yBegin; y < yEnd; y++) {
                     let index = x + y * xSize;
-                    zMap_array[index] = z;
+                    if (GA.map[i] === MAPDICT.EMPTY) {
+                        zMap_array[index] = z;
+                    }
                 }
             }
         }
@@ -537,10 +540,12 @@ console.log(`%cQUAD_MAP ${QUAD_MAP.VERSION} loaded.`, QUAD_MAP.CSS);
 
 
 class QuadMap {
-    constructor(map, max, min) {
+    constructor(map, max, min, W, H) {
         this.map = map;
         this.max = Vector3.from_array(max);
         this.min = Vector3.from_array(min);
+        this.W = W;
+        this.H = H;
     }
 }
 

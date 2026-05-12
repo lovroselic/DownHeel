@@ -1726,7 +1726,6 @@ const WORLD = {
         if (!WebGL.PRUNE) return this.addElement(ELEMENT.CUBE, Y, grid, type);                                          //draws complete cube, no questions asked
 
         const GA = WORLD.GA;
-
         const rememberZ = grid.z;                                                                                       //this is pointer, don't screw it!
         grid.z = Y;                                                                                                     //face pruning
 
@@ -1752,6 +1751,56 @@ const WORLD = {
         }
 
         grid.z = rememberZ;                                                                                             //revert to initial z value
+    },
+    addSurfaceCube(quadNode, height = 2.0, type = "wall", E = ELEMENT.CUBE) {
+        let positions = E.positions.slice();
+        let indices = E.indices.slice();
+        let textureCoordinates = E.textureCoordinates.slice();
+        let vertexNormals = E.vertexNormals.slice();
+
+        const baseY = Math.min(quadNode.beforeZ, quadNode.afterZ);
+
+        for (let p = 0; p < positions.length; p += 3) {
+            const localX = positions[p];       // 0 or 1
+            const localY = positions[p + 1];   // 0 or 1
+            const localZ = positions[p + 2];   // 0 or 1
+
+            /*
+                X:
+                cube x 0 -> quad beforeX
+                cube x 1 -> quad afterX
+            */
+            positions[p] = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);
+
+            /*
+                Y:
+                OpenGL vertical coordinate.
+                Start at lower side of this slope segment.
+                Cube rises upward by height.
+            */
+            positions[p + 1] = baseY + localY * height;
+
+            /*
+                Z:
+                OpenGL lateral coordinate.
+                This follows the quad's skewed top/bottom sides.
+    
+                localZ 0 -> top side
+                localZ 1 -> bottom side
+    
+                localX controls whether we use before edge or after edge.
+            */
+            const beforeSideZ = Math.lerp(quadNode.beforeYTop, quadNode.beforeYBottom, localZ);
+            const afterSideZ = Math.lerp(quadNode.afterYTop, quadNode.afterYBottom, localZ);
+            positions[p + 2] = Math.lerp(beforeSideZ, afterSideZ, localX);
+        }
+
+        indices = indices.map(e => e + (this[type].positions.length / 3));
+
+        this[type].positions.push(...positions);
+        this[type].indices.push(...indices);
+        this[type].textureCoordinates.push(...textureCoordinates);
+        this[type].vertexNormals.push(...vertexNormals);
     },
     addBlockWall(Y, grid, type) {
         return this.addElement(ELEMENT.BLOCKWALL, Y, grid, type);
@@ -1815,6 +1864,7 @@ const WORLD = {
         const GA = map.GA;
         WORLD.GA = GA;
         const QM = map.quadMap.map;
+
         console.time("WorldBuilding");
         this.init();
 
@@ -1826,7 +1876,8 @@ const WORLD = {
                     this.addSurfaceQuad(QM[index].array);
                     break;
                 case MAPDICT.WALL:
-                    //to do
+                    console.info("index, value", index, value);
+                    this.addSurfaceCube(QM[index]);
                     break;
                 default:
                     console.error("surface world building unexpected GA value error", value, "grid", grid);

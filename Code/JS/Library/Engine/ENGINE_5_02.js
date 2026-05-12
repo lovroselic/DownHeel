@@ -52,7 +52,7 @@ const BELOW3 = new Vector3D(0, 0, -1);
 const ABOVE3 = new Vector3D(0, 0, 1);
 
 const ENGINE = {
-    VERSION: "5.01",
+    VERSION: "5.02",
     CSS: "color: #0FA",
     INI: {
         ANIMATION_INTERVAL: 16,

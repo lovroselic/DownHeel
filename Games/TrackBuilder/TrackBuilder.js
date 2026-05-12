@@ -48,7 +48,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.3.2",
+    VERSION: "0.4.0",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -610,11 +610,12 @@ const GAME = {
         GAME.renderQuadMap();
     },
     renderQuadMap() {
-        const QM = QUAD_MAP.create($MAP.map.GA, $MAP.map.terrain);
+        const GA = $MAP.map.GA;
+        const QM = QUAD_MAP.create(GA, $MAP.map.terrain);
         $MAP.map.quadMap = QM;
         QUAD_MAP.paintTopDown(QM, "surface");
         QUAD_MAP.paintSideSlope(QM, "sideslope");
-        $MAP.map.zMap = QUAD_MAP.create_zMap($MAP.map.quadMap);
+        $MAP.map.zMap = QUAD_MAP.create_zMap($MAP.map.quadMap, GA);
         console.warn("$MAP.map.zMap", $MAP.map.zMap);
         QUAD_MAP.paintZMap($MAP.map.zMap, "zmap");
     },
