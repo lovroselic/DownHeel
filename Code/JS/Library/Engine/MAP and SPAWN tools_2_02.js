@@ -210,7 +210,8 @@ const SPAWN_TOOLS = {
     },
     lights(map, GA) {
         for (const L of map.lights) {
-            const grid = GA.indexToGrid(L[0]);
+            const index = L[0];
+            const grid = GA.indexToGrid(index);
             const face = DirectionToFace(Vector.fromInt(L[1]));
             const picture = L[2];
             const type = L[3];
@@ -222,7 +223,14 @@ const SPAWN_TOOLS = {
                 expand = true;
                 category = "crest";
             };
-            LIGHTS3D.add(new LightDecal(grid, face, sprite, category, picture, LIGHT_COLORS[type], expand));
+            let position = null;
+            if (map.quadMap) {
+                const quadNode = map.quadMap.map[index];
+                position = WORLD.surfaceLightPosition(quadNode, face, WebGL.INI.SURFACE_WALL_HEIGHT);
+                position = Vector3.from_array(position);
+            }
+
+            LIGHTS3D.add(new LightDecal(grid, face, sprite, category, picture, LIGHT_COLORS[type], expand, position));
         }
     },
     externalGates(map, GA) {

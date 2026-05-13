@@ -96,7 +96,7 @@ const WebGL = {
         DIFFUSE_LIGHT_STRENGTH: 25.0,
         SPECULAR_LIGHT_STRENGTH: 5.0,
         BACKGROUND_ALPHA: 1.0,
-        SURFACE_WALL_HEIGHT: 2.0,
+        SURFACE_WALL_HEIGHT: 1.0,
     },
     CONFIG: {
         firstperson: true,
@@ -1602,23 +1602,23 @@ const WORLD = {
         this[type].textureCoordinates.push(...textureCoordinates);
         this[type].vertexNormals.push(...vertexNormals);
     },
-    addPic(decal, type) {
-        console.warn("addpic", decal, type);
+    _makePicLocalGeometry(decal) {
         const expandables = ["crest", "portal", "lair", "light"];
         let resolution = WebGL.INI.DEFAULT_RESOLUTION;
+
         if (decal.resolution) {
             resolution = decal.resolution;
         } else if (
-            (decal.category === "texture")
-            ||
+            decal.category === "texture" ||
             (expandables.includes(decal.category) && decal.expand)
         ) {
             resolution = this.divineResolution(decal.texture);
             decal.resolution = resolution;
         }
-        //console.warn("..addpic", decal, decal.category, decal.name, resolution); //DEBUG
+
         const [leftX, rightX, topY, bottomY] = this.getBoundaries(decal.category, decal.width, decal.height, resolution);
         const E = ELEMENT[`${decal.face}_FACE`];
+
         let positions = E.positions.slice();
         let indices = E.indices.slice();
         let textureCoordinates = E.textureCoordinates.slice();
@@ -1627,7 +1627,6 @@ const WORLD = {
         let OUT = WebGL.INI.PIC_OUT;
         if (decal.category === "texture") OUT = WebGL.INI.TEXTURE_OUT;
 
-        //scale
         switch (decal.face) {
             case "FRONT":
                 positions[0] = leftX;
@@ -1638,10 +1637,12 @@ const WORLD = {
                 positions[7] = topY;
                 positions[9] = leftX;
                 positions[10] = topY;
+
                 for (let z of [2, 5, 8, 11]) {
                     positions[z] += OUT;
                 }
                 break;
+
             case "BACK":
                 positions[0] = leftX;
                 positions[1] = bottomY;
@@ -1651,10 +1652,12 @@ const WORLD = {
                 positions[7] = topY;
                 positions[9] = rightX;
                 positions[10] = bottomY;
+
                 for (let z of [2, 5, 8, 11]) {
                     positions[z] -= OUT;
                 }
                 break;
+
             case "RIGHT":
                 positions[1] = bottomY;
                 positions[2] = leftX;
@@ -1664,10 +1667,12 @@ const WORLD = {
                 positions[8] = rightX;
                 positions[10] = bottomY;
                 positions[11] = rightX;
+
                 for (let x of [0, 3, 6, 9]) {
                     positions[x] += OUT;
                 }
                 break;
+
             case "LEFT":
                 positions[1] = bottomY;
                 positions[2] = leftX;
@@ -1677,10 +1682,12 @@ const WORLD = {
                 positions[8] = rightX;
                 positions[10] = topY;
                 positions[11] = leftX;
+
                 for (let x of [0, 3, 6, 9]) {
                     positions[x] -= OUT;
                 }
                 break;
+
             case "TOP":
                 positions[0] = leftX;
                 positions[2] = bottomY;
@@ -1690,10 +1697,12 @@ const WORLD = {
                 positions[8] = topY;
                 positions[9] = leftX;
                 positions[11] = topY;
+
                 for (let y of [1, 4, 7, 10]) {
                     positions[y] += OUT - 1.0;
                 }
                 break;
+
             case "BOTTOM":
                 positions[0] = leftX;
                 positions[2] = bottomY;
@@ -1703,20 +1712,102 @@ const WORLD = {
                 positions[8] = topY;
                 positions[9] = leftX;
                 positions[11] = topY;
+
                 for (let y of [1, 4, 7, 10]) {
                     positions[y] -= OUT - 1.0;
                 }
                 break;
+
             default:
                 console.error("addPic face error:", decal.face);
                 break;
         }
 
-        //translate
+        return { positions, indices, textureCoordinates, vertexNormals };
+    },
+    addPic(decal, type) {
+        const geo = this._makePicLocalGeometry(decal);
+
+        let positions = geo.positions;
+        const indices = geo.indices;
+        const textureCoordinates = geo.textureCoordinates;
+        const vertexNormals = geo.vertexNormals;
+
         for (let p = 0; p < positions.length; p += 3) {
             positions[p] += decal.grid.x;
             positions[p + 1] += decal.grid?.z || 0;
             positions[p + 2] += decal.grid.y;
+        }
+
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
+    },
+    surfaceLocalToWorld(quadNode, localX, localY, localZ, height = WebGL.INI.SURFACE_WALL_HEIGHT) {
+        /*
+            Local cube coordinates:
+                localX: 0..1 along x segment
+                localY: 0..1 vertical height
+                localZ: 0..1 across quad width
+    
+            World output:
+                x = progress axis
+                y = OpenGL vertical axis
+                z = lateral axis
+        */
+
+        const worldX = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);
+        const surfaceY = Math.lerp(quadNode.beforeZ, quadNode.afterZ, localX);
+        const beforeLateral = Math.lerp(quadNode.beforeYTop, quadNode.beforeYBottom, localZ);
+        const afterLateral = Math.lerp(quadNode.afterYTop, quadNode.afterYBottom, localZ);
+        const worldZ = Math.lerp(beforeLateral, afterLateral, localX);
+        const worldY = surfaceY + localY * height;
+
+        return [worldX, worldY, worldZ];
+    },
+    surfaceLightLocal(face, OUT = WebGL.INI.LIGHT_OUT, TOP = WebGL.INI.LIGHT_TOP) {
+        const lxMid = 0.5;
+        const lzMid = 0.5;
+        const ly = 1.0 - TOP;
+        switch (face) {
+            case "FRONT": return [lxMid, ly, 1.0 + OUT];
+            case "BACK": return [lxMid, ly, 0.0 - OUT];
+            case "RIGHT": return [1.0 + OUT, ly, lzMid];
+            case "LEFT": return [0.0 - OUT, ly, lzMid];
+            case "TOP": return [lxMid, 1.0 + OUT, lzMid];
+            case "BOTTOM": return [lxMid, 0.0 - OUT, lzMid];
+
+            default:
+                console.error("surfaceLightLocal face error:", face);
+                return [lxMid, ly, lzMid];
+        }
+    },
+    surfaceLightPosition(quadNode, face, height = 1.0) {
+        const [localX, localY, localZ] = this.surfaceLightLocal(face);
+        return this.surfaceLocalToWorld(quadNode, localX, localY, localZ, height);
+    },
+    _getSurfaceDecalQuadNode(decal, QM) {
+        const index = WORLD.GA.gridToIndex(decal.grid);
+        if (QM.indexOutOfBounds(index)) throw `Surface decal quad index out of bounds: ${index}`;
+        return QM.map[index];
+    },
+    addSurfacePic(decal, QM, type = "decal", height = WebGL.INI.SURFACE_WALL_HEIGHT) {
+        const quadNode = this._getSurfaceDecalQuadNode(decal, QM);
+        const geo = this._makePicLocalGeometry(decal);
+
+        let positions = geo.positions;
+        const indices = geo.indices;
+        const textureCoordinates = geo.textureCoordinates;
+        const vertexNormals = geo.vertexNormals;
+
+        for (let p = 0; p < positions.length; p += 3) {
+            const localX = positions[p];
+            const localY = positions[p + 1];
+            const localZ = positions[p + 2];
+
+            const [worldX, worldY, worldZ] = this.surfaceLocalToWorld(quadNode, localX, localY, localZ, height);
+
+            positions[p] = worldX;
+            positions[p + 1] = worldY;
+            positions[p + 2] = worldZ;
         }
 
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
@@ -1879,7 +1970,7 @@ const WORLD = {
         /** build static decals */
         for (const iam of [...WebGL.staticDecalList, ...WebGL.interactiveDecalList]) {
             for (const decal of iam.POOL) {
-                this.addPic(decal, "decal");
+                this.addSurfacePic(decal, map.quadMap, "decal");
             }
         }
 
@@ -2894,13 +2985,13 @@ class StaticDecal extends Decal {
 }
 
 class LightDecal extends Decal {
-    constructor(grid, face, texture, category, name, lightColor, expand) {
+    constructor(grid, face, texture, category, name, lightColor, expand, position = null) {
         super(grid, face, texture, category, name);
         this.lightColor = lightColor;
         this.type = "LightDecal";
         this.interactive = false;
         this.expand = expand;
-        this.position = LightDecal.setPosition(grid, face);
+        this.position = position || LightDecal.setPosition(grid, face);
     }
     static setPosition(grid, face) {
         const gridType = grid.constructor.name;
