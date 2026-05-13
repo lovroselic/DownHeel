@@ -24,7 +24,7 @@ const QUAD_MAP = {
     VERSION: "1.0",
     CSS: "color: #0C8",
     INI: {
-        TILING_RESOLUTION: 10,
+        TILING_RESOLUTION: 20, //10
     },
     create(GA, terrain) {
         const H = GA.height;
@@ -428,9 +428,7 @@ const QUAD_MAP = {
             CTX.fillText(`finish`, canvas.width - cfg.padding - 48, canvas.height - cfg.padding - 6);
         }
     },
-    create_zMap(QM, GA) {
-        console.warn("GA", GA);
-        const TR = this.INI.TILING_RESOLUTION;
+    create_zMap(QM, GA, TR = QUAD_MAP.INI.TILING_RESOLUTION) {
         const minX = Math.floor(QM.min.x);
         const minY = Math.floor(QM.min.y);
         const sizeX = Math.ceil(QM.max.x) - minX;
@@ -533,6 +531,24 @@ const QUAD_MAP = {
             CTX.fillText(`black = outside slope`, 8, 42);
         }
     },
+    toTextureMap(zMap) {
+        //expected zMap of tiling resolution 1! more than that and you will not have same coord system!!
+        /** 0 - light can pass through */
+        console.log("zMap", zMap);
+        const paddedWidth = POT(zMap.xSize);
+        const paddedHeight = POT(zMap.ySize);
+        const pixelData = new Uint8Array(paddedWidth * paddedHeight).fill(255);
+        for (let y = 0; y < zMap.ySize; y++) {
+            for (let x = 0; x < zMap.xSize; x++) {
+                let zIndex = y * zMap.xSize + x;
+                let tIndex = y * paddedWidth + x;
+                if (zMap.map[zIndex] < Infinity) {
+                    pixelData[tIndex] = 0;
+                }
+            }
+        }
+        return pixelData;
+    }
 };
 
 //END

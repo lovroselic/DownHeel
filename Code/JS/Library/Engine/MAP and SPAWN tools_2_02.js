@@ -125,11 +125,17 @@ const MAP_TOOLS = {
      * @param {*} level - leved/dungeon/room id
      */
     setOcclusionMap(level) {
+        // only 3D occlusion maps now supported, for 2D use depth = 1;
         const GA = this.MAP[level].map.GA;
         const map = this.MAP[level].map;
-        map.textureMap = GA.toTextureMap();
-        // only 3D occlusion maps now supported, for 2D use depth = 1;
-        map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.width, map.height, map.depth);
+        if (map.zMap1) {
+            map.textureMap = QUAD_MAP.toTextureMap(map.zMap1);
+            map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.zMap1.sizeX, map.zMap1.sizeY, 1);
+
+        } else {
+            map.textureMap = GA.toTextureMap();
+            map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.width, map.height, map.depth);
+        }
     },
 
     /**

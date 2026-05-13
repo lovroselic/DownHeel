@@ -48,15 +48,14 @@ const INI = {
     SCREEN_BORDER: 256,
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
-    //SUN_VECTOR: Vector3.from_array([0, 50, 0]),
     SUN_VECTOR: Vector3.from_array([-0.5, 50, 0]),
+    //SUN_VECTOR: Vector3.from_array([-0.5, 10, 0]),
     HERO_HEIGHT: 0.15,
-    //SUN_HEIGHT_FACTOR: 7.5, //7.5
-    //JUMP_POWER: 1.55,                    // jump distance in grid units 1.55 default
+
 };
 
 const PRG = {
-    VERSION: "0.3.5",
+    VERSION: "0.3.6",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -360,7 +359,9 @@ const GAME = {
         //console.warn("HERO.player.heigth", HERO.player.heigth);
 
         GAME.setCameraView();
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.sun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.sun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
@@ -383,9 +384,10 @@ const GAME = {
     buildWorld(level) {
         if (DEBUG.VERBOSE) console.info(" ******** building world, room/dungeon/level:", level, "restart", GAME.restarted);
         WebGL.init_required_IAM(MAP[level].map, HERO);
-        SPAWN_TOOLS.spawn(level);
         MAP[level].map.quadMap = QUAD_MAP.create(MAP[level].map.GA, MAP[level].terrain);
         MAP[level].map.zMap = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA);
+        MAP[level].map.zMap1 = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA, 1);
+        SPAWN_TOOLS.spawn(level);
         MAP[level].world = WORLD.buildSurfaceBasedWorld(MAP[level].map);
     },
     newDungeon(level) {

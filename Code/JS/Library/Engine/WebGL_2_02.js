@@ -1603,6 +1603,7 @@ const WORLD = {
         this[type].vertexNormals.push(...vertexNormals);
     },
     addPic(decal, type) {
+        console.warn("addpic", decal, type);
         const expandables = ["crest", "portal", "lair", "light"];
         let resolution = WebGL.INI.DEFAULT_RESOLUTION;
         if (decal.resolution) {
@@ -1834,7 +1835,7 @@ const WORLD = {
                 break;
 
             default:
-                throw `Unknown surface wall edge: ${edge}`;
+                throw `Unsupported surface wall edge: ${edge}`;
         }
 
         for (let p = 0; p < positions.length; p += 3) {
@@ -1872,6 +1873,13 @@ const WORLD = {
                     break;
                 default:
                     console.error("surface world building unexpected GA value error", value, "grid", grid);
+            }
+        }
+
+        /** build static decals */
+        for (const iam of [...WebGL.staticDecalList, ...WebGL.interactiveDecalList]) {
+            for (const decal of iam.POOL) {
+                this.addPic(decal, "decal");
             }
         }
 
@@ -2479,6 +2487,7 @@ class $3D_player {
         this.GA = this.map.GA;
         this.enemyIA = this.map.enemyIA;
         if (map.zMap) this.ZM = this.map.zMap;
+        if (map.quadMap) this.QM = this.map.quadMap;
     }
     setR(r) {
         this.r = r;
@@ -2535,14 +2544,18 @@ class $3D_player {
         let checks = this.GA.Vector3_pointsAroundEntity(nextPos3, dir, this.r);
         for (const check of checks) {
             let z = this.ZM.getZ(check.x, check.z);
-            if (z === Infinity) return this._out_of_surface();
+            if (z === Infinity) return this._out_of_surface(nextPos3, check);
         }
 
         nextPos3.set_y(this.minY + this.heigth + this.ZM.getZ(nextPos3.x, nextPos3.z));
         return this.setPos(nextPos3);
     }
-    _out_of_surface() {
-        console.log("OOS");
+    _out_of_surface(nextPos3, check) {
+        //console.log("OOS", nextPos3, check);
+        if (check.x >= this.QM.W) {
+            console.warn("level completed", check.x);
+        }
+
     }
     _applyMove_(lapsedTime, dir) {
         let length = (lapsedTime / 1000) * this.moveSpeed;
