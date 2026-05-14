@@ -25,6 +25,8 @@ const MAP = {
         leftPanorama: "AlpinePanorama_170",
         rightPanorama: "AlpinePanorama_181",
         backPanorama: "BackAlpinePanorama_195",
+        archPanorama: "Arch_200",
+        skyPanorama: "Sky_204",
         start: '[13,5]',
         decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
         lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',
@@ -249,6 +251,21 @@ const GAME = {
         $("#rightPanorama").change(GAME.updateTextures);
         $("#backPanorama").change(GAME.updateTextures);
 
+        //arch
+        for (const prop of ARCH_DECALS) {
+            $("#archPanorama").append(`<option value="${prop}">${prop}</option>`);
+        }
+        LAYER.archPanoramaCanvas = $("#archPanoramaCanvas")[0].getContext("2d");
+        $("#archPanorama").change(GAME.updateTextures);
+
+        //sky
+        for (const prop of SKY_DECALS) {
+            $("#skyPanorama").append(`<option value="${prop}">${prop}</option>`);
+        }
+        LAYER.skyPanoramaCanvas = $("#skyPanoramaCanvas")[0].getContext("2d");
+        $("#skyPanorama").change(GAME.updateTextures);
+
+
         GAME.updateTextures();                  //common to textures and panorama
 
         /** pictures */
@@ -307,6 +324,8 @@ const GAME = {
         $("#randLeftPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#leftPanorama", "leftPanoramaCanvas"));
         $("#randRightPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#rightPanorama", "rightPanoramaCanvas"));
         $("#randBackPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#backPanorama", "backPanoramaCanvas"));
+        $("#randArchPanorama").click(GAME.randomTexture.bind(null, ARCH_DECALS, "#archPanorama", "archPanoramaCanvas"));
+        $("#randSkyPanorama").click(GAME.randomTexture.bind(null, SKY_DECALS, "#skyPanorama", "skyPanoramaCanvas"));
 
         $("#randpic").click(GAME.randomPic);
         $("#randcrest").click(GAME.randomCrest);
@@ -332,6 +351,8 @@ const GAME = {
         $('#searchLeftPanorama').on('keyup', () => filterOptions("#leftPanorama", "#searchLeftPanorama"));
         $('#searchRightPanorama').on('keyup', () => filterOptions("#rightPanorama", "#searchRightPanorama"));
         $('#searchBackPanorama').on('keyup', () => filterOptions("#backPanorama", "#searchBackPanorama"));
+        $('#searchArchPanorama').on('keyup', () => filterOptions("#archPanorama", "#searchArchPanorama"));
+        $('#searchSkyPanorama').on('keyup', () => filterOptions("#skyPanorama", "#searchSkyPanorama"));
 
         /** shortcuts */
 
@@ -413,12 +434,17 @@ const GAME = {
         const leftPanorama = TEXTURE[$("#leftPanorama")[0].value];
         const rightPanorama = TEXTURE[$("#rightPanorama")[0].value];
         const backPanorama = TEXTURE[$("#backPanorama")[0].value];
+        const archPanorama = TEXTURE[$("#archPanorama")[0].value];
+        const skyPanorama = TEXTURE[$("#skyPanorama")[0].value];
         ENGINE.resizeAndFill(LAYER.frontPanoramaCanvas, frontPanorama, 320);
         ENGINE.resizeAndFill(LAYER.leftPanoramaCanvas, leftPanorama, 320);
         ENGINE.resizeAndFill(LAYER.rightPanoramaCanvas, rightPanorama, 320);
         ENGINE.resizeAndFill(LAYER.backPanoramaCanvas, backPanorama, 320);
+        ENGINE.resizeAndFill(LAYER.archPanoramaCanvas, archPanorama, 320);
+        ENGINE.resizeAndFill(LAYER.skyPanoramaCanvas, skyPanorama, 320);
 
-        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution", "backPanorama_resolution"];
+
+        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution", "backPanorama_resolution", "archPanorama_resolution", "skyPanorama_resolution"];
         for (const [i, pTexture] of [wallTexture, floorTexture, frontPanorama, leftPanorama, rightPanorama, backPanorama].entries()) {
             let res = GAME.getResolution(pTexture);
             $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
@@ -795,6 +821,8 @@ frontPanorama: "${$("#frontPanorama")[0].value}",
 leftPanorama: "${$("#leftPanorama")[0].value}",
 rightPanorama: "${$("#rightPanorama")[0].value}",
 backPanorama: "${$("#backPanorama")[0].value}",
+archPanorama: "${$("#archPanorama")[0].value}",
+skyPanorama: "${$("#skyPanorama")[0].value}",
 `;
         for (let desc of $MAP.properties) {
             if ($MAP.map[desc].length > 0) {
@@ -832,7 +860,7 @@ backPanorama: "${$("#backPanorama")[0].value}",
             $(`#${prop}texture`).val(ImportText.extractGroup(pattern));
         }
 
-        const Panoramas = ["frontPanorama", "leftPanorama", "rightPanorama", "backPanorama"];
+        const Panoramas = ["frontPanorama", "leftPanorama", "rightPanorama", "backPanorama", "archPanorama", "skyPanorama"];
         for (const prop of Panoramas) {
             const pattern = new RegExp(`${prop}:\\s"(.*)"`);
             $(`#${prop}`).val(ImportText.extractGroup(pattern));

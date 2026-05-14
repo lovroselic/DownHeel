@@ -525,8 +525,7 @@
                             </legend>
                             <div>
                                 <div class="d-flex justify-content-center align-items-center">
-                                    <input type="text" id="searchBackPanorama" class="w-75"
-                                        placeholder="Back">
+                                    <input type="text" id="searchBackPanorama" class="w-75" placeholder="Back">
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <input type="button" id="randBackPanorama" value="Random" />
@@ -537,6 +536,59 @@
                                 </div>
                                 <div class="d-flex justify-content-center">
                                     <p id="backPanorama_resolution"></p>
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="setup_container section">
+                        <fieldset>
+                            <legend>
+                                Arch panorama
+                            </legend>
+                            <div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <input type="text" id="searchArchPanorama" class="w-75"
+                                        placeholder="... search arch panorama">
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <input type="button" id="randArchPanorama" value="Random" />
+                                    <select id="archPanorama" class="ms-3"></select>
+                                </div>
+                                <div class="m-3">
+                                    <canvas id="archPanoramaCanvas" width="320" height="320"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <p id="archPanorama_resolution"></p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="setup_container section">
+                        <fieldset>
+                            <legend>
+                                Sky panorama
+                            </legend>
+                            <div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <input type="text" id="searchSkyPanorama" class="w-75"
+                                        placeholder="... search sky panorama">
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <input type="button" id="randSkyPanorama" value="Random" />
+                                    <select id="skyPanorama" class="ms-3"></select>
+                                </div>
+                                <div class="m-3">
+                                    <canvas id="skyPanoramaCanvas" width="320" height="320"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <p id="skyPanorama_resolution"></p>
                                 </div>
                             </div>
 
@@ -561,6 +613,8 @@ frontPanorama: "AlpinePanorama_168",
 leftPanorama: "AlpinePanorama_170",
 rightPanorama: "AlpinePanorama_181",
 backPanorama: "BackAlpinePanorama_195",
+archPanorama: "Arch_200",
+skyPanorama: "Sky_204",
 start: '[13,5]',
 decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
 lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',

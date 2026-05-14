@@ -21,6 +21,8 @@ const MAP = {
         leftPanorama: "AlpinePanorama_170",
         rightPanorama: "AlpinePanorama_181",
         backPanorama: "BackAlpinePanorama_195",
+        archPanorama: "Arch_200",
+        skyPanorama: "Sky_204",
         start: '[13,5]',
         decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
         lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',

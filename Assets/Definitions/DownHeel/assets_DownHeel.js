@@ -144,6 +144,17 @@ LoadTextures = [
     { srcName: "Panorama/BackAlpinePanorama_197.webp", name: "BackAlpinePanorama_197" },
     { srcName: "Panorama/BackAlpinePanorama_198.webp", name: "BackAlpinePanorama_198" },
     { srcName: "Panorama/BackAlpinePanorama_199.webp", name: "BackAlpinePanorama_199" },
+
+    //arch
+    { srcName: "Arch/Arch_200.webp", name: "Arch_200" },
+    { srcName: "Arch/Arch_201.webp", name: "Arch_201" },
+    { srcName: "Arch/Arch_202.webp", name: "Arch_202" },
+    { srcName: "Arch/Arch_203.webp", name: "Arch_203" },
+
+    //sky
+    { srcName: "Sky/Sky_204.webp", name: "Sky_204" },
+    { srcName: "Sky/Sky_205.webp", name: "Sky_205" },
+    { srcName: "Sky/Sky_206.webp", name: "Sky_206" },
 ];
 
 LoadAudio = [

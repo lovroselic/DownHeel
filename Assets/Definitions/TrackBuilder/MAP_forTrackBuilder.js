@@ -43,6 +43,16 @@ const PANORAMA_DECALS = [
     "BackAlpinePanorama_195", "BackAlpinePanorama_196", "BackAlpinePanorama_197", "BackAlpinePanorama_198", "BackAlpinePanorama_199"
 ].sort();
 
+//arch
+const ARCH_DECALS = [
+    "Arch_200", "Arch_201", "Arch_202", "Arch_203",
+].sort();;
+
+//sky
+const SKY_DECALS = [
+    "Sky_204", "Sky_205", "Sky_206",
+].sort();
+
 const TRIGGER_DECALS = [];
 const LAIR_DECALS = [].sort();
 
