@@ -17,7 +17,13 @@ const TEXTURE_LIST = [
 ].sort();
 
 /** Decals */
-const DECAL_PAINTINGS = [].sort();
+const DECAL_PAINTINGS = [
+    "Warnings_001", "Warnings_002", "Warnings_003", "Warnings_004", "Warnings_005", "Warnings_006", "Warnings_007", "Warnings_008", "Warnings_009", "Warnings_010", "Warnings_011", "Warnings_012",
+    "Warnings_013", "Warnings_014", "Warnings_015", "Warnings_016", "Warnings_017", "Warnings_018", "Warnings_019", "Warnings_020",
+    "Warnings_030", "Warnings_031", "Warnings_032", "Warnings_033", "Warnings_034", "Warnings_035", "Warnings_036", "Warnings_037", "Warnings_038", "Warnings_039", "Warnings_040", "Warnings_041",
+    "Warnings_042", "Warnings_043", "Warnings_044", "Warnings_045", "Warnings_046", "Warnings_047", "Warnings_048", "Warnings_049", "Warnings_050", "Warnings_051", "Warnings_052", "Warnings_053",
+    "Warnings_054", "Warnings_055", "Warnings_056"
+].sort();
 
 /** Crests */
 

@@ -51,11 +51,10 @@ const INI = {
     SUN_VECTOR: Vector3.from_array([-0.5, 50, 0]),
     //SUN_VECTOR: Vector3.from_array([-0.5, 10, 0]),
     HERO_HEIGHT: 0.15,
-
 };
 
 const PRG = {
-    VERSION: "0.4.0",
+    VERSION: "0.4.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",

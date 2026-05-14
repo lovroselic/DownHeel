@@ -96,7 +96,7 @@ const WebGL = {
         DIFFUSE_LIGHT_STRENGTH: 25.0,
         SPECULAR_LIGHT_STRENGTH: 5.0,
         BACKGROUND_ALPHA: 1.0,
-        SURFACE_WALL_HEIGHT: 1.0,
+        SURFACE_WALL_HEIGHT: 1.5,
     },
     CONFIG: {
         firstperson: true,
@@ -2646,7 +2646,6 @@ class $3D_player {
         if (check.x >= this.QM.W) {
             console.warn("level completed", check.x);
         }
-
     }
     _applyMove_(lapsedTime, dir) {
         let length = (lapsedTime / 1000) * this.moveSpeed;
