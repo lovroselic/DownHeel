@@ -434,8 +434,115 @@
                         </fieldset>
                     </div>
                 </div>
+            </div>
 
+            <div class="row">
+                <div class="col-4">
+                    <div class="setup_container section">
+                        <fieldset>
+                            <legend>
+                                Front panorama
+                            </legend>
+                            <div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <input type="text" id="searchFrontPanorama" class="w-75"
+                                        placeholder="Search front panorama ...">
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <input type="button" id="randFrontPanorama" value="Random" />
+                                    <select id="frontPanorama" class="ms-3"></select>
+                                </div>
+                                <div class="m-3">
+                                    <canvas id="frontPanoramaCanvas" width="320" height="320"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <p id="frontPanorama_resolution"></p>
+                                </div>
 
+                            </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="setup_container section">
+                        <fieldset>
+                            <legend>
+                                Left panorama
+                            </legend>
+                            <div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <input type="text" id="searchLeftPanorama" class="w-75"
+                                        placeholder="Search left panorama ...">
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <input type="button" id="randLeftPanorama" value="Random" />
+                                    <select id="leftPanorama" class="ms-3"></select>
+                                </div>
+                                <div class="m-3">
+                                    <canvas id="leftPanoramaCanvas" width="320" height="320"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <p id="leftPanorama_resolution"></p>
+                                </div>
+
+                            </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="setup_container section">
+                        <fieldset>
+                            <legend>
+                                Right panorama
+                            </legend>
+                            <div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <input type="text" id="searchRightPanorama" class="w-75"
+                                        placeholder="Search right panorama ...">
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <input type="button" id="randRightPanorama" value="Random" />
+                                    <select id="rightPanorama" class="ms-3"></select>
+                                </div>
+                                <div class="m-3">
+                                    <canvas id="rightPanoramaCanvas" width="320" height="320"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <p id="rightPanorama_resolution"></p>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-4">
+                    <div class="setup_container section">
+                        <fieldset>
+                            <legend>
+                                Back panorama
+                            </legend>
+                            <div>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <input type="text" id="searchBackPanorama" class="w-75"
+                                        placeholder="Search back panorama ...">
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <input type="button" id="randBackPanorama" value="Random" />
+                                    <select id="backPanorama" class="ms-3"></select>
+                                </div>
+                                <div class="m-3">
+                                    <canvas id="backPanoramaCanvas" width="320" height="320"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <p id="backPanorama_resolution"></p>
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                </div>
             </div>
 
             <div class=" row">
@@ -450,6 +557,9 @@ name: "Generic room name",
 data: '{"width":"128","height":"3","depth":1,"map":"AA106BB2AA193$AA2BAA6BAA2BAA11BAA58"}',
 wall: "MountainWall_123",
 floor: "Snow_002",
+frontPanorama: "AlpinePanorama_168",
+leftPanorama: "AlpinePanorama_170",
+rightPanorama: "AlpinePanorama_181",
 start: '[13,5]',
 decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
 lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',

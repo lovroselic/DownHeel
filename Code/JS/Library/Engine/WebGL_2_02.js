@@ -588,7 +588,7 @@ const WebGL = {
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);                   //changed, keep
         this.texture = {};
 
-        // wall, ceil, floor
+        // wall, ceil, floor, panorama ...
         for (let T in textureData) {
             this.texture[T] = this.createTexture(textureData[T]);
         }

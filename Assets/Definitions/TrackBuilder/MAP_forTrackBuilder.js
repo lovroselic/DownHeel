@@ -35,6 +35,12 @@ const LIGHT_DECALS = [
     "AlpineLight_165", "AlpineLight_166", "AlpineLight_167",
 ].sort();
 
+//panorama
+const PANORAMA_DECALS = [
+    "AlpinePanorama_168", "AlpinePanorama_169", "AlpinePanorama_170", "AlpinePanorama_171", "AlpinePanorama_172", "AlpinePanorama_173", "AlpinePanorama_174", "AlpinePanorama_175", "AlpinePanorama_176", "AlpinePanorama_177", "AlpinePanorama_178", "AlpinePanorama_179",
+    "AlpinePanorama_180", "AlpinePanorama_181", "AlpinePanorama_182",
+].sort();
+
 const TRIGGER_DECALS = [];
 const LAIR_DECALS = [].sort();
 

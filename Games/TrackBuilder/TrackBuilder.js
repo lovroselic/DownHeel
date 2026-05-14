@@ -18,11 +18,16 @@ const INI = {
 const MAP = {
     Demo: {
         name: "Generic room name",
-        data: '{"width":"128","height":"3","depth":1,"map":"AA122BB2AA256$AA4"}',
-        wall: "RockWall_SDXL_003",
+        data: '{"width":"128","height":"3","depth":1,"map":"AA106BB2AA193$AA2BAA6BAA2BAA11BAA58"}',
+        wall: "MountainWall_123",
         floor: "Snow_002",
-        start: '[128,5]',
-        terrain: '{"direction":{"parameters":{"seed":666,"amplitude":3,"wavelength":32,"octaves":3,"persistence":0.5,"lacunarity":2,"biasDeg":0,"smooth":"smootherstep","minDeg":-45,"maxDeg":45,"decimals":3},"values":[-1.742,-1.746,-1.764,-1.792,-1.814,-1.809,-1.761,-1.662,-1.527,-1.382,-1.229,-1.072,-0.925,-0.806,-0.73,-0.7,-0.704,-0.715,-0.726,-0.736,-0.744,-0.746,-0.743,-0.735,-0.721,-0.707,-0.694,-0.686,-0.681,-0.68,-0.68,-0.681,-0.681,-0.684,-0.706,-0.75,-0.812,-0.881,-0.944,-0.991,-1.016,-1.022,-1.007,-0.965,-0.892,-0.787,-0.651,-0.489,-0.311,-0.128,0.065,0.268,0.473,0.669,0.847,0.998,1.123,1.227,1.304,1.354,1.379,1.388,1.388,1.385,1.385,1.377,1.333,1.245,1.124,0.994,0.878,0.793,0.733,0.687,0.678,0.716,0.787,0.863,0.918,0.933,0.915,0.886,0.844,0.786,0.719,0.65,0.59,0.545,0.513,0.483,0.444,0.394,0.34,0.29,0.254,0.236,0.232,0.24,0.284,0.374,0.496,0.628,0.744,0.825,0.869,0.893,0.906,0.904,0.878,0.819,0.72,0.583,0.419,0.245,0.053,-0.157,-0.372,-0.573,-0.743,-0.87,-0.958,-1.021,-1.055,-1.057,-1.036,-1.005,-0.978,-0.963]},"width":{"parameters":{"seed":777,"amplitude":1.5,"wavelength":16,"octaves":3,"persistence":0.5,"lacunarity":2,"biasWidth":1,"smooth":"smootherstep","minWidth":0.5,"maxWidth":2,"decimals":3},"values":[0.5,0.5,0.5,0.5,0.5,0.546,0.694,0.787,0.803,0.8,0.81,0.822,0.829,0.826,0.802,0.776,0.769,0.759,0.715,0.664,0.643,0.653,0.69,0.78,0.932,1.099,1.254,1.386,1.483,1.577,1.723,1.847,1.878,1.849,1.733,1.603,1.54,1.53,1.602,1.686,1.705,1.687,1.649,1.667,1.791,1.948,2,2,2,2,2,1.969,1.856,1.753,1.66,1.604,1.596,1.601,1.6,1.59,1.57,1.571,1.641,1.719,1.74,1.718,1.636,1.565,1.566,1.613,1.729,1.825,1.82,1.763,1.66,1.564,1.531,1.52,1.502,1.487,1.483,1.508,1.601,1.684,1.68,1.614,1.463,1.307,1.228,1.186,1.173,1.142,1.061,0.982,0.95,0.95,0.953,0.93,0.848,0.785,0.808,0.882,1.017,1.13,1.145,1.124,1.082,1.032,0.989,0.919,0.764,0.621,0.585,0.623,0.76,0.877,0.866,0.802,0.713,0.65,0.652,0.676,0.708,0.745,0.782,0.804,0.791,0.766]},"slope":{"parameters":{"seed":888,"amplitude":18,"wavelength":16,"octaves":3,"persistence":0.65,"lacunarity":2,"biasSlope":18,"smooth":"smootherstep","minSlope":3,"maxSlope":45,"decimals":3},"values":[12.183,12.01,11.579,11.898,13.582,15.715,17.751,19.034,19.302,19.422,19.897,20.348,20.407,20.109,19.192,18.302,18.072,17.925,17.324,16.623,16.303,16.136,15.747,15.893,17.13,18.553,19.458,19.989,20.409,20.95,22.22,23.429,23.742,23.912,24.431,24.498,23.455,21.519,18.494,15.402,13.209,11.555,10.753,10.769,11.232,11.679,11.302,10.626,10.424,11.022,13.2,15.027,14.848,13.994,12.911,12.682,14.033,16.268,19.811,23.761,26.916,29.244,30.351,30.546,30.525,30.646,31.132,31.688,31.965,31.41,28.845,26.112,25.125,25.44,27.67,29.981,30.516,29.842,27.466,25.106,24.491,24.68,25.257,25.341,24.268,22.998,22.484,22.228,21.561,20.68,19.742,18.991,18.616,18.654,19.333,20.059,20.251,19.706,17.456,14.668,12.77,11.31,10.282,9.661,9.185,9.219,10.856,13.065,14.54,15.692,16.58,17.027,17.107,16.784,15.556,14.352,14.078,14.361,15.339,16.225,16.27,15.931,15.14,13.781,12.046,9.964,7.236,5.143]}}',
+        frontPanorama: "AlpinePanorama_168",
+        leftPanorama: "AlpinePanorama_170",
+        rightPanorama: "AlpinePanorama_181",
+        start: '[13,5]',
+        decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
+        lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',
+        terrain: '{"direction":{"parameters":{"seed":666,"amplitude":45,"wavelength":3,"octaves":4,"persistence":0.1,"lacunarity":3,"biasDeg":0,"smooth":"smootherstep","minDeg":-45,"maxDeg":45,"decimals":3},"values":[-33.051,-28.42,-29.859,-35.588,-19.737,20.866,35.621,38.612,33.146,25.006,11.641,-25.562,-37.954,-23.549,6.948,22.366,19.382,16.098,17.564,19.822,23.324,18.896,13.404,-24.618,-36.621,-34.868,-21.101,-21.477,-9.677,7.655,18.492,14.769,11.562,7.865,3.571,-7.66,-16.852,-23.092,-32.33,-37.343,-41.374,-33.794,-26.911,-26.517,-37.582,-31.488,-30.766,-8.698,-0.399,-4.3,-14.846,-17.078,-9.203,18.853,32.597,29.327,40.162,40.403,26.991,-7.18,-21.174,-28.512,-32.997,-40.158,-21.864,20.607,29.092,23.791,8.908,6.166,-2.573,-14.952,-18.332,-8.384,16.686,25.869,20.648,2.43,-3.72,-6.86,-6.769,-3.922,-5.061,12.651,19.156,19.724,6.952,5.715,-2.904,-28.066,-28.56,-18.842,11.085,21.784,24.691,19.751,25.229,14.233,-2.766,-13.667,-14.563,-32.973,-34.745,-21.742,14.379,26.672,20.586,5.14,-5.851,-5.555,-8.793,-18.967,-19.61,-31.232,-40.728,-28.57,-1.423,4.795,13.39,28.377,35.949,29.81,16.404,16.314,8.456,-29.02,-36.792,-35.308]},"width":{"parameters":{"seed":777,"amplitude":1.5,"wavelength":7,"octaves":4,"persistence":0.15,"lacunarity":3,"biasWidth":1,"smooth":"smootherstep","minWidth":0.75,"maxWidth":2,"decimals":3},"values":[0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.836,1.319,1.802,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1.873,1.783,1.61,1.541,1.538,1.489,1.341,1.153,1.027,1.142,1.253,1.163,1.028,1.012,1.01,0.946,0.937,0.983,0.894,0.833,0.897,0.882,0.975,0.965,0.988,0.993,1.015,1.039,1.149,1.256,1.298,1.315,1.311,1.192,0.946,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.813,1.113,1.31,1.411,1.366,1.444,1.456,1.404,1.443,1.509,1.523,1.534,1.561,1.476,1.457,1.426,1.273,1.217,1.248,1.298,1.215,1.254,1.209,1.138,1.124,1.119,1.199,1.331,1.376,1.482,1.765,1.867,1.792,1.548,1.383,1.321,1.147,1.026,1.028,1.05,1.263,1.497,1.809,2,2,2,2,1.991,1.413,0.75,0.75,0.75,0.75,0.75]},"slope":{"parameters":{"seed":888,"amplitude":30,"wavelength":12,"octaves":3,"persistence":0.65,"lacunarity":2,"biasSlope":15,"smooth":"smootherstep","minSlope":5,"maxSlope":35,"decimals":3},"values":[5.305,5,5,7.637,12.388,16.211,17.171,17.583,18.723,19.012,18.095,15.899,15.12,14.615,13.053,12.171,11.682,11.211,13.55,16.524,18.054,19.016,20.511,23.512,24.569,25.119,25.977,24.092,19.34,12.258,7.016,5,5,5,5,5,5,5,9.357,9.747,7.706,5.976,8.389,13.86,22.487,29.86,34.587,35,35,35,35,35,35,29.794,26.875,28.352,33.942,35,33.668,27.898,25.818,26.43,27.388,25.446,22.912,22.232,20.936,18.942,17.006,16.027,16.374,18.104,18.752,16.88,10.899,6.284,5,5,5,5,5.619,9.234,11.718,13.214,13.512,12.423,9.45,8.463,9.381,11.679,12.117,11.217,8.819,5.077,5,5,5,5,5,5,7.307,13.591,18.415,22.761,25.806,25.519,22.378,17.521,15.961,17.058,20.976,24.904,26.784,25.034,22.482,21.221,21.198,18.209,15.311,15.547,15.98,14.271,9.384,7.163,8.181,12.249,14.229,13.516]}}',
     }
 };
 
@@ -48,7 +53,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.4.0",
+    VERSION: "0.4.1",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -220,11 +225,23 @@ const GAME = {
         LAYER.floorcanvas = $("#floorcanvas")[0].getContext("2d");
         LAYER.texturecanvas = $("#texturecanvas")[0].getContext("2d");
 
-        GAME.updateTextures();
+
         $("#walltexture").change(GAME.repaintTextures);
         $("#floortexture").change(GAME.repaintTextures);
         $("#texture_decal").change(GAME.repaintTextures);
 
+        //panorama
+        for (const prop of PANORAMA_DECALS) {
+            $("#frontPanorama").append(`<option value="${prop}">${prop}</option>`);
+            $("#leftPanorama").append(`<option value="${prop}">${prop}</option>`);
+            $("#rightPanorama").append(`<option value="${prop}">${prop}</option>`);
+        }
+
+        LAYER.frontPanoramaCanvas = $("#frontPanoramaCanvas")[0].getContext("2d");
+        LAYER.leftPanoramaCanvas = $("#leftPanoramaCanvas")[0].getContext("2d");
+        LAYER.rightPanoramaCanvas = $("#rightPanoramaCanvas")[0].getContext("2d");
+
+        GAME.updateTextures();                  //common to textures and panorama
         /** pictures */
         if (DECAL_PAINTINGS.length > 0) {
             for (const pic of DECAL_PAINTINGS) {
@@ -277,6 +294,10 @@ const GAME = {
         $("#randwall").click(GAME.randomTexture.bind(null, TEXTURE_LIST, "#walltexture", "wallcanvas"));
         $("#randfloor").click(GAME.randomTexture.bind(null, TEXTURE_LIST, "#floortexture", "floorcanvas"));
 
+        $("#randFrontPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#frontPanorama", "frontPanoramaCanvas"));
+        $("#randLeftPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#leftPanorama", "leftPanoramaCanvas"));
+        $("#randRightPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#rightPanorama", "rightPanoramaCanvas"));
+
         $("#randpic").click(GAME.randomPic);
         $("#randcrest").click(GAME.randomCrest);
         $("#randlight").click(GAME.randomLight);
@@ -298,6 +319,9 @@ const GAME = {
         $('#searchLights').on('keyup', () => filterOptions("#light_decal", "#searchLights"));
         $('#searchWall').on('keyup', () => filterOptions("#walltexture", "#searchWall"));
         $('#searchFloor').on('keyup', () => filterOptions("#floortexture", "#searchFloor"));
+        $('#searchFrontPanorama').on('keyup', () => filterOptions("#frontPanorama", "#searchFrontPanorama"));
+        $('#searchLeftPanorama').on('keyup', () => filterOptions("#leftPanorama", "#searchLeftPanorama"));
+        $('#searchRightPanorama').on('keyup', () => filterOptions("#rightPanorama", "#searchRightPanorama"));
 
         /** shortcuts */
 
@@ -365,13 +389,23 @@ const GAME = {
         ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
     },
     updateTextures() {
+        //textures
         const wallTexture = TEXTURE[$("#walltexture")[0].value];
         const floorTexture = TEXTURE[$("#floortexture")[0].value];
         const textureTexture = TEXTURE[$("#texture_decal")[0].value];
         ENGINE.resizeAndFill(LAYER.wallcanvas, wallTexture, 320);
         ENGINE.resizeAndFill(LAYER.floorcanvas, floorTexture, 320);
         ENGINE.resizeAndFill(LAYER.texturecanvas, textureTexture, INI.CANVAS_RESOLUTION);
-        const ids = ["wall_resolution", "floor_resolution"];
+
+        //panorama
+        const frontPanorama = TEXTURE[$("#frontPanorama")[0].value];
+        const leftPanorama = TEXTURE[$("#leftPanorama")[0].value];
+        const rightPanorama = TEXTURE[$("#rightPanorama")[0].value];
+        ENGINE.resizeAndFill(LAYER.frontPanoramaCanvas, frontPanorama, 320);
+        ENGINE.resizeAndFill(LAYER.leftPanoramaCanvas, leftPanorama, 320);
+        ENGINE.resizeAndFill(LAYER.rightPanoramaCanvas, rightPanorama, 320);
+
+        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution"];
         for (const [i, pTexture] of [wallTexture, floorTexture].entries()) {
             let res = GAME.getResolution(pTexture);
             $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
@@ -747,6 +781,9 @@ name: "${RoomName}",
 data: '${JSON.stringify(Export)}',
 wall: "${$("#walltexture")[0].value}",
 floor: "${$("#floortexture")[0].value}",
+frontPanorama: "${$("#frontPanorama")[0].value}",
+leftPanorama: "${$("#leftPanorama")[0].value}",
+rightPanorama: "${$("#rightPanorama")[0].value}",
 `;
         for (let desc of $MAP.properties) {
             if ($MAP.map[desc].length > 0) {
@@ -782,6 +819,12 @@ floor: "${$("#floortexture")[0].value}",
         for (const prop of Textures) {
             const pattern = new RegExp(`${prop}:\\s"(.*)"`);
             $(`#${prop}texture`).val(ImportText.extractGroup(pattern));
+        }
+
+        const Panoramas = ["frontPanorama", "leftPanorama", "rightPanorama"];
+        for (const prop of Panoramas) {
+            const pattern = new RegExp(`${prop}:\\s"(.*)"`);
+            $(`#${prop}`).val(ImportText.extractGroup(pattern));
         }
 
         console.log("Import", Import);

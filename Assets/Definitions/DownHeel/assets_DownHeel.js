@@ -110,6 +110,23 @@ LoadTextures = [
     //{ srcName: "ObjectTextures/FireTexture2_Green.webp", name: "FireTexture2_Green" },
     //{ srcName: "ObjectTextures/RedFireTexture.webp", name: "RedFireTexture" },
     //{ srcName: "ObjectTextures/BluBallTexture.webp", name: "BluBallTexture" },
+
+    //panorama
+    { srcName: "Panorama/AlpinePanorama_168.webp", name: "AlpinePanorama_168" },
+    { srcName: "Panorama/AlpinePanorama_169.webp", name: "AlpinePanorama_169" },
+    { srcName: "Panorama/AlpinePanorama_170.webp", name: "AlpinePanorama_170" },
+    { srcName: "Panorama/AlpinePanorama_171.webp", name: "AlpinePanorama_171" },
+    { srcName: "Panorama/AlpinePanorama_172.webp", name: "AlpinePanorama_172" },
+    { srcName: "Panorama/AlpinePanorama_173.webp", name: "AlpinePanorama_173" },
+    { srcName: "Panorama/AlpinePanorama_174.webp", name: "AlpinePanorama_174" },
+    { srcName: "Panorama/AlpinePanorama_175.webp", name: "AlpinePanorama_175" },
+    { srcName: "Panorama/AlpinePanorama_176.webp", name: "AlpinePanorama_176" },
+    { srcName: "Panorama/AlpinePanorama_177.webp", name: "AlpinePanorama_177" },
+    { srcName: "Panorama/AlpinePanorama_178.webp", name: "AlpinePanorama_178" },
+    { srcName: "Panorama/AlpinePanorama_179.webp", name: "AlpinePanorama_179" },
+    { srcName: "Panorama/AlpinePanorama_180.webp", name: "AlpinePanorama_180" },
+    { srcName: "Panorama/AlpinePanorama_181.webp", name: "AlpinePanorama_181" },
+    { srcName: "Panorama/AlpinePanorama_182.webp", name: "AlpinePanorama_182" },
 ];
 
 LoadAudio = [
