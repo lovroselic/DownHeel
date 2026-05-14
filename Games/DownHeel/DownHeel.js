@@ -23,7 +23,7 @@ const DEBUG = {
     AUTO_TEST: false,
     FPS: true,
     VERBOSE: true,
-    _2D_display: false,
+    _2D_display: true,
     INVINCIBLE: false,
     keys: true,
     max17: false,
@@ -54,7 +54,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.4.4",
+    VERSION: "0.4.5",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -119,7 +119,7 @@ const PRG = {
         ENGINE.addBOX("DOWN", ENGINE.bottomWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText", "subtitle"], null);
 
         if (DEBUG._2D_display) {
-            ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["pacgrid", "grid", "coord", "player"], null);
+            ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["pacgrid", "grid", "coord", "player", "debug"], null);
         }
 
         /** dev settings */
@@ -368,6 +368,12 @@ const GAME = {
         const textureData = {
             wall: TEXTURE[MAP[level].wall],
             floor: TEXTURE[MAP[level].floor],
+            frontPanorama: TEXTURE[MAP[level].frontPanorama],
+            leftPanorama: TEXTURE[MAP[level].leftPanorama],
+            rightPanorama: TEXTURE[MAP[level].rightPanorama],
+            backPanorama: TEXTURE[MAP[level].backPanorama],
+            archPanorama: TEXTURE[MAP[level].archPanorama],
+            skyPanorama: TEXTURE[MAP[level].skyPanorama],
         };
 
         WebGL.updateShaders();
@@ -475,6 +481,7 @@ const GAME = {
             const map = MAP[GAME.level].map;
             ENGINE.BLOCKGRID3D.draw(map, HERO.player.depth);
             GRID.paintCoord3D("coord", MAP[GAME.level].map, HERO.player.depth);
+            WebGL.visualizeTexture3DSlice(map.occlusionMap, map.zMap1.xSize, map.zMap1.ySize, 1, 0, LAYER.debug); //debug
         }
     },
     drawPlayer() {

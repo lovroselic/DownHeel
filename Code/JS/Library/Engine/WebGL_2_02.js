@@ -97,6 +97,10 @@ const WebGL = {
         SPECULAR_LIGHT_STRENGTH: 5.0,
         BACKGROUND_ALPHA: 1.0,
         SURFACE_WALL_HEIGHT: 1.5,
+        BACKGROUND_DISTANCE: 48,
+        BACKGROUND_BACK_DISTANCE: 10,
+        BACKGROUND_HEIGHT: 40,
+        BACKGROUND_TOP_PAD: 8,
     },
     CONFIG: {
         firstperson: true,
@@ -413,6 +417,17 @@ const WebGL = {
     },
     createOcclusionTexture3D(pixelData, width, height, depth) {
         const gl = this.CTX;
+
+        width = Number(width);
+        height = Number(height);
+        depth = Number(depth ?? 1);
+
+        const expected = width * height * depth;
+
+        if (!(width > 0 && height > 0 && depth > 0)) throw new Error(`Bad 3D texture dimensions: ${width} x ${height} x ${depth}`);
+        if (!(pixelData instanceof Uint8Array)) throw new Error(`pixelData must be Uint8Array, got ${pixelData?.constructor?.name}`);
+        if (pixelData.length !== expected) throw new Error(`Bad pixelData length: got ${pixelData.length}, expected ${expected}`);
+
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_3D, texture);
 
@@ -420,29 +435,34 @@ const WebGL = {
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
-        gl.texImage3D(
-            gl.TEXTURE_3D,     // target
-            0,                 // mip level
-            gl.R8,             // internal format (single-channel 8-bit)
-            width,             // width
-            height,            // height
-            depth,             // depth
-            0,                 // border
-            gl.RED,            // base format
-            gl.UNSIGNED_BYTE,  // type
-            pixelData          // Uint8Array
-        );
-
-        // Set wrapping for S, T, and R directions
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-
-        // Set minification & magnification filters
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-        // Unbind for cleanliness
+        gl.texImage3D(
+            gl.TEXTURE_3D,
+            0,
+            gl.R8,
+            width,
+            height,
+            depth,
+            0,
+            gl.RED,
+            gl.UNSIGNED_BYTE,
+            pixelData
+        );
+
+        const err = gl.getError();
+        if (err !== gl.NO_ERROR) {
+            throw new Error(
+                `createOcclusionTexture3D: gl.texImage3D failed: ${err}, ` +
+                `size=${width}x${height}x${depth}, ` +
+                `data=${pixelData?.constructor?.name}, len=${pixelData?.length}`
+            );
+        }
+
         gl.bindTexture(gl.TEXTURE_3D, null);
 
         return texture;
@@ -493,7 +513,7 @@ const WebGL = {
     },
     visualizeTexture3DSlice(texture3D, width, height, depth, sliceIndex, CTX, scale = 8) {
         const gl = this.CTX;
-        if (this.VERBOSE) console.warn("WebGL.visualizeTexture", width, height, depth, sliceIndex, texture3D);
+        //if (this.VERBOSE) console.warn("WebGL.visualizeTexture", width, height, depth, sliceIndex, texture3D);
 
         CTX.canvas.width = width * scale;
         CTX.canvas.height = height * scale;
@@ -520,7 +540,7 @@ const WebGL = {
         gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
         const pixels = new Uint8Array(width * height);
         gl.readPixels(0, 0, width, height, gl.RED, gl.UNSIGNED_BYTE, pixels);
-        if (this.VERBOSE) WebGL.checkError("read pixels");
+        //if (this.VERBOSE) WebGL.checkError("read pixels");
 
         const imageData = CTX.createImageData(width, height);
         for (let i = 0; i < pixels.length; i++) {
@@ -545,7 +565,6 @@ const WebGL = {
         // Cleanup
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.deleteFramebuffer(framebuffer);
-
     },
     createTexture(T, S = null, flip = false) {
         if (T instanceof WebGLTexture) return T;
@@ -599,8 +618,6 @@ const WebGL = {
                 this.texture[T] = this.createTexture(TEXTURE[T]);
             }
         }
-
-        //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     },
     setDecalTextures() {
         for (const iam of [...WebGL.staticDecalList, ...WebGL.dynamicDecalList, ...WebGL.interactiveDecalList]) {
@@ -1171,10 +1188,36 @@ const WebGL = {
         gl.drawElements(gl.TRIANGLES, this.world.offset.floor_count, gl.UNSIGNED_SHORT, this.world.offset.floor_start * 2);
 
         //ceil
-        if (this.CONFIG.firstperson) {
+        if (this.CONFIG.firstperson && this.texture.ceil) {
             gl.bindTexture(gl.TEXTURE_2D, this.texture.ceil);
             gl.drawElements(gl.TRIANGLES, this.world.offset.ceil_count, gl.UNSIGNED_SHORT, this.world.offset.ceil_start * 2);
         }
+
+        //frontPanorama
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.frontPanorama);
+        gl.drawElements(gl.TRIANGLES, this.world.offset.frontPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.frontPanorama_start * 2);
+
+        //leftPanorama
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.leftPanorama);
+        gl.drawElements(gl.TRIANGLES, this.world.offset.leftPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.leftPanorama_start * 2);
+
+        //rightPanorama
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.rightPanorama);
+        gl.drawElements(gl.TRIANGLES, this.world.offset.rightPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.rightPanorama_start * 2);
+
+        //backPanorama
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.backPanorama);
+        gl.drawElements(gl.TRIANGLES, this.world.offset.backPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.backPanorama_start * 2);
+
+        //skyPanorama
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.skyPanorama);
+        gl.drawElements(gl.TRIANGLES, this.world.offset.skyPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.skyPanorama_start * 2);
+
+        //archPanorama
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.archPanorama);
+        gl.drawElements(gl.TRIANGLES, this.world.offset.archPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.archPanorama_start * 2);
+
+
 
         //static decals
         let decalCount = 0;
@@ -1523,7 +1566,8 @@ const RAY = {
 const WORLD = {
     GA: null,                                                                                                           //reference
     bufferTypes: ["positions", 'indices', "textureCoordinates", "vertexNormals"],
-    objectTypes: ["wall", "floor", "ceil", "decal"],
+    objectTypes: ["wall", "floor", "ceil", "decal",
+        "frontPanorama", "leftPanorama", "rightPanorama", "backPanorama", "skyPanorama", "archPanorama"],
     cubeFaces: ["BACK_FACE", "RIGHT_FACE", "FRONT_FACE", "LEFT_FACE", "BOTTOM_FACE", "TOP_FACE"],                       //corresponds to directions3D: [UP3, RIGHT3, DOWN3, LEFT3, BELOW3, ABOVE3],
     faceTypes: ["wall", "wall", "wall", "wall", "ceil", "floor"],
     init() {
@@ -1742,18 +1786,6 @@ const WORLD = {
         this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
     },
     surfaceLocalToWorld(quadNode, localX, localY, localZ, height = WebGL.INI.SURFACE_WALL_HEIGHT) {
-        /*
-            Local cube coordinates:
-                localX: 0..1 along x segment
-                localY: 0..1 vertical height
-                localZ: 0..1 across quad width
-    
-            World output:
-                x = progress axis
-                y = OpenGL vertical axis
-                z = lateral axis
-        */
-
         const worldX = Math.lerp(quadNode.beforeX, quadNode.afterX, localX);
         const surfaceY = Math.lerp(quadNode.beforeZ, quadNode.afterZ, localX);
         const beforeLateral = Math.lerp(quadNode.beforeYTop, quadNode.beforeYBottom, localZ);

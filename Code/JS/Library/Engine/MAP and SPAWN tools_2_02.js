@@ -129,8 +129,11 @@ const MAP_TOOLS = {
         const GA = this.MAP[level].map.GA;
         const map = this.MAP[level].map;
         if (map.zMap1) {
+            //console.error(map.zMap1, map.zMap1.sizeX, map.zMap1.sizeY);
             map.textureMap = QUAD_MAP.toTextureMap(map.zMap1);
-            map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.zMap1.sizeX, map.zMap1.sizeY, 1);
+            map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.zMap1.xSize, map.zMap1.ySize, 1);
+
+            //throw "here";
 
         } else {
             map.textureMap = GA.toTextureMap();
