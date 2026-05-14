@@ -20,6 +20,7 @@ const MAP = {
         frontPanorama: "AlpinePanorama_168",
         leftPanorama: "AlpinePanorama_170",
         rightPanorama: "AlpinePanorama_181",
+        backPanorama: "BackAlpinePanorama_195",
         start: '[13,5]',
         decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
         lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',

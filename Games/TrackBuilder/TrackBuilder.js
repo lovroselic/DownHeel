@@ -24,6 +24,7 @@ const MAP = {
         frontPanorama: "AlpinePanorama_168",
         leftPanorama: "AlpinePanorama_170",
         rightPanorama: "AlpinePanorama_181",
+        backPanorama: "BackAlpinePanorama_195",
         start: '[13,5]',
         decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
         lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',
@@ -53,7 +54,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.4.1",
+    VERSION: "0.4.2",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -226,22 +227,30 @@ const GAME = {
         LAYER.texturecanvas = $("#texturecanvas")[0].getContext("2d");
 
 
-        $("#walltexture").change(GAME.repaintTextures);
-        $("#floortexture").change(GAME.repaintTextures);
-        $("#texture_decal").change(GAME.repaintTextures);
+        $("#walltexture").change(GAME.updateTextures);
+        $("#floortexture").change(GAME.updateTextures);
+        $("#texture_decal").change(GAME.updateTextures);
 
         //panorama
         for (const prop of PANORAMA_DECALS) {
             $("#frontPanorama").append(`<option value="${prop}">${prop}</option>`);
             $("#leftPanorama").append(`<option value="${prop}">${prop}</option>`);
             $("#rightPanorama").append(`<option value="${prop}">${prop}</option>`);
+            $("#backPanorama").append(`<option value="${prop}">${prop}</option>`);
         }
 
         LAYER.frontPanoramaCanvas = $("#frontPanoramaCanvas")[0].getContext("2d");
         LAYER.leftPanoramaCanvas = $("#leftPanoramaCanvas")[0].getContext("2d");
         LAYER.rightPanoramaCanvas = $("#rightPanoramaCanvas")[0].getContext("2d");
+        LAYER.backPanoramaCanvas = $("#backPanoramaCanvas")[0].getContext("2d");
+
+        $("#frontPanorama").change(GAME.updateTextures);
+        $("#leftPanorama").change(GAME.updateTextures);
+        $("#rightPanorama").change(GAME.updateTextures);
+        $("#backPanorama").change(GAME.updateTextures);
 
         GAME.updateTextures();                  //common to textures and panorama
+
         /** pictures */
         if (DECAL_PAINTINGS.length > 0) {
             for (const pic of DECAL_PAINTINGS) {
@@ -289,7 +298,7 @@ const GAME = {
         GAME.printMaterialDetails();
         $("#materialtype").change(GAME.printMaterialDetails);
 
-        /** */
+        /** randoms */
 
         $("#randwall").click(GAME.randomTexture.bind(null, TEXTURE_LIST, "#walltexture", "wallcanvas"));
         $("#randfloor").click(GAME.randomTexture.bind(null, TEXTURE_LIST, "#floortexture", "floorcanvas"));
@@ -297,6 +306,7 @@ const GAME = {
         $("#randFrontPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#frontPanorama", "frontPanoramaCanvas"));
         $("#randLeftPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#leftPanorama", "leftPanoramaCanvas"));
         $("#randRightPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#rightPanorama", "rightPanoramaCanvas"));
+        $("#randBackPanorama").click(GAME.randomTexture.bind(null, PANORAMA_DECALS, "#backPanorama", "backPanoramaCanvas"));
 
         $("#randpic").click(GAME.randomPic);
         $("#randcrest").click(GAME.randomCrest);
@@ -312,7 +322,6 @@ const GAME = {
             });
         };
 
-
         $('#searchDecalTexture').on('keyup', () => filterOptions("#texture_decal", "#searchDecalTexture"));
         $('#searchDecals').on('keyup', () => filterOptions("#crest_decal", "#searchDecals"));
         $('#searchPics').on('keyup', () => filterOptions("#picture_decal", "#searchPics"));
@@ -322,6 +331,7 @@ const GAME = {
         $('#searchFrontPanorama').on('keyup', () => filterOptions("#frontPanorama", "#searchFrontPanorama"));
         $('#searchLeftPanorama').on('keyup', () => filterOptions("#leftPanorama", "#searchLeftPanorama"));
         $('#searchRightPanorama').on('keyup', () => filterOptions("#rightPanorama", "#searchRightPanorama"));
+        $('#searchBackPanorama').on('keyup', () => filterOptions("#backPanorama", "#searchBackPanorama"));
 
         /** shortcuts */
 
@@ -389,6 +399,7 @@ const GAME = {
         ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
     },
     updateTextures() {
+        //console.error(" ----------------------------- updateTextures -------------------------------");
         //textures
         const wallTexture = TEXTURE[$("#walltexture")[0].value];
         const floorTexture = TEXTURE[$("#floortexture")[0].value];
@@ -401,12 +412,14 @@ const GAME = {
         const frontPanorama = TEXTURE[$("#frontPanorama")[0].value];
         const leftPanorama = TEXTURE[$("#leftPanorama")[0].value];
         const rightPanorama = TEXTURE[$("#rightPanorama")[0].value];
+        const backPanorama = TEXTURE[$("#backPanorama")[0].value];
         ENGINE.resizeAndFill(LAYER.frontPanoramaCanvas, frontPanorama, 320);
         ENGINE.resizeAndFill(LAYER.leftPanoramaCanvas, leftPanorama, 320);
         ENGINE.resizeAndFill(LAYER.rightPanoramaCanvas, rightPanorama, 320);
+        ENGINE.resizeAndFill(LAYER.backPanoramaCanvas, backPanorama, 320);
 
-        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution"];
-        for (const [i, pTexture] of [wallTexture, floorTexture].entries()) {
+        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution", "backPanorama_resolution"];
+        for (const [i, pTexture] of [wallTexture, floorTexture, frontPanorama, leftPanorama, rightPanorama, backPanorama].entries()) {
             let res = GAME.getResolution(pTexture);
             $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
         }
@@ -414,9 +427,6 @@ const GAME = {
     },
     repaintTextures() {
         GAME.updateTextures();
-        if ($("#selector input[name=renderer]:checked").val() === "texture") {
-            GAME.texture();
-        }
     },
     updateWH() {
         if (isNaN(parseInt($("#verticalGrid").val(), 10))) $("#verticalGrid").val(32);
@@ -784,6 +794,7 @@ floor: "${$("#floortexture")[0].value}",
 frontPanorama: "${$("#frontPanorama")[0].value}",
 leftPanorama: "${$("#leftPanorama")[0].value}",
 rightPanorama: "${$("#rightPanorama")[0].value}",
+backPanorama: "${$("#backPanorama")[0].value}",
 `;
         for (let desc of $MAP.properties) {
             if ($MAP.map[desc].length > 0) {
@@ -821,7 +832,7 @@ rightPanorama: "${$("#rightPanorama")[0].value}",
             $(`#${prop}texture`).val(ImportText.extractGroup(pattern));
         }
 
-        const Panoramas = ["frontPanorama", "leftPanorama", "rightPanorama"];
+        const Panoramas = ["frontPanorama", "leftPanorama", "rightPanorama", "backPanorama"];
         for (const prop of Panoramas) {
             const pattern = new RegExp(`${prop}:\\s"(.*)"`);
             $(`#${prop}`).val(ImportText.extractGroup(pattern));

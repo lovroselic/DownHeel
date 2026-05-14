@@ -39,6 +39,8 @@ const LIGHT_DECALS = [
 const PANORAMA_DECALS = [
     "AlpinePanorama_168", "AlpinePanorama_169", "AlpinePanorama_170", "AlpinePanorama_171", "AlpinePanorama_172", "AlpinePanorama_173", "AlpinePanorama_174", "AlpinePanorama_175", "AlpinePanorama_176", "AlpinePanorama_177", "AlpinePanorama_178", "AlpinePanorama_179",
     "AlpinePanorama_180", "AlpinePanorama_181", "AlpinePanorama_182",
+    "AlpinePanorama_183", "AlpinePanorama_184", "AlpinePanorama_185", "AlpinePanorama_186", "AlpinePanorama_187", "AlpinePanorama_188", "AlpinePanorama_189", "AlpinePanorama_190", "AlpinePanorama_191", "AlpinePanorama_192", "AlpinePanorama_193", "AlpinePanorama_194",
+    "BackAlpinePanorama_195", "BackAlpinePanorama_196", "BackAlpinePanorama_197", "BackAlpinePanorama_198", "BackAlpinePanorama_199"
 ].sort();
 
 const TRIGGER_DECALS = [];
