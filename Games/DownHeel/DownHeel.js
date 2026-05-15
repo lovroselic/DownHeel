@@ -54,7 +54,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.4.6",
+    VERSION: "0.4.7",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -392,7 +392,7 @@ const GAME = {
         WebGL.init_required_IAM(MAP[level].map, HERO);
         MAP[level].map.quadMap = QUAD_MAP.create(MAP[level].map.GA, MAP[level].terrain);
         MAP[level].map.zMap = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA);
-        MAP[level].map.zMap1 = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA, 1);
+        MAP[level].map.zMap1 = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA, 1); //TR = 1 ...
         SPAWN_TOOLS.spawn(level);
         MAP[level].world = WORLD.buildSurfaceBasedWorld(MAP[level].map);
     },

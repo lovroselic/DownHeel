@@ -127,6 +127,7 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination);
 bool isOmniDirectional(vec3 dir);
 vec3 worldToOcclusionCoord(vec3 position3D);
 bool isOccludedTexel(ivec3 texel);
+bool isOccluded(vec3 position3D);
 
 // ----------------------------------------------------------------------------
 
@@ -318,35 +319,26 @@ vec3 CalcLight(
 // -------------------------- Raycasting / occlusion --------------------------
 
 bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
-    vec3 worldDirection = rayTarget3D - rayOrigin3D;
-    float worldDirLen = length(worldDirection);
-
-    if (worldDirLen < EPSILON)
-        return false;
-
-    vec3 worldDirNorm = worldDirection / worldDirLen;
-
-    float occResolution = max(uOcclusionResolution, 1.0f);
-    float occCellWorldSize = 1.0f / occResolution;
-
-    // Bias in WORLD units, scaled by occlusion texel size.
-    vec3 biasedOriginWorld = rayOrigin3D + worldDirNorm * RAY_ORIGIN_BIAS * occCellWorldSize;
-    vec3 biasedTargetWorld = rayTarget3D - worldDirNorm * INTO_WALL * occCellWorldSize;
-
-    // Convert to OCCLUSION TEXTURE coordinates.
-    vec3 rayOriginOcc = worldToOcclusionCoord(biasedOriginWorld);
-    vec3 rayTargetOcc = worldToOcclusionCoord(biasedTargetWorld);
-
-    vec3 direction = rayTargetOcc - rayOriginOcc;
+    vec3 direction = rayTarget3D - rayOrigin3D;
     float dirLen = length(direction);
 
     if (dirLen < EPSILON)
         return false;
 
-    vec3 step = vec3(direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f), direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f), direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f));
+    vec3 dirNorm = direction / dirLen;
 
-    vec3 currentCell = floor(rayOriginOcc);
-    vec3 cellTarget = floor(rayTargetOcc);
+    vec3 step = vec3(
+        direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f),
+        direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f),
+        direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f)
+    );
+
+    // Pull target slightly back so the destination cell does not shadow itself.
+    vec3 cellTarget = floor(rayTarget3D - dirNorm * INTO_WALL);
+
+    // Push origin slightly forward to avoid immediately hitting the light's own cell.
+    rayOrigin3D = rayOrigin3D + dirNorm * RAY_ORIGIN_BIAS;
+    vec3 currentCell = floor(rayOrigin3D);
 
     const float INF = 1e30f;
     vec3 tDelta = vec3(INF);
@@ -355,31 +347,42 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     // X axis
     if (step.x != 0.0f) {
         tDelta.x = 1.0f / abs(direction.x);
-        float nextBoundaryX = (step.x > 0.0f) ? (floor(rayOriginOcc.x) + 1.0f) : floor(rayOriginOcc.x);
-        tMax.x = abs((nextBoundaryX - rayOriginOcc.x) / direction.x);
+        float nextBoundaryX = (step.x > 0.0f)
+            ? floor(rayOrigin3D.x) + 1.0f
+            : floor(rayOrigin3D.x);
+
+        tMax.x = abs((nextBoundaryX - rayOrigin3D.x) / direction.x);
     }
 
-    // Y axis, this is occlusion texture Y, usually world Z.
+    // Y axis, world height
     if (step.y != 0.0f) {
         tDelta.y = 1.0f / abs(direction.y);
-        float nextBoundaryY = (step.y > 0.0f) ? (floor(rayOriginOcc.y) + 1.0f) : floor(rayOriginOcc.y);
-        tMax.y = abs((nextBoundaryY - rayOriginOcc.y) / direction.y);
+        float nextBoundaryY = (step.y > 0.0f)
+            ? floor(rayOrigin3D.y) + 1.0f
+            : floor(rayOrigin3D.y);
+
+        tMax.y = abs((nextBoundaryY - rayOrigin3D.y) / direction.y);
     }
 
-    // Z axis, only meaningful for true 3D occlusion maps.
+    // Z axis, world map-width direction
     if (step.z != 0.0f) {
         tDelta.z = 1.0f / abs(direction.z);
-        float nextBoundaryZ = (step.z > 0.0f) ? (floor(rayOriginOcc.z) + 1.0f) : floor(rayOriginOcc.z);
-        tMax.z = abs((nextBoundaryZ - rayOriginOcc.z) / direction.z);
+        float nextBoundaryZ = (step.z > 0.0f)
+            ? floor(rayOrigin3D.z) + 1.0f
+            : floor(rayOrigin3D.z);
+
+        tMax.z = abs((nextBoundaryZ - rayOrigin3D.z) / direction.z);
     }
 
     for (int i = 0; i < MAX_STEPS; i++) {
-        // Do not let the destination texel shadow itself.
+        // Do not let the destination cell shadow itself.
         if (all(equal(currentCell, cellTarget))) {
             return false;
         }
 
-        if (isOccludedTexel(ivec3(currentCell))) {
+        // Important: currentCell is WORLD/grid space.
+        // isOccluded() handles conversion to occlusion texture space.
+        if (isOccluded(currentCell)) {
             return true;
         }
 
@@ -396,6 +399,11 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     }
 
     return false;
+}
+
+bool isOccluded(vec3 position3D) {
+    vec3 occCoord = worldToOcclusionCoord(position3D);
+    return isOccludedTexel(ivec3(floor(occCoord)));
 }
 
 vec3 worldToOcclusionCoord(vec3 position3D) {
