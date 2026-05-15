@@ -54,7 +54,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.4.7",
+    VERSION: "0.4.8",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -294,7 +294,8 @@ const GAME = {
         WebGL.setAmbientStrength(0.1);
         WebGL.setDiffuseStrength(0.5);
         //WebGL.HERO_AS_INNER = true;
-        //WebGL.INI.BACKGROUND_ALPHA = 0.0;
+        //WebGL.PRUNE = false;
+        WebGL.INI.BACKGROUND_ALPHA = 0.0;
         WebGL.USE_SHADOW = false;
         WebGL.USE_INTERACTION = false;
         //WebGL.INI.HERO_HEIGHT = 0;
@@ -359,9 +360,9 @@ const GAME = {
         console.warn("HERO.player.poa", HERO.player.pos, "HERO.player.pos.add(INI.SUN_VECTOR)", HERO.player.pos.add(INI.SUN_VECTOR));
 
         GAME.setCameraView();
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
         //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {

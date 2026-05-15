@@ -176,7 +176,8 @@ void main(void) {
     vec3 diffuseFinal = baseColor * max(nonSpecularLight, GLOBAL_AMBIENT);
     vec3 finalColor = diffuseFinal + specularTotal;
 
-    fragColor = vec4(clamp(finalColor, 0.0f, 1.0f), texelColor.a);
+    //fragColor = vec4(clamp(finalColor, 0.0f, 1.0f), texelColor.a);
+    fragColor = texelColor; //de-*fucking-bug
 }
 
 // ----------------------------------------------------------------------------

@@ -97,10 +97,15 @@ const WebGL = {
         SPECULAR_LIGHT_STRENGTH: 5.0,
         BACKGROUND_ALPHA: 1.0,
         SURFACE_WALL_HEIGHT: 1.5,
-        BACKGROUND_DISTANCE: 48,
-        BACKGROUND_BACK_DISTANCE: 10,
-        BACKGROUND_HEIGHT: 40,
-        BACKGROUND_TOP_PAD: 8,
+        BACKGROUND_DISTANCE: 48,  //48
+        BACKGROUND_HEIGHT: 40,    //40
+        BACKGROUND_TOP_PAD: 0, //8
+        BACKGROUND_BACK_DISTANCE: 0,
+        BACKGROUND_BACK_WIDTH: 6,
+        BACKGROUND_BACK_HEIGHT: 3,
+        BACKGROUND_BACK_BOTTOM_OFFSET: 0,
+        BACKGROUND_BACK_LATERAL_SHIFT: 0,
+        FINISH_ARCH_HEIGHT: 1.5,
     },
     CONFIG: {
         firstperson: true,
@@ -152,7 +157,7 @@ const WebGL = {
     texture: null,
     aspect: null,
     zNear: 0.1,
-    zFar: 100,
+    zFar: 512, //100
     projectionMatrix: null,
     vertexCount: null,
     targetTexture: null,
@@ -1075,7 +1080,7 @@ const WebGL = {
         gl.activeTexture(gl.TEXTURE1); // Use texture unit 1
         gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap.texture);
         gl.uniform1i(this.program.uniformLocations.uOcclusionMap, 1);
-        gl.uniform3fv(this.program.uniformLocations.uGridSize,  map.occlusionMap.size);
+        gl.uniform3fv(this.program.uniformLocations.uGridSize, map.occlusionMap.size);
         gl.uniform2fv(this.program.uniformLocations.uOcclusionOrigin, map.occlusionMap.originXZ);
         gl.uniform1f(this.program.uniformLocations.uOcclusionResolution, map.occlusionMap.resolution);
 
@@ -1111,7 +1116,7 @@ const WebGL = {
         gl.activeTexture(gl.TEXTURE1); // Use texture unit 1
         gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap.texture);
         gl.uniform1i(this.model_program.uniforms.uOcclusionMap, 1);
-        gl.uniform3fv(this.model_program.uniforms.uGridSize,  map.occlusionMap.size);
+        gl.uniform3fv(this.model_program.uniforms.uGridSize, map.occlusionMap.size);
         gl.uniform2fv(this.model_program.uniforms.uOcclusionOrigin, map.occlusionMap.originXZ);
         gl.uniform1f(this.model_program.uniforms.uOcclusionResolution, map.occlusionMap.resolution);
 
@@ -2006,13 +2011,15 @@ const WORLD = {
             }
         }
 
+        this.addBackgroundBox(QM);
+        this.addFinishArch(QM);
+
         /** build static decals */
         for (const iam of [...WebGL.staticDecalList, ...WebGL.interactiveDecalList]) {
             for (const decal of iam.POOL) {
-                this.addSurfacePic(decal, map.quadMap, "decal");
+                this.addSurfacePic(decal, QM, "decal");
             }
         }
-
 
         /** map indices */
         {
@@ -2151,7 +2158,229 @@ const WORLD = {
         }
 
         return offset;
-    }
+    },
+    addTexturedQuad(points, type, uv = null, normal = null) {
+        const positions = [
+            points[0].x, points[0].y, points[0].z,
+            points[1].x, points[1].y, points[1].z,
+            points[2].x, points[2].y, points[2].z,
+            points[3].x, points[3].y, points[3].z,
+        ];
+
+        const indices = [0, 1, 2, 0, 2, 3];
+
+        const textureCoordinates = uv || [
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+        ];
+
+        let vertexNormals;
+
+        if (normal) {
+            vertexNormals = [
+                normal.x, normal.y, normal.z,
+                normal.x, normal.y, normal.z,
+                normal.x, normal.y, normal.z,
+                normal.x, normal.y, normal.z,
+            ];
+        } else {
+            vertexNormals = this.calcQuadNormal(positions);
+        }
+
+        this._appendGeometry(type, positions, indices, textureCoordinates, vertexNormals);
+    },
+    calcQuadNormal(positions) {
+        const ax = positions[3] - positions[0];
+        const ay = positions[4] - positions[1];
+        const az = positions[5] - positions[2];
+
+        const bx = positions[6] - positions[0];
+        const by = positions[7] - positions[1];
+        const bz = positions[8] - positions[2];
+
+        let nx = ay * bz - az * by;
+        let ny = az * bx - ax * bz;
+        let nz = ax * by - ay * bx;
+
+        const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1.0;
+
+        nx /= len;
+        ny /= len;
+        nz /= len;
+
+        return [
+            nx, ny, nz,
+            nx, ny, nz,
+            nx, ny, nz,
+            nx, ny, nz,
+        ];
+    },
+    addBackgroundBox(bounds) {
+        const D = WebGL.INI.BACKGROUND_DISTANCE;
+        const BD = WebGL.INI.BACKGROUND_BACK_DISTANCE;
+        const H = WebGL.INI.BACKGROUND_HEIGHT;
+        const TOP_PAD = WebGL.INI.BACKGROUND_TOP_PAD;
+        const BW = WebGL.INI.BACKGROUND_BACK_WIDTH;
+        const BH = WebGL.INI.BACKGROUND_BACK_HEIGHT;
+        const BO = WebGL.INI.BACKGROUND_BACK_BOTTOM_OFFSET;
+        const BS = WebGL.INI.BACKGROUND_BACK_LATERAL_SHIFT;
+
+        const minX = bounds.min.x;
+        const maxX = bounds.max.x;
+        const minLat = bounds.min.y;
+        const maxLat = bounds.max.y;
+        const minHeight = bounds.min.z;
+        const maxHeight = bounds.max.z;
+
+        const xBack = minX - BD;
+        const xFront = maxX + D;
+
+        const zLeft = minLat - D;
+        const zRight = maxLat + D;
+
+        const yBottom = minHeight - 2;
+        const yTop = maxHeight + H + TOP_PAD;
+
+        const startTopNode = bounds.map[0];
+        const startBottomNode = bounds.map[(bounds.H - 1) * bounds.W];
+        const startLeftZ = startTopNode.beforeYTop;
+        const startRightZ = startBottomNode.beforeYBottom;
+        const backCenterZ = (startLeftZ + startRightZ) * 0.5 + BS;
+        const backHalfWidth = BW * 0.5;
+        const backZLeft = backCenterZ - backHalfWidth;
+        const backZRight = backCenterZ + backHalfWidth;
+        const backYBottom = maxHeight + BO;
+        const backYTop = backYBottom + BH;
+
+        /*
+            Coordinate convention:
+                world x = progress
+                world y = vertical
+                world z = lateral
+        */
+
+        // FRONT, at +X
+        this.addTexturedQuad(
+            [
+                new Vector3(xFront, yBottom, zLeft),
+                new Vector3(xFront, yBottom, zRight),
+                new Vector3(xFront, yTop, zRight),
+                new Vector3(xFront, yTop, zLeft),
+            ],
+            "frontPanorama",
+            null,
+            new Vector3(-1, 0, 0)
+        );
+
+        // BACK, near start, at -X
+        this.addTexturedQuad(
+            [
+                new Vector3(xBack, backYBottom, backZRight),
+                new Vector3(xBack, backYBottom, backZLeft),
+                new Vector3(xBack, backYTop, backZLeft),
+                new Vector3(xBack, backYTop, backZRight),
+            ],
+            "backPanorama",
+            null,
+            new Vector3(1, 0, 0)
+        );
+
+        // LEFT side
+        this.addTexturedQuad(
+            [
+                new Vector3(xBack, yBottom, zLeft),
+                new Vector3(xFront, yBottom, zLeft),
+                new Vector3(xFront, yTop, zLeft),
+                new Vector3(xBack, yTop, zLeft),
+            ],
+            "leftPanorama",
+            null,
+            new Vector3(0, 0, 1)
+        );
+
+        // RIGHT side
+        this.addTexturedQuad(
+            [
+                new Vector3(xFront, yBottom, zRight),
+                new Vector3(xBack, yBottom, zRight),
+                new Vector3(xBack, yTop, zRight),
+                new Vector3(xFront, yTop, zRight),
+            ],
+            "rightPanorama",
+            null,
+            new Vector3(0, 0, -1)
+        );
+
+        // SKY
+        this.addTexturedQuad(
+            [
+                new Vector3(xBack, yTop, zLeft),
+                new Vector3(xFront, yTop, zLeft),
+                new Vector3(xFront, yTop, zRight),
+                new Vector3(xBack, yTop, zRight),
+            ],
+            "skyPanorama",
+            null,
+            new Vector3(0, -1, 0)
+        );
+    },
+    addFinishArch(QM) {
+        const cfg = {
+            type: "archPanorama",
+            // rows included in the finish opening
+            rowStart: 0,
+            rowEnd: QM.H - 1,
+            xOffset: 0.0,
+            height: WebGL.INI.FINISH_ARCH_HEIGHT || 1.0,
+            yOffset: 0.0,
+        };
+
+        const W = QM.W;
+        const H = QM.H;
+
+        const rowStart = Math.clamp(cfg.rowStart, 0, H - 1);
+        const rowEnd = Math.clamp(cfg.rowEnd, rowStart, H - 1);
+        const x = W - 1;
+        const topNode = QM.map[rowStart * W + x];
+        const bottomNode = QM.map[rowEnd * W + x];
+
+        /*
+            Final cross-section:
+                X comes from final afterX.
+                Y is OpenGL vertical height, from afterZ.
+                Z is lateral coordinate, from afterYTop/Bottom.
+        */
+
+        const finishX = topNode.afterX + cfg.xOffset;
+        const baseY = Math.min(topNode.afterZ, bottomNode.afterZ) + cfg.yOffset;
+        const topY = baseY + cfg.height;
+        const leftZ = topNode.afterYTop;
+        const rightZ = bottomNode.afterYBottom;
+
+        /*
+            Quad points:
+                0 bottom-left
+                1 bottom-right
+                2 top-right
+                3 top-left
+    
+            Plane faces toward -X, back toward the player approaching from the slope.
+        */
+
+        this.addTexturedQuad(
+            [
+                new Vector3(finishX, baseY, leftZ),
+                new Vector3(finishX, baseY, rightZ),
+                new Vector3(finishX, topY, rightZ),
+                new Vector3(finishX, topY, leftZ),
+            ],
+            cfg.type,
+            null,
+            new Vector3(-1, 0, 0)
+        );
+    },
 };
 
 /** Classes */
@@ -2212,6 +2441,7 @@ class $3D_player {
         this.setMap(map);
         if (size) this.setR(size / 2.0);
         this.setFov();
+        this.rotateToNorth = 0.0;
         this.rotationResolution = 64;
         this.setSpeed(4.0);
         this.parent = parent;
@@ -4224,6 +4454,20 @@ class BoundingBox {
     }
     getRotatedBoundingBoxYTurns(turns = 0) {
         const rot = this.getRotatedYTurns(turns);
+
+        if (!rot) {
+            console.error("Invalid rotated bounding box lookup", {
+                turns,
+                normalized: ((turns % 4) + 4) % 4,
+                isFinite: Number.isFinite(turns),
+                isInteger: Number.isInteger(turns),
+                rotY: this._rotY,
+                bb: this
+            });
+            debugger;
+            throw new TypeError("Invalid rotated bounding box lookup");
+        }
+
         const bb = new BoundingBox(rot.max, rot.min);
         bb.scaled = this.scaled;
         return bb;
@@ -4232,7 +4476,6 @@ class BoundingBox {
         if (!this._rotY) this._buildRotYCache();
         return this._rotY[((turns % 4) + 4) % 4];
     }
-
     getRotatedYRad(rad = 0) {
         return this.getRotatedYTurns(BoundingBox.radToTurns(rad));
     }
