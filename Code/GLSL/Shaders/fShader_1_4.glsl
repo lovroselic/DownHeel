@@ -4,6 +4,7 @@
 * v1.4 (patched)
 * DownHeel - specular fixes
 * debugging functions removed, check 1.3 or earlier for them
+* flexible occlusion map
 */
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -50,6 +51,8 @@ uniform Material uMaterial;
 
 uniform sampler3D uOcclusionMap;
 uniform vec3 uGridSize;
+uniform vec2 uOcclusionOrigin;                                   // world X/Z origin of the occlusion texture
+uniform float uOcclusionResolution;                              // texels per world unit
 
 uniform float innerAmbientStrength;
 uniform float innerDiffuseStrength;
@@ -121,8 +124,9 @@ vec3 CalcLight(
 );
 
 bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination);
-bool isOccluded(vec3 position3D);
 bool isOmniDirectional(vec3 dir);
+vec3 worldToOcclusionCoord(vec3 position3D);
+bool isOccludedTexel(ivec3 texel);
 
 // ----------------------------------------------------------------------------
 
@@ -314,20 +318,35 @@ vec3 CalcLight(
 // -------------------------- Raycasting / occlusion --------------------------
 
 bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
-    vec3 direction = rayTarget3D - rayOrigin3D;
+    vec3 worldDirection = rayTarget3D - rayOrigin3D;
+    float worldDirLen = length(worldDirection);
+
+    if (worldDirLen < EPSILON)
+        return false;
+
+    vec3 worldDirNorm = worldDirection / worldDirLen;
+
+    float occResolution = max(uOcclusionResolution, 1.0f);
+    float occCellWorldSize = 1.0f / occResolution;
+
+    // Bias in WORLD units, scaled by occlusion texel size.
+    vec3 biasedOriginWorld = rayOrigin3D + worldDirNorm * RAY_ORIGIN_BIAS * occCellWorldSize;
+    vec3 biasedTargetWorld = rayTarget3D - worldDirNorm * INTO_WALL * occCellWorldSize;
+
+    // Convert to OCCLUSION TEXTURE coordinates.
+    vec3 rayOriginOcc = worldToOcclusionCoord(biasedOriginWorld);
+    vec3 rayTargetOcc = worldToOcclusionCoord(biasedTargetWorld);
+
+    vec3 direction = rayTargetOcc - rayOriginOcc;
     float dirLen = length(direction);
+
     if (dirLen < EPSILON)
         return false;
 
-    vec3 dirNorm = direction / dirLen;
     vec3 step = vec3(direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f), direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f), direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f));
-    float illumination2 = (illumination + EPSILON) * (illumination + EPSILON);
 
-    vec3 cellTarget = floor(rayTarget3D - dirNorm * INTO_WALL * illumination2);                         // pull back continuously
-
-    // walk cells
-    rayOrigin3D = rayOrigin3D + dirNorm * RAY_ORIGIN_BIAS;
-    vec3 currentCell = floor(rayOrigin3D);
+    vec3 currentCell = floor(rayOriginOcc);
+    vec3 cellTarget = floor(rayTargetOcc);
 
     const float INF = 1e30f;
     vec3 tDelta = vec3(INF);
@@ -336,31 +355,32 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     // X axis
     if (step.x != 0.0f) {
         tDelta.x = 1.0f / abs(direction.x);
-        float nextBoundaryX = (step.x > 0.0f) ? (floor(rayOrigin3D.x) + 1.0f) : floor(rayOrigin3D.x);
-        tMax.x = abs((nextBoundaryX - rayOrigin3D.x) / direction.x);
+        float nextBoundaryX = (step.x > 0.0f) ? (floor(rayOriginOcc.x) + 1.0f) : floor(rayOriginOcc.x);
+        tMax.x = abs((nextBoundaryX - rayOriginOcc.x) / direction.x);
     }
 
-    // Y axis
+    // Y axis, this is occlusion texture Y, usually world Z.
     if (step.y != 0.0f) {
         tDelta.y = 1.0f / abs(direction.y);
-        float nextBoundaryY = (step.y > 0.0f) ? (floor(rayOrigin3D.y) + 1.0f) : floor(rayOrigin3D.y);
-        tMax.y = abs((nextBoundaryY - rayOrigin3D.y) / direction.y);
+        float nextBoundaryY = (step.y > 0.0f) ? (floor(rayOriginOcc.y) + 1.0f) : floor(rayOriginOcc.y);
+        tMax.y = abs((nextBoundaryY - rayOriginOcc.y) / direction.y);
     }
 
-    // Z axis
+    // Z axis, only meaningful for true 3D occlusion maps.
     if (step.z != 0.0f) {
         tDelta.z = 1.0f / abs(direction.z);
-        float nextBoundaryZ = (step.z > 0.0f) ? (floor(rayOrigin3D.z) + 1.0f) : floor(rayOrigin3D.z);
-        tMax.z = abs((nextBoundaryZ - rayOrigin3D.z) / direction.z);
+        float nextBoundaryZ = (step.z > 0.0f) ? (floor(rayOriginOcc.z) + 1.0f) : floor(rayOriginOcc.z);
+        tMax.z = abs((nextBoundaryZ - rayOriginOcc.z) / direction.z);
     }
 
     for (int i = 0; i < MAX_STEPS; i++) {
-        if (isOccluded(currentCell)) {
-            return true;
-        }
-
+        // Do not let the destination texel shadow itself.
         if (all(equal(currentCell, cellTarget))) {
             return false;
+        }
+
+        if (isOccludedTexel(ivec3(currentCell))) {
+            return true;
         }
 
         if (tMax.x <= tMax.y && tMax.x <= tMax.z) {
@@ -378,11 +398,31 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     return false;
 }
 
-bool isOccluded(vec3 position3D) {
-    ivec3 cell = ivec3(floor(position3D));
+vec3 worldToOcclusionCoord(vec3 position3D) {
+    float occResolution = max(uOcclusionResolution, 1.0f);
 
-    // swap y/z to match texture layout
-    ivec3 texel = ivec3(cell.x, cell.z, cell.y);
+    // Shared mapping:
+    // world X -> texture X
+    // world Z -> texture Y
+    vec2 texXY = (vec2(position3D.x, position3D.z) - uOcclusionOrigin) * occResolution;
+
+    // depth == 1:
+    //   2.5D zMap/heightmap-style occlusion.
+    //   Texture Z is always 0.
+    //
+    // depth > 1:
+    //   Old 3D-grid layout:
+    //   world Y -> texture Z.
+    float texZ = 0.0f;
+
+    if (uGridSize.z > 1.5f) {
+        texZ = position3D.y * occResolution;
+    }
+
+    return vec3(texXY.x, texXY.y, texZ);
+}
+
+bool isOccludedTexel(ivec3 texel) {
     ivec3 size = ivec3(uGridSize);
 
     if (any(lessThan(texel, ivec3(0))) || any(greaterThanEqual(texel, size))) {

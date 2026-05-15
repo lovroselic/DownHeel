@@ -785,7 +785,9 @@ const WebGL = {
                 uMaterialMetallic: gl.getUniformLocation(this[prog].program, 'uMaterial.metallic'),
                 uMaterialFresnelStrength: gl.getUniformLocation(this[prog].program, 'uMaterial.fresnelStrength'),
                 uOcclusionMap: gl.getUniformLocation(this[prog].program, "uOcclusionMap"),
-                uGridSize: gl.getUniformLocation(this[prog].program, "uGridSize")
+                uGridSize: gl.getUniformLocation(this[prog].program, "uGridSize"),
+                uOcclusionOrigin: gl.getUniformLocation(this[prog].program, "uOcclusionOrigin"),
+                uOcclusionResolution: gl.getUniformLocation(this[prog].program, "uOcclusionResolution"),
             };
 
             if (this.VERBOSE) {
@@ -902,6 +904,8 @@ const WebGL = {
                 uMaterialFresnelStrength: gl.getUniformLocation(shaderProgram, 'uMaterial.fresnelStrength'),
                 uOcclusionMap: gl.getUniformLocation(shaderProgram, "uOcclusionMap"),
                 uGridSize: gl.getUniformLocation(shaderProgram, "uGridSize"),
+                uOcclusionOrigin: gl.getUniformLocation(shaderProgram, "uOcclusionOrigin"),
+                uOcclusionResolution: gl.getUniformLocation(shaderProgram, "uOcclusionResolution"),
                 innerAmbientStrength: gl.getUniformLocation(shaderProgram, "innerAmbientStrength"),
                 innerDiffuseStrength: gl.getUniformLocation(shaderProgram, "innerDiffuseStrength"),
                 innerSpecularStrength: gl.getUniformLocation(shaderProgram, "innerSpecularStrength"),
@@ -1069,9 +1073,11 @@ const WebGL = {
 
         //3D occlusion map 
         gl.activeTexture(gl.TEXTURE1); // Use texture unit 1
-        gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap);
+        gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap.texture);
         gl.uniform1i(this.program.uniformLocations.uOcclusionMap, 1);
-        gl.uniform3fv(this.program.uniformLocations.uGridSize, new Float32Array([map.width, map.height, map.depth]));
+        gl.uniform3fv(this.program.uniformLocations.uGridSize,  map.occlusionMap.size);
+        gl.uniform2fv(this.program.uniformLocations.uOcclusionOrigin, map.occlusionMap.originXZ);
+        gl.uniform1f(this.program.uniformLocations.uOcclusionResolution, map.occlusionMap.resolution);
 
         //defaults that can be changed
         gl.uniform1f(this.program.uniformLocations.innerAmbientStrength, this.ambient_light_strength);
@@ -1101,12 +1107,13 @@ const WebGL = {
         gl.uniform1f(this.model_program.uniforms.uMaterialMetallic, MATERIAL.wall.metallic);
         gl.uniform1f(this.model_program.uniforms.uMaterialFresnelStrength, MATERIAL.wall.fresnelStrength);
 
-
         //3D occlusion map for models
         gl.activeTexture(gl.TEXTURE1); // Use texture unit 1
-        gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap);
+        gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap.texture);
         gl.uniform1i(this.model_program.uniforms.uOcclusionMap, 1);
-        gl.uniform3fv(this.model_program.uniforms.uGridSize, new Float32Array([map.width, map.height, map.depth]));
+        gl.uniform3fv(this.model_program.uniforms.uGridSize,  map.occlusionMap.size);
+        gl.uniform2fv(this.model_program.uniforms.uOcclusionOrigin, map.occlusionMap.originXZ);
+        gl.uniform1f(this.model_program.uniforms.uOcclusionResolution, map.occlusionMap.resolution);
 
         /** PICK */
         //pickProgram uniforms and defaults
@@ -1169,7 +1176,7 @@ const WebGL = {
 
         // Bind occlusion map
         gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap);
+        gl.bindTexture(gl.TEXTURE_3D, map.occlusionMap.texture);
 
         this.enableAttributes(gl);
 

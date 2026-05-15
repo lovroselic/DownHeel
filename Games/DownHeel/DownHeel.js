@@ -48,13 +48,13 @@ const INI = {
     SCREEN_BORDER: 256,
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
-    SUN_VECTOR: Vector3.from_array([-0.5, 50, 0]),
+    SUN_VECTOR: Vector3.from_array([0, 50, 0]),
     //SUN_VECTOR: Vector3.from_array([-0.5, 10, 0]),
     HERO_HEIGHT: 0.15,
 };
 
 const PRG = {
-    VERSION: "0.4.5",
+    VERSION: "0.4.6",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -245,6 +245,7 @@ const HERO = {
         //assuming single sun
         const sun = SUN3D.POOL[0];
         sun.pos = this.player.pos.add(INI.SUN_VECTOR);
+        //console.info("sun.pos", sun.pos);
     },
 };
 
@@ -355,12 +356,12 @@ const GAME = {
         //console.warn("HERO.height + z", HERO.height, HERO.height + z, z);
         start_grid = new Vector3(start_grid.x, HERO.height + z, start_grid.y);
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
-        //console.warn("HERO.player.heigth", HERO.player.heigth);
+        console.warn("HERO.player.poa", HERO.player.pos, "HERO.player.pos.add(INI.SUN_VECTOR)", HERO.player.pos.add(INI.SUN_VECTOR));
 
         GAME.setCameraView();
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.sun);
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.scaleVec3(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
@@ -481,7 +482,7 @@ const GAME = {
             const map = MAP[GAME.level].map;
             ENGINE.BLOCKGRID3D.draw(map, HERO.player.depth);
             GRID.paintCoord3D("coord", MAP[GAME.level].map, HERO.player.depth);
-            WebGL.visualizeTexture3DSlice(map.occlusionMap, map.zMap1.xSize, map.zMap1.ySize, 1, 0, LAYER.debug); //debug
+            WebGL.visualizeTexture3DSlice(map.occlusionMap.texture, map.zMap1.xSize, map.zMap1.ySize, 1, 0, LAYER.debug); //debug
         }
     },
     drawPlayer() {

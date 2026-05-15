@@ -129,15 +129,24 @@ const MAP_TOOLS = {
         const GA = this.MAP[level].map.GA;
         const map = this.MAP[level].map;
         if (map.zMap1) {
-            //console.error(map.zMap1, map.zMap1.sizeX, map.zMap1.sizeY);
             map.textureMap = QUAD_MAP.toTextureMap(map.zMap1);
-            map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.zMap1.xSize, map.zMap1.ySize, 1);
-
-            //throw "here";
+            const texture = WebGL.createOcclusionTexture3D(map.textureMap, map.zMap1.xSize, map.zMap1.ySize, 1);
+            map.occlusionMap = {
+                texture: texture,
+                originXZ: new Float32Array([map.zMap1.minX, map.zMap1.minY]),
+                resolution: map.zMap1.TR,
+                size: new Float32Array([map.zMap1.xSize, map.zMap1.ySize, 1])
+            }
 
         } else {
             map.textureMap = GA.toTextureMap();
-            map.occlusionMap = WebGL.createOcclusionTexture3D(map.textureMap, map.width, map.height, map.depth);
+            const texture = WebGL.createOcclusionTexture3D(map.textureMap, map.width, map.height, map.depth);
+            map.occlusionMap = {
+                texture: texture,
+                originXZ: new Float32Array([0, 0]),
+                resolution: 1,
+                size: new Float32Array([map.width, map.height, map.depth])
+            }
         }
     },
 
