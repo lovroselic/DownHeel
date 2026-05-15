@@ -2235,6 +2235,7 @@ const WORLD = {
         const maxHeight = bounds.max.z;
 
         const xBack = minX - BD;
+        const xBack2 = minX - D;
         const xFront = maxX + D;
 
         const zLeft = minLat - D;
@@ -2274,7 +2275,7 @@ const WORLD = {
             new Vector3(-1, 0, 0)
         );
 
-        // BACK, near start, at -X
+        // BACK1, near start, at -X
         this.addTexturedQuad(
             [
                 new Vector3(xBack, backYBottom, backZRight),
@@ -2287,13 +2288,26 @@ const WORLD = {
             new Vector3(1, 0, 0)
         );
 
+        // BACK2, further than BACK
+        this.addTexturedQuad(
+            [
+                new Vector3(xBack2, yBottom, zRight),
+                new Vector3(xBack2, yBottom, zLeft),
+                new Vector3(xBack2, yTop, zLeft),
+                new Vector3(xBack2, yTop, zRight),
+            ],
+            "backPanorama",
+            null,
+            new Vector3(1, 0, 0)
+        );
+
         // LEFT side
         this.addTexturedQuad(
             [
-                new Vector3(xBack, yBottom, zLeft),
+                new Vector3(xBack2, yBottom, zLeft),
                 new Vector3(xFront, yBottom, zLeft),
                 new Vector3(xFront, yTop, zLeft),
-                new Vector3(xBack, yTop, zLeft),
+                new Vector3(xBack2, yTop, zLeft),
             ],
             "leftPanorama",
             null,
@@ -2304,8 +2318,8 @@ const WORLD = {
         this.addTexturedQuad(
             [
                 new Vector3(xFront, yBottom, zRight),
-                new Vector3(xBack, yBottom, zRight),
-                new Vector3(xBack, yTop, zRight),
+                new Vector3(xBack2, yBottom, zRight),
+                new Vector3(xBack2, yTop, zRight),
                 new Vector3(xFront, yTop, zRight),
             ],
             "rightPanorama",
@@ -2316,14 +2330,27 @@ const WORLD = {
         // SKY
         this.addTexturedQuad(
             [
-                new Vector3(xBack, yTop, zLeft),
+                new Vector3(xBack2, yTop, zLeft),
                 new Vector3(xFront, yTop, zLeft),
                 new Vector3(xFront, yTop, zRight),
-                new Vector3(xBack, yTop, zRight),
+                new Vector3(xBack2, yTop, zRight),
             ],
             "skyPanorama",
             null,
             new Vector3(0, -1, 0)
+        );
+
+        // floor
+        this.addTexturedQuad(
+            [
+                new Vector3(xBack2, yBottom, zLeft),
+                new Vector3(xFront, yBottom, zLeft),
+                new Vector3(xFront, yBottom, zRight),
+                new Vector3(xBack2, yBottom, zRight),
+            ],
+            "floor",
+            null,
+            new Vector3(0, 1, 0)
         );
     },
     addFinishArch(QM) {
