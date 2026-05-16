@@ -914,6 +914,7 @@ const WebGL = {
                 innerAmbientStrength: gl.getUniformLocation(shaderProgram, "innerAmbientStrength"),
                 innerDiffuseStrength: gl.getUniformLocation(shaderProgram, "innerDiffuseStrength"),
                 innerSpecularStrength: gl.getUniformLocation(shaderProgram, "innerSpecularStrength"),
+                uUnlitTexture: gl.getUniformLocation(shaderProgram, "uUnlitTexture"),
             },
         };
 
@@ -1175,6 +1176,13 @@ const WebGL = {
         gl.vertexAttribPointer(this.pickProgram.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.pickProgram.attribLocations.vertexPosition);
     },
+    drawTexturedRange(type, texture, unlit = false) {
+        const gl = this.CTX;
+
+        gl.uniform1i(this.program.uniformLocations.uUnlitTexture, unlit ? 1 : 0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.drawElements(gl.TRIANGLES, this.world.offset[`${type}_count`], gl.UNSIGNED_SHORT, this.world.offset[`${type}_start`] * 2);
+    },
     renderDungeon(map) {
         const gl = this.CTX;
         gl.useProgram(this.program.program);
@@ -1189,47 +1197,22 @@ const WebGL = {
         gl.useProgram(this.program.program);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        /**  draw per slice of the world  */
-        gl.activeTexture(gl.TEXTURE0);
-
-        //wall
-        gl.drawElements(gl.TRIANGLES, this.world.offset.wall_count, gl.UNSIGNED_SHORT, this.world.offset.wall_start * 2);
-
-        //floor
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.floor);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.floor_count, gl.UNSIGNED_SHORT, this.world.offset.floor_start * 2);
+        /**  draw per slice/buffer type of the world  */
+   
+        this.drawTexturedRange("wall", this.texture.wall, false);
+        this.drawTexturedRange("floor", this.texture.floor, false);
 
         //ceil
         if (this.CONFIG.firstperson && this.texture.ceil) {
-            gl.bindTexture(gl.TEXTURE_2D, this.texture.ceil);
-            gl.drawElements(gl.TRIANGLES, this.world.offset.ceil_count, gl.UNSIGNED_SHORT, this.world.offset.ceil_start * 2);
+             this.drawTexturedRange("ceil", this.texture.ceil, false);
         }
 
-        //frontPanorama
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.frontPanorama);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.frontPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.frontPanorama_start * 2);
-
-        //leftPanorama
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.leftPanorama);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.leftPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.leftPanorama_start * 2);
-
-        //rightPanorama
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.rightPanorama);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.rightPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.rightPanorama_start * 2);
-
-        //backPanorama
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.backPanorama);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.backPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.backPanorama_start * 2);
-
-        //skyPanorama
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.skyPanorama);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.skyPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.skyPanorama_start * 2);
-
-        //archPanorama
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.archPanorama);
-        gl.drawElements(gl.TRIANGLES, this.world.offset.archPanorama_count, gl.UNSIGNED_SHORT, this.world.offset.archPanorama_start * 2);
-
-
+        this.drawTexturedRange("archPanorama", this.texture.archPanorama, false);
+        this.drawTexturedRange("frontPanorama", this.texture.frontPanorama, true);
+        this.drawTexturedRange("leftPanorama", this.texture.leftPanorama, true);
+        this.drawTexturedRange("rightPanorama", this.texture.rightPanorama, true);
+        this.drawTexturedRange("backPanorama", this.texture.backPanorama, true);
+        this.drawTexturedRange("skyPanorama", this.texture.skyPanorama, true);
 
         //static decals
         let decalCount = 0;

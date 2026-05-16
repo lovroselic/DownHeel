@@ -58,6 +58,8 @@ uniform float innerAmbientStrength;
 uniform float innerDiffuseStrength;
 uniform float innerSpecularStrength;
 
+uniform bool uUnlitTexture;                         //returns just texel colour
+
 in vec3 FragPos;                                    // WORLD space 
 in vec3 v_normal;                                   // WORLD space 
 in vec2 vTextureCoord;
@@ -135,6 +137,11 @@ void main(void) {
     vec4 texelColor = texture(uSampler, vTextureCoord);
     if (texelColor.a < IGNORE_ALPHA)
         discard;
+
+    if (uUnlitTexture) {
+        fragColor = texelColor;
+        return;
+    }
 
     vec3 baseColor = texelColor.rgb;
 
@@ -328,11 +335,7 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
 
     vec3 dirNorm = direction / dirLen;
 
-    vec3 step = vec3(
-        direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f),
-        direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f),
-        direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f)
-    );
+    vec3 step = vec3(direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f), direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f), direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f));
 
     // Pull target slightly back so the destination cell does not shadow itself.
     vec3 cellTarget = floor(rayTarget3D - dirNorm * INTO_WALL);
@@ -348,9 +351,7 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     // X axis
     if (step.x != 0.0f) {
         tDelta.x = 1.0f / abs(direction.x);
-        float nextBoundaryX = (step.x > 0.0f)
-            ? floor(rayOrigin3D.x) + 1.0f
-            : floor(rayOrigin3D.x);
+        float nextBoundaryX = (step.x > 0.0f) ? floor(rayOrigin3D.x) + 1.0f : floor(rayOrigin3D.x);
 
         tMax.x = abs((nextBoundaryX - rayOrigin3D.x) / direction.x);
     }
@@ -358,9 +359,7 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     // Y axis, world height
     if (step.y != 0.0f) {
         tDelta.y = 1.0f / abs(direction.y);
-        float nextBoundaryY = (step.y > 0.0f)
-            ? floor(rayOrigin3D.y) + 1.0f
-            : floor(rayOrigin3D.y);
+        float nextBoundaryY = (step.y > 0.0f) ? floor(rayOrigin3D.y) + 1.0f : floor(rayOrigin3D.y);
 
         tMax.y = abs((nextBoundaryY - rayOrigin3D.y) / direction.y);
     }
@@ -368,9 +367,7 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     // Z axis, world map-width direction
     if (step.z != 0.0f) {
         tDelta.z = 1.0f / abs(direction.z);
-        float nextBoundaryZ = (step.z > 0.0f)
-            ? floor(rayOrigin3D.z) + 1.0f
-            : floor(rayOrigin3D.z);
+        float nextBoundaryZ = (step.z > 0.0f) ? floor(rayOrigin3D.z) + 1.0f : floor(rayOrigin3D.z);
 
         tMax.z = abs((nextBoundaryZ - rayOrigin3D.z) / direction.z);
     }
