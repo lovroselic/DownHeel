@@ -56,7 +56,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.4.2",
+    VERSION: "0.4.3",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -114,76 +114,290 @@ const HERO = {};
 const GAME = {
     floor: 0,
     start() {
-        WebGL.setContext('webgl');
+        WebGL.setContext("webgl");
+
         $MAP.properties = MAP_TOOLS.properties;
         $MAP.lists = MAP_TOOLS.lists;
+
         $("#bottom")[0].scrollIntoView();
+
         ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");
         $(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, GAME.mouseClick);
-        GAME.init();
-        GAME.started = true;
+
         GAME.level = "Demo";
+        GAME.loadLevel(GAME.level);
+
+        GAME.started = false;
 
         WebGL.PRUNE = false;
         WebGL.HERO_AS_INNER = true;
         WebGL.INI.BACKGROUND_ALPHA = 0.0;
         WebGL.USE_SHADOW = false;
 
+        GAME.render(false);
+        GAME.started = true;
         GAME.levelStart();
     },
-    levelStart() {
-        GAME.initLevel(GAME.level);
-        WebGL.GAME.setFirstPerson();
-        console.info(" ---- before levelStart", $MAP.map, MAP[GAME.level].map);
-        $MAP.map.occlusionMap = MAP[GAME.level].map.occlusionMap;
-        WebGL.renderScene($MAP.map);
-    },
-    newDungeon(level) {
-        MAP_TOOLS.unpack(level);
-    },
-    buildWorld(level) {
-        console.warn("building world, level", level);
-        MAP[level].world = WORLD.build(MAP[level].map);
-
-        if ($MAP.map.zMap1) {
-            MAP[GAME.level].map.zMap1 = $MAP.map.zMap1;
-        } {
-            $MAP.map.zMap1 = QUAD_MAP.create_zMap(QUAD_MAP.create($MAP.map.GA, MAP[GAME.level].terrain), $MAP.map.GA, 1);
-             MAP[GAME.level].map.zMap1 = $MAP.map.zMap1;
+    setStartPositionFromStart(map = GAME.activeMap()) {
+        if (!map || !map.GA) {
+            throw new Error("setStartPositionFromStart: missing map/GA");
         }
 
+        if (!Array.isArray(map.start) || map.start.length < 2) {
+            throw new Error("setStartPositionFromStart: map.start missing or invalid");
+        }
 
+        map.startPosition = new Pointer_3DGrid(
+            map.GA.indexToGrid(map.start[0]),
+            Vector.fromInt(map.start[1])
+        );
 
-        console.log("--------------buildWorld:: MAP[GAME.level].map.zMap1", MAP[GAME.level].map.zMap1);
-        SPAWN_TOOLS.spawn(level);
-        //$MAP.map.textureMap = $MAP.map.GA.toTextureMap();
+        return map.startPosition;
     },
-    setWorld(level, decalsAreSet = false) {
+    activeMap() {
+        return $MAP.map;
+    },
+    syncLegacyLevel(level = GAME.level, map = GAME.activeMap()) {
+        if (!level) level = "Demo";
+        if (!MAP[level]) {
+            MAP[level] = {
+                name: "TrackBuilder scratch level"
+            };
+        }
+
+        MAP[level].map = map;
+        MAP[level].world = map.world || null;
+        return map;
+    },
+    ensureMapArrays(map = GAME.activeMap()) {
+        if (!map) throw new Error("ensureMapArrays: missing map");
+
+        for (const prop of ($MAP.properties || [])) {
+            if (!Array.isArray(map[prop])) map[prop] = [];
+        }
+
+        for (const list of ($MAP.lists || [])) {
+            if (!Array.isArray(map[list])) map[list] = [];
+        }
+
+        return map;
+    },
+    adoptMap(map, level = GAME.level) {
+        if (!map || !map.GA) {
+            throw new Error("adoptMap: expected a map with GA");
+        }
+
+        $MAP.map = map;
+        $MAP.width = map.GA.width;
+        $MAP.height = map.GA.height;
+        $MAP.depth = map.GA.depth || 1;
+
+        $("#horizontalGrid").val($MAP.width);
+        $("#verticalGrid").val($MAP.height);
+
+        GAME.ensureMapArrays(map);
+        GAME.ensureTerrain();
+        GAME.syncLegacyLevel(level, map);
+
+        return map;
+    },
+    loadLevel(level) {
+        GAME.level = level;
+        MAP_TOOLS.unpack(level);
+
+        if (!MAP[level] || !MAP[level].map) {
+            throw new Error(`loadLevel: MAP[${level}].map was not created by MAP_TOOLS.unpack`);
+        }
+
+        const map = GAME.adoptMap(MAP[level].map, level);
+
+        if (!map.terrain && MAP[level].terrain) {
+            map.terrain = typeof MAP[level].terrain === "string"
+                ? JSON.parse(MAP[level].terrain)
+                : MAP[level].terrain;
+        }
+
+        GAME.ensureTerrain();
+
+        if (map.terrain.direction?.parameters &&
+            map.terrain.width?.parameters &&
+            map.terrain.slope?.parameters) {
+            NOISE_FUNCTION.writeParsToForm();
+        } else {
+            NOISE_FUNCTION.generate_terrain();
+        }
+
+        return map;
+    },
+    levelStart() {
+        const map = GAME.activeMap();
+        if (!map || !map.GA) throw new Error("levelStart: no active $MAP.map");
+        GAME.initLevel(GAME.level);
+        if (WebGL.GAME?.setFirstPerson) WebGL.GAME.setFirstPerson();
+
+        GAME.assertRenderableMap(map);
+        console.table({
+            sameMap: $MAP.map === MAP[GAME.level].map,
+            hasGA: !!$MAP.map.GA,
+            hasQuadMap: !!$MAP.map.quadMap,
+            hasZMap1: !!$MAP.map.zMap1,
+            hasWorld: !!$MAP.map.world,
+            hasOcclusionMap: !!$MAP.map.occlusionMap,
+            hasOcclusionTexture: !!$MAP.map.occlusionMap?.texture,
+            occlusionResolution: $MAP.map.occlusionMap?.resolution,
+            occlusionSize: Array.from($MAP.map.occlusionMap?.size || []),
+            occlusionOriginXZ: Array.from($MAP.map.occlusionMap?.originXZ || []),
+        });
+        WebGL.renderScene(map);
+    },
+    initLevel(level) {
+        const map = GAME.activeMap();
+
+        GAME.syncLegacyLevel(level, map);
+        GAME.ensureMapArrays(map);
+        GAME.ensureTerrain();
+
+        if (!map.startPosition) {
+            GAME.setStartPositionFromStart(map);
+        }
+
+        const start_dir = map.startPosition.vector;
+        let start_grid = map.startPosition.grid;
+
+        start_grid = Vector3.from_Grid(Grid.toCenter(start_grid), 0.6);
+
+        HERO.player = new $3D_player(
+            start_grid,
+            Vector3.from_2D_dir(start_dir),
+            map,
+            HERO_TYPE.ThePrincess
+        );
+
+        WebGL.CONFIG.set("first_person", false);
+
+        WebGL.init_required_IAM(map, HERO, GAME);
+
+        if (typeof SPAWN_TOOLS !== "undefined" && SPAWN_TOOLS.spawn) {
+            SPAWN_TOOLS.spawn(level);
+        }
+
+        GAME.setCameraView();
+        GAME.buildWorld(level, map);
+        GAME.setWorld(map);
+
+        console.info("GAME init completed", map);
+    },
+    buildWorld(level = GAME.level, map = GAME.activeMap()) {
+        console.warn("building world", { level, map });
+
+        GAME.syncLegacyLevel(level, map);
+        GAME.renderQuadMap(false);
+        GAME.rebuildOcclusionMap(map);
+
+        if (WORLD.buildSurfaceBasedWorld) {
+            map.world = WORLD.buildSurfaceBasedWorld(map);
+        } else {
+            map.world = WORLD.build(map);
+        }
+
+        MAP[level].world = map.world;
+
+        return map.world;
+    },
+    setWorld(map = GAME.activeMap(), decalsAreSet = false) {
         console.log("setting world");
         console.time("setWorld");
 
         const textureData = {
             wall: TEXTURE[$("#walltexture")[0].value],
             floor: TEXTURE[$("#floortexture")[0].value],
+            frontPanorama: TEXTURE[$("#frontPanorama")[0].value],
+            leftPanorama: TEXTURE[$("#leftPanorama")[0].value],
+            rightPanorama: TEXTURE[$("#rightPanorama")[0].value],
+            backPanorama: TEXTURE[$("#backPanorama")[0].value],
+            archPanorama: TEXTURE[$("#archPanorama")[0].value],
+            skyPanorama: TEXTURE[$("#skyPanorama")[0].value],
         };
 
         WebGL.updateShaders();
-        WebGL.init('webgl', MAP[level].world, textureData, HERO.player, decalsAreSet);
+        WebGL.init("webgl", map.world, textureData, WebGL.camera || HERO.player, decalsAreSet);
+
         console.timeEnd("setWorld");
     },
-    initLevel(level) {
-        this.newDungeon(level);
-        const start_dir = MAP[level].map.startPosition.vector;
-        let start_grid = MAP[level].map.startPosition.grid;
-        start_grid = Vector3.from_Grid(Grid.toCenter(start_grid), 0.6);
-        HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
-        WebGL.CONFIG.set("first_person", false);
+    renderQuadMap(paint = true) {
+        const map = GAME.activeMap();
 
-        WebGL.init_required_IAM($MAP.map, HERO);
-        GAME.setCameraView();
-        this.buildWorld(level);
-        this.setWorld(level);
-        console.info("GAME init completed");
+        if (!map || !map.GA) {
+            throw new Error("renderQuadMap: no active map/GA");
+        }
+
+        GAME.ensureTerrain();
+
+        const GA = map.GA;
+        const QM = QUAD_MAP.create(GA, map.terrain);
+
+        map.quadMap = QM;
+        map.zMap = QUAD_MAP.create_zMap(QM, GA);
+        map.zMap1 = QUAD_MAP.create_zMap(QM, GA, 1);
+
+        if (paint) {
+            QUAD_MAP.paintTopDown(QM, "surface");
+            QUAD_MAP.paintSideSlope(QM, "sideslope");
+            QUAD_MAP.paintZMap(map.zMap, "zmap");
+        }
+
+        return QM;
+    },
+    rebuildOcclusionMap(map = GAME.activeMap()) {
+        if (!map || !map.zMap1) {
+            throw new Error("rebuildOcclusionMap: map.zMap1 missing");
+        }
+
+        const zMap = map.zMap1;
+        const pixelData = QUAD_MAP.toTextureMap(zMap);
+
+        // Shader layout:
+        // texture X = world X
+        // texture Y = world Z / lateral zMap axis
+        // texture Z = world Y layer, fixed to 0 for 2.5D DownHeel maps
+        const texWidth = POT(zMap.xSize);
+        const texHeight = POT(zMap.ySize);
+        const texDepth = 1;
+
+        if (map.occlusionMap?.texture && WebGL.CTX) {
+            WebGL.CTX.deleteTexture(map.occlusionMap.texture);
+        }
+
+        map.textureMap = pixelData;
+
+        map.occlusionMap = {
+            texture: WebGL.createOcclusionTexture3D(
+                pixelData,
+                texWidth,
+                texHeight,
+                texDepth
+            ),
+            size: new Float32Array([texWidth, texHeight, texDepth]),
+            originXZ: new Float32Array([zMap.minX, zMap.minY]),
+            resolution: zMap.resolution,
+            zMap: zMap,
+        };
+
+        return map.occlusionMap;
+    },
+    assertRenderableMap(map = GAME.activeMap()) {
+        if (!map) throw new Error("render map missing");
+        if (!map.GA) throw new Error("render map missing GA");
+        if (!map.quadMap) throw new Error("render map missing quadMap");
+        if (!map.zMap1) throw new Error("render map missing zMap1");
+        if (!map.world) throw new Error("render map missing world");
+        if (!map.occlusionMap) throw new Error("render map missing occlusionMap");
+        if (!map.occlusionMap.texture) throw new Error("render map occlusionMap missing texture");
+        if (!map.occlusionMap.size) throw new Error("render map occlusionMap missing size");
+        if (!map.occlusionMap.originXZ) throw new Error("render map occlusionMap missing originXZ");
+        if (!Number.isFinite(map.occlusionMap.resolution)) {
+            throw new Error("render map occlusionMap has invalid resolution");
+        }
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
@@ -432,23 +646,24 @@ const GAME = {
         $("#crest_decal").val(pic).change();
         ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
     },
-    updateTextures() {
+    updateTextures(restart = true) {
         console.error(" ----------------------------- updateTextures -------------------------------");
-        //textures
+
         const wallTexture = TEXTURE[$("#walltexture")[0].value];
         const floorTexture = TEXTURE[$("#floortexture")[0].value];
         const textureTexture = TEXTURE[$("#texture_decal")[0].value];
+
         ENGINE.resizeAndFill(LAYER.wallcanvas, wallTexture, 320);
         ENGINE.resizeAndFill(LAYER.floorcanvas, floorTexture, 320);
         ENGINE.resizeAndFill(LAYER.texturecanvas, textureTexture, INI.CANVAS_RESOLUTION);
 
-        //panorama
         const frontPanorama = TEXTURE[$("#frontPanorama")[0].value];
         const leftPanorama = TEXTURE[$("#leftPanorama")[0].value];
         const rightPanorama = TEXTURE[$("#rightPanorama")[0].value];
         const backPanorama = TEXTURE[$("#backPanorama")[0].value];
         const archPanorama = TEXTURE[$("#archPanorama")[0].value];
         const skyPanorama = TEXTURE[$("#skyPanorama")[0].value];
+
         ENGINE.resizeAndFill(LAYER.frontPanoramaCanvas, frontPanorama, 320);
         ENGINE.resizeAndFill(LAYER.leftPanoramaCanvas, leftPanorama, 320);
         ENGINE.resizeAndFill(LAYER.rightPanoramaCanvas, rightPanorama, 320);
@@ -456,14 +671,36 @@ const GAME = {
         ENGINE.resizeAndFill(LAYER.archPanoramaCanvas, archPanorama, 320);
         ENGINE.resizeAndFill(LAYER.skyPanoramaCanvas, skyPanorama, 320);
 
+        const ids = [
+            "wall_resolution",
+            "floor_resolution",
+            "frontPanorama_resolution",
+            "leftPanorama_resolution",
+            "rightPanorama_resolution",
+            "backPanorama_resolution",
+            "archPanorama_resolution",
+            "skyPanorama_resolution"
+        ];
 
-        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution",
-            "backPanorama_resolution", "archPanorama_resolution", "skyPanorama_resolution"];
-        for (const [i, pTexture] of [wallTexture, floorTexture, frontPanorama, leftPanorama, rightPanorama, backPanorama, archPanorama, skyPanorama].entries()) {
-            let res = GAME.getResolution(pTexture);
+        const textures = [
+            wallTexture,
+            floorTexture,
+            frontPanorama,
+            leftPanorama,
+            rightPanorama,
+            backPanorama,
+            archPanorama,
+            skyPanorama
+        ];
+
+        for (const [i, pTexture] of textures.entries()) {
+            const res = GAME.getResolution(pTexture);
             $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
         }
-        if (GAME.started) GAME.levelStart(); //
+
+        if (restart && GAME.started && $MAP.map?.GA) {
+            GAME.levelStart();
+        }
     },
     repaintTextures() {
         GAME.updateTextures();
@@ -674,32 +911,36 @@ const GAME = {
         GAME.stack.previousRadio = radio;
         GAME.render();
     },
-    render() {
-        // GAME.renderQuadMap();
+    render(refresh3D = true) {
         const radio = $("#selector input[name=renderer]:checked").val();
+
         switch (radio) {
             case "block":
                 GAME.blockGrid3D();
                 break;
-
         }
-        if ($("input[name='grid']")[0].checked) GRID.grid();
-        if ($("input[name='coord']")[0].checked) GRID.paintCoord3D("coord", $MAP.map, GAME.floor, $("input[name='all_coord']")[0].checked);
+
+        if ($("input[name='grid']")[0].checked) {
+            GRID.grid();
+        }
+
+        if ($("input[name='coord']")[0].checked) {
+            GRID.paintCoord3D(
+                "coord",
+                $MAP.map,
+                GAME.floor,
+                $("input[name='all_coord']")[0].checked
+            );
+        }
 
         GAME.resizeGL_window();
-        GAME.renderQuadMap();
-    },
-    renderQuadMap() {
-        const GA = $MAP.map.GA;
-        const QM = QUAD_MAP.create(GA, $MAP.map.terrain);
-        $MAP.map.quadMap = QM;
-        QUAD_MAP.paintTopDown(QM, "surface");
-        QUAD_MAP.paintSideSlope(QM, "sideslope");
-        $MAP.map.zMap = QUAD_MAP.create_zMap($MAP.map.quadMap, GA);
-        $MAP.map.zMap1 = QUAD_MAP.create_zMap($MAP.map.quadMap, GA, 1);
-        console.warn("renderQuadMap $MAP.map.zMap", $MAP.map.zMap);
-        console.warn("renderQuadMap $MAP.map.zMap1", $MAP.map.zMap1);
-        QUAD_MAP.paintZMap($MAP.map.zMap, "zmap");
+        GAME.renderQuadMap(true);
+
+        // refresh3D !== false is intentional:
+        // jQuery event objects passed by click/change handlers should still count as "true".
+        if (refresh3D !== false && GAME.started && $MAP.map?.GA) {
+            GAME.levelStart();
+        }
     },
     stack: {
         fillCount: 0,
@@ -885,7 +1126,7 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
 
         $MAP.init();
         WebGL.init_required_IAM($MAP.map, HERO);
-        GAME.updateTextures();  //restarts the level
+        GAME.updateTextures(false);
 
         for (const prop of [...$MAP.properties, ...$MAP.lists]) {
             const pattern = new RegExp(`${prop}:\\s'(.*)'`);
@@ -893,7 +1134,7 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
             $MAP.map[prop] = JSON.parse(value) || [];
         }
 
-
+        GAME.setStartPositionFromStart($MAP.map);
         $MAP.width = Import.width;
         $MAP.height = Import.height;
         $MAP.depth = 1;
