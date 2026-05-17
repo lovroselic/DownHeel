@@ -1018,7 +1018,46 @@ const WebGL = {
             lightColors.push(...sun.lightColor);
         }
     },
-    renderScene(map) {
+    enableAttributes(gl) {
+        //dungeon
+        //setPositionAttribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.position);
+        gl.vertexAttribPointer(this.program.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.program.attribLocations.vertexPosition);
+
+        //setTextureAttribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.textureCoord);
+        gl.vertexAttribPointer(this.program.attribLocations.textureCoord, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.program.attribLocations.textureCoord);
+
+        // indices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer.indices);
+
+        //setNormalAttribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.normal);
+        gl.vertexAttribPointer(this.program.attribLocations.vertexNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.program.attribLocations.vertexNormal);
+
+        // Bind the texture to texture unit 0
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.wall);
+
+        //picking program
+        gl.useProgram(this.pickProgram.program);
+
+        //setPositionAttribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.position);
+        gl.vertexAttribPointer(this.pickProgram.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.pickProgram.attribLocations.vertexPosition);
+    },
+    drawTexturedRange(type, texture, unlit = false) {
+        const gl = this.CTX;
+
+        gl.uniform1i(this.program.uniformLocations.uUnlitTexture, unlit ? 1 : 0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.drawElements(gl.TRIANGLES, this.world.offset[`${type}_count`], gl.UNSIGNED_SHORT, this.world.offset[`${type}_start`] * 2);
+    },
+    renderScene(map, unlit = false) {
         const gl = this.CTX;
         gl.clearColor(0.0, 0.0, 0.0, WebGL.INI.BACKGROUND_ALPHA);
         gl.clearDepth(1.0);
@@ -1143,48 +1182,9 @@ const WebGL = {
             gl.uniform1f(this.shadow_program.uniforms.uShadowPlaneY, this.hero.player.getWorldYBelow());
         }
 
-        this.renderDungeon(map);
+        this.renderDungeon(map, unlit);
     },
-    enableAttributes(gl) {
-        //dungeon
-        //setPositionAttribute
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.position);
-        gl.vertexAttribPointer(this.program.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.program.attribLocations.vertexPosition);
-
-        //setTextureAttribute
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.textureCoord);
-        gl.vertexAttribPointer(this.program.attribLocations.textureCoord, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.program.attribLocations.textureCoord);
-
-        // indices
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer.indices);
-
-        //setNormalAttribute
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.normal);
-        gl.vertexAttribPointer(this.program.attribLocations.vertexNormal, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.program.attribLocations.vertexNormal);
-
-        // Bind the texture to texture unit 0
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.wall);
-
-        //picking program
-        gl.useProgram(this.pickProgram.program);
-
-        //setPositionAttribute
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.position);
-        gl.vertexAttribPointer(this.pickProgram.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.pickProgram.attribLocations.vertexPosition);
-    },
-    drawTexturedRange(type, texture, unlit = false) {
-        const gl = this.CTX;
-
-        gl.uniform1i(this.program.uniformLocations.uUnlitTexture, unlit ? 1 : 0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.drawElements(gl.TRIANGLES, this.world.offset[`${type}_count`], gl.UNSIGNED_SHORT, this.world.offset[`${type}_start`] * 2);
-    },
-    renderDungeon(map) {
+    renderDungeon(map, unlit) {
         const gl = this.CTX;
         gl.useProgram(this.program.program);
 
@@ -1200,15 +1200,15 @@ const WebGL = {
 
         /**  draw per slice/buffer type of the world  */
 
-        this.drawTexturedRange("wall", this.texture.wall, false);
-        this.drawTexturedRange("floor", this.texture.floor, false);
+        this.drawTexturedRange("wall", this.texture.wall, unlit);
+        this.drawTexturedRange("floor", this.texture.floor, unlit);
 
         //ceil
         if (this.CONFIG.firstperson && this.texture.ceil) {
-            this.drawTexturedRange("ceil", this.texture.ceil, false);
+            this.drawTexturedRange("ceil", this.texture.ceil, unlit);
         }
 
-        this.drawTexturedRange("archPanorama", this.texture.archPanorama, false);
+        this.drawTexturedRange("archPanorama", this.texture.archPanorama, unlit);
         this.drawTexturedRange("frontPanorama", this.texture.frontPanorama, true);
         this.drawTexturedRange("leftPanorama", this.texture.leftPanorama, true);
         this.drawTexturedRange("rightPanorama", this.texture.rightPanorama, true);
@@ -1987,7 +1987,7 @@ const WORLD = {
                     if (QM.indexOutOfBounds(index + QM.W)) this.addUpperSurfaceWallBack(QM.map[index]);
                     break;
                 case MAPDICT.WALL:
-                    console.info("index, value", index, value);
+                    //console.info("index, value", index, value);
                     this.addSurfaceCube(QM.map[index]);
                     break;
                 default:
