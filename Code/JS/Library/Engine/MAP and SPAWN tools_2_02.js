@@ -128,8 +128,12 @@ const MAP_TOOLS = {
         // only 3D occlusion maps now supported, for 2D use depth = 1;
         const GA = this.MAP[level].map.GA;
         const map = this.MAP[level].map;
+        console.info("setOcclusionMap map", map, "map.zMap1", map.zMap1);
         if (map.zMap1) {
+            console.warn("here");
             map.textureMap = QUAD_MAP.toTextureMap(map.zMap1);
+            //const texture = WebGL.createOcclusionTexture3D(QUAD_MAP.toTextureMap(map.zMap1), map.zMap1.xSize, map.zMap1.ySize, 1);
+            console.warn("..map.textureMap", map.textureMap);
             const texture = WebGL.createOcclusionTexture3D(map.textureMap, map.zMap1.xSize, map.zMap1.ySize, 1);
             map.occlusionMap = {
                 texture: texture,
@@ -139,15 +143,17 @@ const MAP_TOOLS = {
             }
 
         } else {
-            map.textureMap = GA.toTextureMap();
-            const texture = WebGL.createOcclusionTexture3D(map.textureMap, map.width, map.height, map.depth);
+            const texture = WebGL.createOcclusionTexture3D(GA.toTextureMap(), map.width, map.height, map.depth);
             map.occlusionMap = {
                 texture: texture,
                 originXZ: new Float32Array([0, 0]),
                 resolution: 1,
                 size: new Float32Array([map.width, map.height, map.depth])
             }
+            console.error("map.occlusionMap", map.occlusionMap);
         }
+
+        console.warn("this.MAP[level]", this.MAP[level]);
     },
 
     /**

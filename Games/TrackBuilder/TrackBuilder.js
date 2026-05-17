@@ -134,6 +134,8 @@ const GAME = {
     levelStart() {
         GAME.initLevel(GAME.level);
         WebGL.GAME.setFirstPerson();
+        console.info(" ---- before levelStart", $MAP.map, MAP[GAME.level].map);
+        $MAP.map.occlusionMap = MAP[GAME.level].map.occlusionMap;
         WebGL.renderScene($MAP.map);
     },
     newDungeon(level) {
@@ -141,9 +143,20 @@ const GAME = {
     },
     buildWorld(level) {
         console.warn("building world, level", level);
-        SPAWN_TOOLS.spawn(level);
         MAP[level].world = WORLD.build(MAP[level].map);
-        $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
+
+        if ($MAP.map.zMap1) {
+            MAP[GAME.level].map.zMap1 = $MAP.map.zMap1;
+        } {
+            $MAP.map.zMap1 = QUAD_MAP.create_zMap(QUAD_MAP.create($MAP.map.GA, MAP[GAME.level].terrain), $MAP.map.GA, 1);
+             MAP[GAME.level].map.zMap1 = $MAP.map.zMap1;
+        }
+
+
+
+        console.log("--------------buildWorld:: MAP[GAME.level].map.zMap1", MAP[GAME.level].map.zMap1);
+        SPAWN_TOOLS.spawn(level);
+        //$MAP.map.textureMap = $MAP.map.GA.toTextureMap();
     },
     setWorld(level, decalsAreSet = false) {
         console.log("setting world");
@@ -420,7 +433,7 @@ const GAME = {
         ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
     },
     updateTextures() {
-        //console.error(" ----------------------------- updateTextures -------------------------------");
+        console.error(" ----------------------------- updateTextures -------------------------------");
         //textures
         const wallTexture = TEXTURE[$("#walltexture")[0].value];
         const floorTexture = TEXTURE[$("#floortexture")[0].value];
@@ -444,8 +457,9 @@ const GAME = {
         ENGINE.resizeAndFill(LAYER.skyPanoramaCanvas, skyPanorama, 320);
 
 
-        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution", "backPanorama_resolution", "archPanorama_resolution", "skyPanorama_resolution"];
-        for (const [i, pTexture] of [wallTexture, floorTexture, frontPanorama, leftPanorama, rightPanorama, backPanorama].entries()) {
+        const ids = ["wall_resolution", "floor_resolution", "frontPanorama_resolution", "leftPanorama_resolution", "rightPanorama_resolution",
+            "backPanorama_resolution", "archPanorama_resolution", "skyPanorama_resolution"];
+        for (const [i, pTexture] of [wallTexture, floorTexture, frontPanorama, leftPanorama, rightPanorama, backPanorama, archPanorama, skyPanorama].entries()) {
             let res = GAME.getResolution(pTexture);
             $(`#${ids[i]}`).html(`width: ${res[0]}, height: ${res[1]}`);
         }
@@ -661,6 +675,7 @@ const GAME = {
         GAME.render();
     },
     render() {
+        // GAME.renderQuadMap();
         const radio = $("#selector input[name=renderer]:checked").val();
         switch (radio) {
             case "block":
@@ -672,11 +687,6 @@ const GAME = {
         if ($("input[name='coord']")[0].checked) GRID.paintCoord3D("coord", $MAP.map, GAME.floor, $("input[name='all_coord']")[0].checked);
 
         GAME.resizeGL_window();
-        if (INI.DRAW_OCCLUSION_MAP) {
-            $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
-            GAME.drawOcclusionMap();
-        }
-
         GAME.renderQuadMap();
     },
     renderQuadMap() {
@@ -686,7 +696,9 @@ const GAME = {
         QUAD_MAP.paintTopDown(QM, "surface");
         QUAD_MAP.paintSideSlope(QM, "sideslope");
         $MAP.map.zMap = QUAD_MAP.create_zMap($MAP.map.quadMap, GA);
-        console.warn("$MAP.map.zMap", $MAP.map.zMap);
+        $MAP.map.zMap1 = QUAD_MAP.create_zMap($MAP.map.quadMap, GA, 1);
+        console.warn("renderQuadMap $MAP.map.zMap", $MAP.map.zMap);
+        console.warn("renderQuadMap $MAP.map.zMap1", $MAP.map.zMap1);
         QUAD_MAP.paintZMap($MAP.map.zMap, "zmap");
     },
     stack: {
@@ -840,6 +852,7 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
         $("#exp").val(roomExport);
     },
     import() {
+        console.clear();
         const dimension = 1;
         $MAP.map.textureMap = null;
         const ImportText = $("#exp").val();
@@ -902,7 +915,7 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
         $MAP.map.textureMap = $MAP.map.GA.toTextureMap();
         GAME.render();
 
-        console.info("$MAP.map", $MAP.map);
+        console.info("IMPORT $MAP.map", $MAP.map);
     },
     async copyToClipboard() {
         let copyText = $("#exp")[0];

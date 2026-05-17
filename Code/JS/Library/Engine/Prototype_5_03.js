@@ -868,8 +868,11 @@ class FP_Vector extends MasterVectorClass {
         return this.x * vector.x + this.y * vector.y;
     }
     radAngleBetweenVectors(vector) {
-        let angle = Math.acos(this.dot(vector));
+        let dot = this.dot(vector);
+        dot = Math.min(1.0, Math.max(-1.0, dot));
+        let angle = Math.acos(dot);
         if (this.x * vector.y - this.y * vector.x < 0) angle = 2 * Math.PI - angle;
+
         return angle;
     }
     radAngleBetweenVectorsSharp(vector) {

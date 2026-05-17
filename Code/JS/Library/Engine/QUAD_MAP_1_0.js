@@ -534,9 +534,10 @@ const QUAD_MAP = {
     toTextureMap(zMap) {
         //expected zMap of tiling resolution 1! more than that and you will not have same coord system!!
         /** 0 - light can pass through */
-        console.log("zMap", zMap);
+
         const paddedWidth = POT(zMap.xSize);
         const paddedHeight = POT(zMap.ySize);
+        console.log("toTextureMap zMap", zMap, "paddedWidth", paddedWidth, "paddedHeight", paddedHeight);
         const pixelData = new Uint8Array(paddedWidth * paddedHeight).fill(255);
         for (let y = 0; y < zMap.ySize; y++) {
             for (let x = 0; x < zMap.xSize; x++) {

@@ -41,6 +41,7 @@ const WebGL = {
     VERSION: "2.02",
     CSS: "color: gold",
     CTX: null,
+    DEBUG: true,
     VERBOSE: false,                                     // default: false
     PRUNE: true,                                        // if true, only visible faces are considered - looks bad in 3rd person, but the amount of vertices are significantlly reduced
     PRUNE_BLOCKS: true,                                 // if true, only visible blocks considered - looks better 3rd person, a compromise which allows separate pruning of faces
@@ -427,11 +428,11 @@ const WebGL = {
         height = Number(height);
         depth = Number(depth ?? 1);
 
-        const expected = width * height * depth;
+        //const expected = width * height * depth;
 
         if (!(width > 0 && height > 0 && depth > 0)) throw new Error(`Bad 3D texture dimensions: ${width} x ${height} x ${depth}`);
         if (!(pixelData instanceof Uint8Array)) throw new Error(`pixelData must be Uint8Array, got ${pixelData?.constructor?.name}`);
-        if (pixelData.length !== expected) throw new Error(`Bad pixelData length: got ${pixelData.length}, expected ${expected}`);
+        //if (pixelData.length !== expected) throw new Error(`Bad pixelData length: got ${pixelData.length}, expected ${expected}`);
 
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_3D, texture);
@@ -1198,13 +1199,13 @@ const WebGL = {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         /**  draw per slice/buffer type of the world  */
-   
+
         this.drawTexturedRange("wall", this.texture.wall, false);
         this.drawTexturedRange("floor", this.texture.floor, false);
 
         //ceil
         if (this.CONFIG.firstperson && this.texture.ceil) {
-             this.drawTexturedRange("ceil", this.texture.ceil, false);
+            this.drawTexturedRange("ceil", this.texture.ceil, false);
         }
 
         this.drawTexturedRange("archPanorama", this.texture.archPanorama, false);
@@ -2819,9 +2820,27 @@ class $3D_player {
     }
     setRotation() {
         // setting rotation matrix from this.dir
+
+        if (WebGL.DEBUG) {
+            if (!this.dir) {
+                console.error("bad dir in setRotation", {
+                    dir: this.dir,
+                });
+            }
+        }
+
         this.rotation = glMatrix.mat4.create();
         const angle = -FP_Vector.toClass(UP).radAngleBetweenVectors(Vector3.to_FP_Vector(this.dir));
         glMatrix.mat4.rotate(this.rotation, this.rotation, this.rotateToNorth + angle, [0, 1, 0]);
+
+        if (WebGL.DEBUG) {
+            if (!Number.isFinite(angle)) {
+                console.error("bad angle in setRotation", {
+                    angle: angle,
+                });
+            }
+        }
+
         this.rotatedBoundingBox = this.boundingBox.getRotatedBoundingBoxYTurns(BoundingBox.radToTurns(this.rotateToNorth + angle));
     }
     setSpeed(speed) {
@@ -2866,6 +2885,16 @@ class $3D_player {
         this.fov = Math.radians(fov);
     }
     rotate(rotDirection, lapsedTime) {
+
+        if (WebGL.DEBUG) {
+            if (!Number.isFinite(rotDirection) || !Number.isFinite(lapsedTime)) {
+                console.error("rotate issue", {
+                    rotDirection: rotDirection,
+                    lapsedTime: lapsedTime,
+                });
+            }
+        }
+
         // calculating new dir
         let angle = Math.round(lapsedTime / ENGINE.INI.ANIMATION_INTERVAL) * rotDirection * ((2 * Math.PI) / this.rotationResolution);
         this.setDir(Vector3.from_2D_dir(this.dir.rotate2D(angle), this.dir.y));
@@ -4436,6 +4465,15 @@ class BoundingBox {
         this._rotY = null;
     }
     static radToTurns(rad = 0) {
+
+        if (WebGL.DEBUG) {
+            if (!Number.isFinite(rad)) {
+                console.error("radToTurns bad angle", {
+                    rad: rad,
+                });
+            }
+        }
+
         return ((Math.round(rad * 2 / Math.PI) % 4) + 4) % 4;
     }
     setAbsoluteBoundingBox(origin) {
@@ -4463,19 +4501,30 @@ class BoundingBox {
         ];
     }
     getRotatedBoundingBoxYTurns(turns = 0) {
+        if (WebGL.DEBUG) {
+            if (!Number.isFinite(turns)) {
+                console.error("invalid turns in getRotatedBoundingBoxYTurns", {
+                    turns: turns,
+                    rotY: this._rotY
+                });
+            }
+        }
+
         const rot = this.getRotatedYTurns(turns);
 
-        if (!rot) {
-            console.error("Invalid rotated bounding box lookup", {
-                turns,
-                normalized: ((turns % 4) + 4) % 4,
-                isFinite: Number.isFinite(turns),
-                isInteger: Number.isInteger(turns),
-                rotY: this._rotY,
-                bb: this
-            });
-            debugger;
-            throw new TypeError("Invalid rotated bounding box lookup");
+        if (WebGL.DEBUG) {
+            if (!rot) {
+                console.error("Invalid rotated bounding box lookup", {
+                    turns: turns,
+                    normalized: ((turns % 4) + 4) % 4,
+                    isFinite: Number.isFinite(turns),
+                    isInteger: Number.isInteger(turns),
+                    rotY: this._rotY,
+                    bb: this
+                });
+                debugger;
+                throw new TypeError("Invalid rotated bounding box lookup");
+            }
         }
 
         const bb = new BoundingBox(rot.max, rot.min);

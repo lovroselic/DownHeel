@@ -334,7 +334,6 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
         return false;
 
     vec3 dirNorm = direction / dirLen;
-
     vec3 step = vec3(direction.x > EPSILON ? 1.0f : (direction.x < -EPSILON ? -1.0f : 0.0f), direction.y > EPSILON ? 1.0f : (direction.y < -EPSILON ? -1.0f : 0.0f), direction.z > EPSILON ? 1.0f : (direction.z < -EPSILON ? -1.0f : 0.0f));
 
     // Pull target slightly back so the destination cell does not shadow itself.
@@ -352,7 +351,6 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     if (step.x != 0.0f) {
         tDelta.x = 1.0f / abs(direction.x);
         float nextBoundaryX = (step.x > 0.0f) ? floor(rayOrigin3D.x) + 1.0f : floor(rayOrigin3D.x);
-
         tMax.x = abs((nextBoundaryX - rayOrigin3D.x) / direction.x);
     }
 
@@ -360,7 +358,6 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     if (step.y != 0.0f) {
         tDelta.y = 1.0f / abs(direction.y);
         float nextBoundaryY = (step.y > 0.0f) ? floor(rayOrigin3D.y) + 1.0f : floor(rayOrigin3D.y);
-
         tMax.y = abs((nextBoundaryY - rayOrigin3D.y) / direction.y);
     }
 
@@ -368,7 +365,6 @@ bool Raycast3D(vec3 rayOrigin3D, vec3 rayTarget3D, float illumination) {
     if (step.z != 0.0f) {
         tDelta.z = 1.0f / abs(direction.z);
         float nextBoundaryZ = (step.z > 0.0f) ? floor(rayOrigin3D.z) + 1.0f : floor(rayOrigin3D.z);
-
         tMax.z = abs((nextBoundaryZ - rayOrigin3D.z) / direction.z);
     }
 
@@ -406,10 +402,6 @@ bool isOccluded(vec3 position3D) {
 
 vec3 worldToOcclusionCoord(vec3 position3D) {
     float occResolution = max(uOcclusionResolution, 1.0f);
-
-    // Shared mapping:
-    // world X -> texture X
-    // world Z -> texture Y
     vec2 texXY = (vec2(position3D.x, position3D.z) - uOcclusionOrigin) * occResolution;
 
     // depth == 1:
@@ -419,6 +411,7 @@ vec3 worldToOcclusionCoord(vec3 position3D) {
     // depth > 1:
     //   Old 3D-grid layout:
     //   world Y -> texture Z.
+    
     float texZ = 0.0f;
 
     if (uGridSize.z > 1.5f) {
