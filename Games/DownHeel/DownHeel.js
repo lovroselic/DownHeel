@@ -54,7 +54,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.5.4",
+    VERSION: "0.6.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -376,6 +376,7 @@ const GAME = {
             backPanorama: TEXTURE[MAP[level].backPanorama],
             archPanorama: TEXTURE[MAP[level].archPanorama],
             skyPanorama: TEXTURE[MAP[level].skyPanorama],
+            floorPanorama: TEXTURE.SnowFloorPanoramaTexture,                    //fixed
         };
 
         WebGL.updateShaders();

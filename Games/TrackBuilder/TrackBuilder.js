@@ -56,7 +56,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.4.3",
+    VERSION: "0.6.0",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -115,7 +115,6 @@ const GAME = {
     floor: 0,
     start() {
         WebGL.setContext("webgl");
-
         $MAP.properties = MAP_TOOLS.properties;
         $MAP.lists = MAP_TOOLS.lists;
 
@@ -126,7 +125,6 @@ const GAME = {
 
         GAME.level = "Demo";
         GAME.loadLevel(GAME.level);
-
         GAME.started = false;
 
         WebGL.PRUNE = false;
@@ -158,12 +156,9 @@ const GAME = {
         WebGL.FIRST_PERSON_DUAL_DISPLAY = true;
         WebGL.VIEWS_ALLOWED = new Set([1, 3]);
 
-        if (typeof INI !== "undefined" && Number.isFinite(INI.HERO_HEIGHT)) {
-            WebGL.INI.HERO_HEIGHT = INI.HERO_HEIGHT;
-        }
+        if (typeof INI !== "undefined" && Number.isFinite(INI.HERO_HEIGHT)) WebGL.INI.HERO_HEIGHT = INI.HERO_HEIGHT;
 
-        //WebGL.GAME.setViewButtons();
-        WebGL.CONFIG.setMovementMode("surface");
+        //WebGL.CONFIG.setMovementMode("surface");
     },
     activeMap() {
         return $MAP.map;
@@ -194,9 +189,7 @@ const GAME = {
         return map;
     },
     adoptMap(map, level = GAME.level) {
-        if (!map || !map.GA) {
-            throw new Error("adoptMap: expected a map with GA");
-        }
+        if (!map || !map.GA) throw new Error("adoptMap: expected a map with GA");
 
         $MAP.map = map;
         $MAP.width = map.GA.width;
@@ -216,23 +209,12 @@ const GAME = {
         GAME.level = level;
         MAP_TOOLS.unpack(level);
 
-        if (!MAP[level] || !MAP[level].map) {
-            throw new Error(`loadLevel: MAP[${level}].map was not created by MAP_TOOLS.unpack`);
-        }
-
+        if (!MAP[level] || !MAP[level].map) throw new Error(`loadLevel: MAP[${level}].map was not created by MAP_TOOLS.unpack`);
         const map = GAME.adoptMap(MAP[level].map, level);
-
-        if (!map.terrain && MAP[level].terrain) {
-            map.terrain = typeof MAP[level].terrain === "string"
-                ? JSON.parse(MAP[level].terrain)
-                : MAP[level].terrain;
-        }
-
+        if (!map.terrain && MAP[level].terrain) map.terrain = typeof MAP[level].terrain === "string" ? JSON.parse(MAP[level].terrain) : MAP[level].terrain;
         GAME.ensureTerrain();
 
-        if (map.terrain.direction?.parameters &&
-            map.terrain.width?.parameters &&
-            map.terrain.slope?.parameters) {
+        if (map.terrain.direction?.parameters && map.terrain.width?.parameters && map.terrain.slope?.parameters) {
             NOISE_FUNCTION.writeParsToForm();
         } else {
             NOISE_FUNCTION.generate_terrain();
@@ -268,41 +250,23 @@ const GAME = {
         GAME.ensureMapArrays(map);
         GAME.ensureTerrain();
 
-        if (!map.startPosition) {
-            GAME.setStartPositionFromStart(map);
-        }
+        if (!map.startPosition) GAME.setStartPositionFromStart(map);
 
         WebGL.MOUSE.initialize("ROOM");
         WebGL.setContext("webgl");
-
-        // Build surface FIRST, because hero placement depends on quadMap/zMap.
-        GAME.buildWorld(level, map);
+        GAME.buildWorld(level, map);                                        // Build surface FIRST, because hero placement depends on quadMap/zMap.
 
         const start_dir = map.startPosition.vector;
         const start_index = map.GA.gridToIndex(map.startPosition.grid);
         const start_quad = map.quadMap.map[start_index];
 
-        if (!start_quad) {
-            throw new Error(`initLevel: missing start_quad at index ${start_index}`);
-        }
+        if (!start_quad) throw new Error(`initLevel: missing start_quad at index ${start_index}`);
 
         let start_grid = start_quad.getSurfaceCenter();
         const z = map.zMap.getZ(start_grid.x, start_grid.y);
-
         const heroHeight = Number.isFinite(HERO.height) ? HERO.height : (Number.isFinite(WebGL.INI.HERO_HEIGHT) ? WebGL.INI.HERO_HEIGHT : 0.6);
-
-        start_grid = new Vector3(
-            start_grid.x,
-            heroHeight + z,
-            start_grid.y
-        );
-
-        HERO.player = new $3D_player(
-            start_grid,
-            Vector3.from_2D_dir(start_dir),
-            map,
-            HERO_TYPE.ThePrincess
-        );
+        start_grid = new Vector3(start_grid.x, heroHeight + z, start_grid.y);
+        HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), map, HERO_TYPE.ThePrincess);
 
         GAME.setCameraView();
         GAME.setWorld(map);
@@ -312,30 +276,26 @@ const GAME = {
         console.warn("building TrackBuilder world", { level, map });
 
         GAME.syncLegacyLevel(level, map);
-
         WebGL.init_required_IAM(map, HERO);
 
         map.quadMap = QUAD_MAP.create(map.GA, map.terrain);
         map.zMap = QUAD_MAP.create_zMap(map.quadMap, map.GA);
         map.zMap1 = QUAD_MAP.create_zMap(map.quadMap, map.GA, 1);
 
-        if (typeof SPAWN_TOOLS !== "undefined" && SPAWN_TOOLS.spawn) {
-            SPAWN_TOOLS.spawn(level);
-        }
+        if (typeof SPAWN_TOOLS !== "undefined" && SPAWN_TOOLS.spawn) SPAWN_TOOLS.spawn(level);
 
         // Important:
         // SPAWN_TOOLS.spawn() calls MAP_TOOLS.setOcclusionMap(),
         // which currently uses map.zMap1.TR.
         // Rebuild here so TrackBuilder uses zMap.resolution.
         GAME.rebuildOcclusionMap(map);
-
         map.world = WORLD.buildSurfaceBasedWorld(map);
         MAP[level].world = map.world;
 
         return map.world;
     },
     setWorld(map = GAME.activeMap(), decalsAreSet = false) {
-        console.log("setting TrackBuilder world");
+        console.log("setting TrackBuilder world", { map: map });
         console.time("setWorld");
 
         const textureData = {
@@ -347,30 +307,21 @@ const GAME = {
             backPanorama: TEXTURE[$("#backPanorama")[0].value],
             archPanorama: TEXTURE[$("#archPanorama")[0].value],
             skyPanorama: TEXTURE[$("#skyPanorama")[0].value],
+            floorPanorama: TEXTURE.SnowFloorPanoramaTexture,                    //fixed
         };
 
         WebGL.updateShaders();
-
-        const viewObject = WebGL.CONFIG.firstperson
-            ? WebGL.hero.player
-            : WebGL.hero.topCamera;
-
+        const viewObject = WebGL.CONFIG.firstperson ? WebGL.hero.player : WebGL.hero.topCamera;
         WebGL.init("webgl", map.world, textureData, viewObject, decalsAreSet);
-
         console.timeEnd("setWorld");
     },
     renderQuadMap(paint = true) {
         const map = GAME.activeMap();
-
-        if (!map || !map.GA) {
-            throw new Error("renderQuadMap: no active map/GA");
-        }
+        if (!map || !map.GA) throw new Error("renderQuadMap: no active map/GA");
 
         GAME.ensureTerrain();
-
         const GA = map.GA;
         const QM = QUAD_MAP.create(GA, map.terrain);
-
         map.quadMap = QM;
         map.zMap = QUAD_MAP.create_zMap(QM, GA);
         map.zMap1 = QUAD_MAP.create_zMap(QM, GA, 1);
@@ -384,34 +335,19 @@ const GAME = {
         return QM;
     },
     rebuildOcclusionMap(map = GAME.activeMap()) {
-        if (!map || !map.zMap1) {
-            throw new Error("rebuildOcclusionMap: map.zMap1 missing");
-        }
+        if (!map || !map.zMap1) throw new Error("rebuildOcclusionMap: map.zMap1 missing");
 
         const zMap = map.zMap1;
         const pixelData = QUAD_MAP.toTextureMap(zMap);
-
-        // Shader layout:
-        // texture X = world X
-        // texture Y = world Z / lateral zMap axis
-        // texture Z = world Y layer, fixed to 0 for 2.5D DownHeel maps
         const texWidth = POT(zMap.xSize);
         const texHeight = POT(zMap.ySize);
         const texDepth = 1;
 
-        if (map.occlusionMap?.texture && WebGL.CTX) {
-            WebGL.CTX.deleteTexture(map.occlusionMap.texture);
-        }
+        if (map.occlusionMap?.texture && WebGL.CTX) WebGL.CTX.deleteTexture(map.occlusionMap.texture);
 
         map.textureMap = pixelData;
-
         map.occlusionMap = {
-            texture: WebGL.createOcclusionTexture3D(
-                pixelData,
-                texWidth,
-                texHeight,
-                texDepth
-            ),
+            texture: WebGL.createOcclusionTexture3D(pixelData, texWidth, texHeight, texDepth),
             size: new Float32Array([texWidth, texHeight, texDepth]),
             originXZ: new Float32Array([zMap.minX, zMap.minY]),
             resolution: zMap.resolution,
@@ -430,9 +366,8 @@ const GAME = {
         if (!map.occlusionMap.texture) throw new Error("render map occlusionMap missing texture");
         if (!map.occlusionMap.size) throw new Error("render map occlusionMap missing size");
         if (!map.occlusionMap.originXZ) throw new Error("render map occlusionMap missing originXZ");
-        if (!Number.isFinite(map.occlusionMap.resolution)) {
-            throw new Error("render map occlusionMap has invalid resolution");
-        }
+        if (!Number.isFinite(map.occlusionMap.resolution)) throw new Error("render map occlusionMap has invalid resolution");
+
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
@@ -465,7 +400,7 @@ const GAME = {
         ENGINE.addBOX("SURFACE", 2048, 256, ["surface"], null);
         ENGINE.addBOX("SIDE_SLOPE", 2048, 768, ["sideslope"], null);
         ENGINE.addBOX("ZMAP", 2048, 256, ["zmap"], null);
-        ENGINE.addBOX("WEBGL", 800, 600, ["3d_webgl"], null);
+        ENGINE.addBOX("WEBGL", 1024, 768, ["3d_webgl"], null);
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
         $("#buttons").append("<input type='button' id='export' value='Export'>");
@@ -682,7 +617,6 @@ const GAME = {
         ENGINE.drawToId("crestcanvas", 0, 0, ENGINE.conditionalResize(SPRITE[$("#crest_decal")[0].value], INI.CANVAS_RESOLUTION));
     },
     updateTextures(restart = true) {
-        console.error(" ----------------------------- updateTextures -------------------------------");
 
         const wallTexture = TEXTURE[$("#walltexture")[0].value];
         const floorTexture = TEXTURE[$("#floortexture")[0].value];
@@ -1142,7 +1076,6 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
         const SG = ImportText.extractGroup(/sg:\s(\d{1})/);
         $('#checkpoint').val(SG).trigger('change');
 
-
         const Textures = ["wall", "floor"];
         for (const prop of Textures) {
             const pattern = new RegExp(`${prop}:\\s"(.*)"`);
@@ -1156,9 +1089,7 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
         }
 
         console.log("Import", Import);
-
         $MAP.map = FREE_MAP3D.import(Import, MAP_TOOLS.INI.GA_BYTE_SIZE);
-
         $MAP.init();
         WebGL.init_required_IAM($MAP.map, HERO);
         GAME.updateTextures(false);
@@ -1175,7 +1106,6 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
         $MAP.depth = 1;
         $("#horizontalGrid").val(Import.width);
         $("#verticalGrid").val(Import.height);
-
         $("#horizontalGrid").trigger("change");
         $("#verticalGrid").trigger("change");
 

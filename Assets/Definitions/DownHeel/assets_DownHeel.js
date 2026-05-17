@@ -155,6 +155,7 @@ LoadTextures = [
     { srcName: "Sky/Sky_204.webp", name: "Sky_204" },
     { srcName: "Sky/Sky_205.webp", name: "Sky_205" },
     { srcName: "Sky/Sky_206.webp", name: "Sky_206" },
+    { srcName: "Sky/SnowFloorPanoramaTexture.webp", name: "SnowFloorPanoramaTexture" },
 ];
 
 LoadAudio = [

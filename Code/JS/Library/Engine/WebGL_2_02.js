@@ -1214,6 +1214,7 @@ const WebGL = {
         this.drawTexturedRange("rightPanorama", this.texture.rightPanorama, true);
         this.drawTexturedRange("backPanorama", this.texture.backPanorama, true);
         this.drawTexturedRange("skyPanorama", this.texture.skyPanorama, true);
+        this.drawTexturedRange("floorPanorama", this.texture.floorPanorama, true);
 
         //static decals
         let decalCount = 0;
@@ -1563,7 +1564,9 @@ const WORLD = {
     GA: null,                                                                                                           //reference
     bufferTypes: ["positions", 'indices', "textureCoordinates", "vertexNormals"],
     objectTypes: ["wall", "floor", "ceil", "decal",
-        "frontPanorama", "leftPanorama", "rightPanorama", "backPanorama", "skyPanorama", "archPanorama"],
+        "frontPanorama", "leftPanorama", "rightPanorama", "backPanorama", "skyPanorama", "archPanorama",
+        "floorPanorama"
+    ],
     cubeFaces: ["BACK_FACE", "RIGHT_FACE", "FRONT_FACE", "LEFT_FACE", "BOTTOM_FACE", "TOP_FACE"],                       //corresponds to directions3D: [UP3, RIGHT3, DOWN3, LEFT3, BELOW3, ABOVE3],
     faceTypes: ["wall", "wall", "wall", "wall", "ceil", "floor"],
     init() {
@@ -2327,12 +2330,12 @@ const WORLD = {
         // floor
         this.addTexturedQuad(
             [
-                new Vector3(xBack2, yBottom, zLeft),
-                new Vector3(xFront, yBottom, zLeft),
-                new Vector3(xFront, yBottom, zRight),
                 new Vector3(xBack2, yBottom, zRight),
+                new Vector3(xFront, yBottom, zRight),
+                new Vector3(xFront, yBottom, zLeft),
+                new Vector3(xBack2, yBottom, zLeft),
             ],
-            "floor",
+            "floorPanorama",
             null,
             new Vector3(0, 1, 0)
         );
