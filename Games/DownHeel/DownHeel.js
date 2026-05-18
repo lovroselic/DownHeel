@@ -54,7 +54,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.6.0",
+    VERSION: "0.6.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -289,16 +289,11 @@ const GAME = {
         GAME.levelStart();
     },
     WebGL_settings() {
-        //WebGL.setAmbientStrength(10);
-        //WebGL.setDiffuseStrength(50);
         WebGL.setAmbientStrength(0.1);
         WebGL.setDiffuseStrength(0.5);
-        //WebGL.HERO_AS_INNER = true;
-        //WebGL.PRUNE = false;
         WebGL.INI.BACKGROUND_ALPHA = 0.0;
         WebGL.USE_SHADOW = false;
         WebGL.USE_INTERACTION = false;
-        //WebGL.INI.HERO_HEIGHT = 0;
         WebGL.INI.HERO_HEIGHT = INI.HERO_HEIGHT;
         WebGL.FIRST_PERSON_DUAL_DISPLAY = true;
         WebGL.NO_TOP_CEILING = true;
@@ -310,7 +305,8 @@ const GAME = {
         console.log("starting level", GAME.level);
         WebGL.playerList.clear();                           //requred for restart after resurrection
         GAME.initLevel(GAME.level);
-        WebGL.GAME.setFirstPerson();                        //my preference
+        //WebGL.GAME.setFirstPerson();                          //my preference
+        WebGL.GAME.setThirdPerson();                            //my preference
         GAME.continueLevel(GAME.level);
     },
     continueLevel(level) {
@@ -323,8 +319,8 @@ const GAME = {
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
-        //WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.13, new Vector3(0, -0.35, 0), 0.70);
-        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.5, new Vector3(0, -0.35, 0), 0.80);
+        //WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.5, new Vector3(0, -0.35, 0), 0.80);
+        WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.5, new Vector3(0, -0.30, 0), 0.45, 80);
 
         switch (WebGL.CONFIG.cameraType) {
             case "first_person":
@@ -348,21 +344,19 @@ const GAME = {
         this.buildWorld(level);
 
         const map = MAP[level].map;
-        //console.log("map", map);
         let start_dir = map.startPosition.vector;
         let start_index = map.GA.gridToIndex(map.startPosition.grid);
         let start_quad = map.quadMap.map[start_index];
         let start_grid = start_quad.getSurfaceCenter();
         let z = map.zMap.getZ(start_grid.x, start_grid.y);
-        //console.warn("HERO.height + z", HERO.height, HERO.height + z, z);
         start_grid = new Vector3(start_grid.x, HERO.height + z, start_grid.y);
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
-        console.warn("HERO.player.poa", HERO.player.pos, "HERO.player.pos.add(INI.SUN_VECTOR)", HERO.player.pos.add(INI.SUN_VECTOR));
+        //console.warn("HERO.player.poa", HERO.player.pos, "HERO.player.pos.add(INI.SUN_VECTOR)", HERO.player.pos.add(INI.SUN_VECTOR));
 
         GAME.setCameraView();
         //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {

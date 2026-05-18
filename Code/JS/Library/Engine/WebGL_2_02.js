@@ -794,6 +794,7 @@ const WebGL = {
                 uGridSize: gl.getUniformLocation(this[prog].program, "uGridSize"),
                 uOcclusionOrigin: gl.getUniformLocation(this[prog].program, "uOcclusionOrigin"),
                 uOcclusionResolution: gl.getUniformLocation(this[prog].program, "uOcclusionResolution"),
+                uUnlitTexture: gl.getUniformLocation(shaderProgram, "uUnlitTexture"),
             };
 
             if (this.VERBOSE) {
@@ -3090,6 +3091,8 @@ class $3D_player {
         if (this.actionModes.includes(this.mode)) return;               //action must not be interrupted
         if (this.isJumping || this.isFalling) return;                   //powerless
 
+        console.log("mode", this.mode);
+        
         const map = ENGINE.GAME.keymap;
         if (map[ENGINE.KEY.map.Q]) {
             this.rotate(-1, lapsedTime);
@@ -3163,6 +3166,7 @@ class $3D_player {
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialRoughness, this.material.roughness);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialMetallic, this.material.metallic);
         gl.uniform1f(WebGL.model_program.uniforms.uMaterialFresnelStrength, this.material.fresnelStrength);
+        gl.uniform1i(WebGL.model_program.uniforms.uUnlitTexture, 1); //show full texture, no lighting effects
 
         const mScaleMatrix = glMatrix.mat4.create();
         glMatrix.mat4.fromScaling(mScaleMatrix, this.scale);
@@ -3178,6 +3182,10 @@ class $3D_player {
                 break;
             case "walking":
             case "attacking":
+            case "Sliding":
+            case "RightMove":
+            case "LeftMove":
+            case "Breaking":
                 gl.uniformMatrix4fv(uJointMat, false, this.jointMatrix);
                 break;
             default:

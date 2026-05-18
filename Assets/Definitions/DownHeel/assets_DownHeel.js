@@ -176,7 +176,7 @@ LoadShaders = [
 //LoadObjects = [  ];
 
 LoadModels = [
-    "ThePrincess.gltf",
+    "ThePrincess.gltf", "SlidingPrincess.gltf",
 ];
 
 LoadSprites = [
