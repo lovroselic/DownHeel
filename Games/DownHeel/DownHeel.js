@@ -49,12 +49,11 @@ const INI = {
     AVATAR_TRANSPARENCY: 10,
     HERO_HEALTH: 100,
     SUN_VECTOR: Vector3.from_array([0, 50, 0]),
-    //SUN_VECTOR: Vector3.from_array([-0.5, 10, 0]),
     HERO_HEIGHT: 0.15,
 };
 
 const PRG = {
-    VERSION: "0.6.1",
+    VERSION: "0.6.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -149,10 +148,6 @@ const PRG = {
     }
 };
 
-/**
- * *******************************************************************************************
- */
-
 const HERO = {
     construct() {
         this.player = null;
@@ -166,14 +161,20 @@ const HERO = {
         TURN.subtitle(txt);
     },
     concludeAction() {
-        if (!this.player.actionModes.includes(this.player.mode)) {
-            this.player.setMode("idle");
-        }
+        //console.info("begin", this.player.mode);
+
         if (WebGL.CONFIG.firstperson && !this.player.lookingAround && Math.abs(this.player.camera.direction_offset.y) > 0) {
             this.player.resetCamera();
         }
 
         this.player.lookingAround = false;
+        let before = this.player.mode;
+        if (["Sliding", "RightMove", "LeftMove", "Breaking"].includes(this.player.mode)) {
+            this.player.setMode("Sliding");
+        } else if (!this.player.actionModes.includes(this.player.mode)) this.player.setMode("idle");
+        //console.warn("end concludeAction", this.player.mode);
+        let after = this.player.mode;
+        if (after !== before) console.warn("concludeAction chnaged from", before, "to", after)
     },
     applyDamage(damage) {
         HERO.health = Math.max(HERO.health - damage, 0);
@@ -242,10 +243,8 @@ const HERO = {
 
     },
     updateSunPosition() {
-        //assuming single sun
-        const sun = SUN3D.POOL[0];
+        const sun = SUN3D.POOL[0];              //assuming single sun
         sun.pos = this.player.pos.add(INI.SUN_VECTOR);
-        //console.info("sun.pos", sun.pos);
     },
 };
 

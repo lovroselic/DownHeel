@@ -2679,6 +2679,10 @@ class $3D_player {
          * idle             : draws skin
          * walking          : animation 0
          * attacking        : animation 1
+         * Breaking:        : animation 0
+         * LeftMove:        : animation 1
+         * RightMove        : animation 2
+         * Sliding          : animation 3
          */
         if (this.mode === 'idle' && mode === 'idle') this.resetBirth();
         this.mode = mode;
@@ -2693,6 +2697,22 @@ class $3D_player {
                     this.actor.animationIndex = 1;
                     this.actionCallback = this.attackPerformed;
                     this.resetBirth();
+                    break;
+                case "Breaking":
+                    this.actor.animationIndex = 0;
+                    this.actionCallback = null;
+                    break;
+                case "LeftMove":
+                    this.actor.animationIndex = 1;
+                    this.actionCallback = null;
+                    break;
+                case "RightMove":
+                    this.actor.animationIndex = 2;
+                    this.actionCallback = null;
+                    break;
+                case "Sliding":
+                    this.actor.animationIndex = 3;
+                    this.actionCallback = null;
                     break;
                 default:
                     throw Error(`3D played mode error: ${this.mode}`);
@@ -2859,7 +2879,7 @@ class $3D_player {
             this.matrixUpdate();
             this.actor.animate(Date.now());
         }
-        this.setMode('walking');
+        if (this.mode === "idle") this.setMode('walking');
         this.setDepth();
         if (this.rotatedBoundingBox) this.absoluteBoundingBox = this.rotatedBoundingBox.setAbsoluteBoundingBox(this.pos);
     }
@@ -2873,7 +2893,6 @@ class $3D_player {
         this.dir = dir;
         if (this.pos) this.setSwordTip();
         if (this.camera) this.camera.update();
-        this.setMode('walking');
     }
     setMap(map) {
         this.map = map;
@@ -2888,7 +2907,7 @@ class $3D_player {
     setFov(fov = 70) {
         this.fov = Math.radians(fov);
     }
-    rotate(rotDirection, lapsedTime) {
+    rotate(rotDirection, lapsedTime, label = null) {
 
         if (WebGL.DEBUG) {
             if (!Number.isFinite(rotDirection) || !Number.isFinite(lapsedTime)) {
@@ -2902,7 +2921,24 @@ class $3D_player {
         // calculating new dir
         let angle = Math.round(lapsedTime / ENGINE.INI.ANIMATION_INTERVAL) * rotDirection * ((2 * Math.PI) / this.rotationResolution);
         this.setDir(Vector3.from_2D_dir(this.dir.rotate2D(angle), this.dir.y));
-        if (WebGL.CONFIG.dual && WebGL.CONFIG.firstperson) this.setRotation();   //
+
+        if (this.mode === "Sliding") {
+            console.warn("switching for label", label);
+            switch (label) {
+                case "left":
+                    this.setMode("LeftMove");
+                    break;
+                case "right":
+                    this.setMode("RightMove");
+                    break;
+                default:
+                    throw new Error("mode label error", label);
+            }
+        }
+
+        if (WebGL.CONFIG.dual && WebGL.CONFIG.firstperson) this.setRotation();
+        this.setTranslation(); //
+        this.actor.animate(Date.now());
     }
     bumpEnemy(nextPos, nextPos3) {
         if (!this.map.enemyIA) return;
@@ -2919,21 +2955,24 @@ class $3D_player {
         }
         return false;
     }
-    move(reverse, lapsedTime) {
+    move(reverse, lapsedTime, label = null) {
         let dir = this.dir;
         if (reverse) dir = dir.reverse2D();
-        this._route_movement(lapsedTime, dir);
+        this._route_movement(lapsedTime, dir, label);
     }
-    strafe(rotDirection, lapsedTime) {
+    strafe(rotDirection, lapsedTime, label = null) {
         let dir = Vector3.from_2D_dir(this.dir.rotate2D((rotDirection * Math.PI) / 2), this.dir.y);
-        this._route_movement(lapsedTime, dir);
+        this._route_movement(lapsedTime, dir, label);
     }
-    _route_movement(lapsedTime, dir) {
+    _route_movement(lapsedTime, dir, label) {
         switch (WebGL.CONFIG.movementMode) {
             case "basic":
                 this._applyMove_(lapsedTime, dir);
                 break;
             case "surface":
+                console.info("_route_movement", label);
+                if (["left", "right"].includes(label)) return;              // side strafe is not legal move for this concept
+                if (label === "backward") return this._apply_brake();
                 this._apply_surface_move(lapsedTime, dir);
                 break;
             default:
@@ -2941,6 +2980,7 @@ class $3D_player {
         }
     }
     _apply_surface_move(lapsedTime, dir) {
+        if (this.mode !== "idle") return;
         let length = (lapsedTime / 1000) * this.moveSpeed;
         let nextPos3 = this.pos.translate(dir, length);                                     //3D - Vector3
 
@@ -2951,7 +2991,13 @@ class $3D_player {
         }
 
         nextPos3.set_y(this.minY + this.heigth + this.ZM.getZ(nextPos3.x, nextPos3.z));
+        this.setMode("Sliding");
         return this.setPos(nextPos3);
+    }
+    _apply_brake() {
+        console.info("_apply_brake");
+        this.setMode("Breaking");
+        this.actor.animate(Date.now());
     }
     _out_of_surface(nextPos3, check) {
         //console.log("OOS", nextPos3, check);
@@ -3092,30 +3138,30 @@ class $3D_player {
         if (this.isJumping || this.isFalling) return;                   //powerless
 
         console.log("mode", this.mode);
-        
+
         const map = ENGINE.GAME.keymap;
         if (map[ENGINE.KEY.map.Q]) {
-            this.rotate(-1, lapsedTime);
+            this.rotate(-1, lapsedTime, "left");
             return;
         }
         if (map[ENGINE.KEY.map.E]) {
-            this.rotate(1, lapsedTime);
+            this.rotate(1, lapsedTime, "right");
             return;
         }
         if (map[ENGINE.KEY.map.W]) {
-            this.move(false, lapsedTime);
+            this.move(false, lapsedTime, "forward");
             return;
         }
         if (map[ENGINE.KEY.map.S]) {
-            this.move(true, lapsedTime);
+            this.move(true, lapsedTime, "backward");
             return;
         }
         if (map[ENGINE.KEY.map.A]) {
-            this.strafe(-1, lapsedTime);
+            this.strafe(-1, lapsedTime, "left");
             return;
         }
         if (map[ENGINE.KEY.map.D]) {
-            this.strafe(1, lapsedTime);
+            this.strafe(1, lapsedTime, "right");
             return;
         }
         if (map[ENGINE.KEY.map.LT] || map[ENGINE.KEY.map.LTC]) {
