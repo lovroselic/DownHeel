@@ -87,6 +87,9 @@ const WebGL = {
         HERO_HEIGHT: 0.6,
         DELTA_HEIGHT_CLIMB: 0.20, //
         GRAVITY: -9.8,
+        SNOW_FRICTION: 0.1,
+        AIR_DRAG: 0.01,
+        UPHILL_BRAKE: 20.0,
         MAX_JUMP_HEIGHT: 0.55,
         DEFAULT_FALL_CUTOFF: 5.0,
         FEATHER_FALL_CUTOFF: 7.5,
@@ -2508,17 +2511,42 @@ class $3D_player {
         const zBefore = nextPos3.y;
         const zAfter = this.ZM.getZ(nextPos3.x, nextPos3.z) + this.minY + this.heigth;
         const dZ = zAfter - zBefore;
-        console.log("slide", length, "speed", this.slidingSpeed, "zBefore", zBefore, "zAfter", zAfter, "dZ", dZ);
-
         let checks = this.GA.Vector3_pointsAroundEntity(nextPos3, this.dir, this.r);
         for (const check of checks) {
             let z = this.ZM.getZ(check.x, check.z);
             if (z === Infinity) return this._out_of_surface(nextPos3, check);
-
         }
+
+        this.slidingSpeed = this.updateSlidingSpeed(this.slidingSpeed, length, dZ);
+        console.log("slide length", length, "speed", this.slidingSpeed);
         nextPos3.set_y(zAfter);
         this.setPos(nextPos3);
+        if (this.slidingSpeed <= 0) {
+            console.error("this.slidingSpeed < 0 ");
+            this.setMode("idle");
+        }
         return;
+    }
+    updateSlidingSpeed(v0, L, dZ) {
+        const vMax = 20;                    //provisional
+        const G = WebGL.INI.GRAVITY;
+        const slopeDistance = Math.sqrt(L * L + dZ * dZ);
+        const sinSlope = dZ / slopeDistance;
+        const cosSlope = L / slopeDistance;
+        //const accGravity = G * sinSlope;
+        const accGravity = G * sinSlope;
+        const accFriction = WebGL.INI.SNOW_FRICTION * cosSlope;
+        const accDrag = WebGL.INI.AIR_DRAG * v0 * v0;
+        const uphillAmount = Math.max(0, sinSlope);
+        const accUphillBrake = WebGL.INI.UPHILL_BRAKE * uphillAmount;
+        const a = accGravity - accFriction - accDrag - accUphillBrake;
+        console.log(". a", a, "gravity", accGravity, "friction", accFriction, "drag", accDrag, "accUphillBrake", accUphillBrake, "slopeDistance", slopeDistance);
+        
+        const v1Squared = v0 * v0 + 2 * a * slopeDistance;
+        if (v1Squared < 0) return 0;
+        let v1 = Math.sqrt(v1Squared);
+        v1 = Math.min(v1, vMax);
+        return v1;
     }
     changeTexture(texture) {
         const gl = WebGL.CTX;
@@ -3162,7 +3190,7 @@ class $3D_player {
         if (this.actionModes.includes(this.mode)) return;               //action must not be interrupted
         if (this.isJumping || this.isFalling) return;                   //powerless
 
-        console.log("mode", this.mode);
+        //console.log("mode", this.mode);
 
         const map = ENGINE.GAME.keymap;
         if (map[ENGINE.KEY.map.Q]) {
