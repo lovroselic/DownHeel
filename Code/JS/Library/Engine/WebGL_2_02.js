@@ -2482,6 +2482,8 @@ class $3D_player {
         this.velocity_Z = 0.0;
         this.concludeJump();
         this.lookingAround = false;
+        this.sliding = false;
+        this.slidingSpeed = 0;
     }
     getWorldYBelow() {
         let Grid3D = Vector3.to_Grid3D(this.pos.sub(new Vector3(0, this.bb_deltas.y, 0)));
@@ -2498,6 +2500,25 @@ class $3D_player {
         let nextPos3 = this.pos.translate(dir, length);        //3D - Vector3
         this.setPos(nextPos3);
         return length;
+    }
+    slide(lapsedTime) {
+        if (!this.sliding) return;
+        let length = (lapsedTime / 1000) * this.slidingSpeed;
+        let nextPos3 = this.pos.translate(this.dir, length);
+        const zBefore = nextPos3.y;
+        const zAfter = this.ZM.getZ(nextPos3.x, nextPos3.z) + this.minY + this.heigth;
+        const dZ = zAfter - zBefore;
+        console.log("slide", length, "speed", this.slidingSpeed, "zBefore", zBefore, "zAfter", zAfter, "dZ", dZ);
+
+        let checks = this.GA.Vector3_pointsAroundEntity(nextPos3, this.dir, this.r);
+        for (const check of checks) {
+            let z = this.ZM.getZ(check.x, check.z);
+            if (z === Infinity) return this._out_of_surface(nextPos3, check);
+
+        }
+        nextPos3.set_y(zAfter);
+        this.setPos(nextPos3);
+        return;
     }
     changeTexture(texture) {
         const gl = WebGL.CTX;
@@ -2992,6 +3013,8 @@ class $3D_player {
 
         nextPos3.set_y(this.minY + this.heigth + this.ZM.getZ(nextPos3.x, nextPos3.z));
         this.setMode("Sliding");
+        this.sliding = true;
+        this.slidingSpeed = 1;             //initial
         return this.setPos(nextPos3);
     }
     _apply_brake() {
@@ -3003,6 +3026,8 @@ class $3D_player {
         //console.log("OOS", nextPos3, check);
         if (check.x >= this.QM.W) {
             console.warn("level completed", check.x);
+        } else {
+            console.warn("crash");
         }
     }
     _applyMove_(lapsedTime, dir) {

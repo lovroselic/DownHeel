@@ -53,7 +53,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.6.2",
+    VERSION: "0.6.3",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -246,6 +246,10 @@ const HERO = {
         const sun = SUN3D.POOL[0];              //assuming single sun
         sun.pos = this.player.pos.add(INI.SUN_VECTOR);
     },
+    manage(lapsedTime) {
+        this.player.slide(lapsedTime);
+        this.updateSunPosition();
+    }
 };
 
 /**
@@ -350,7 +354,6 @@ const GAME = {
         let z = map.zMap.getZ(start_grid.x, start_grid.y);
         start_grid = new Vector3(start_grid.x, HERO.height + z, start_grid.y);
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
-        //console.warn("HERO.player.poa", HERO.player.pos, "HERO.player.pos.add(INI.SUN_VECTOR)", HERO.player.pos.add(INI.SUN_VECTOR));
 
         GAME.setCameraView();
         //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
@@ -457,7 +460,7 @@ const GAME = {
         EXPLOSION3D.manage(date);
         GAME.respond(lapsedTime);
         ENGINE.TIMERS.update();
-        HERO.updateSunPosition();
+        HERO.manage(lapsedTime);
         GAME.frameDraw(lapsedTime);
         HERO.concludeAction();
         if (HERO.dead) IAM.checkIfProcessesComplete([EXPLOSION3D], HERO.death);
