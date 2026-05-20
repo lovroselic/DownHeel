@@ -53,7 +53,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.6.4",
+    VERSION: "0.6.5",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -161,20 +161,15 @@ const HERO = {
         TURN.subtitle(txt);
     },
     concludeAction() {
-        //console.info("begin", this.player.mode);
-
         if (WebGL.CONFIG.firstperson && !this.player.lookingAround && Math.abs(this.player.camera.direction_offset.y) > 0) {
             this.player.resetCamera();
         }
 
         this.player.lookingAround = false;
-        //let before = this.player.mode;
+
         if (["Sliding", "RightMove", "LeftMove", "Breaking"].includes(this.player.mode)) {
             this.player.setMode("Sliding");
         } else if (!this.player.actionModes.includes(this.player.mode)) this.player.setMode("idle");
-        //console.warn("end concludeAction", this.player.mode);
-        //let after = this.player.mode;
-        //if (after !== before) console.warn("concludeAction chnaged from", before, "to", after)
     },
     applyDamage(damage) {
         HERO.health = Math.max(HERO.health - damage, 0);

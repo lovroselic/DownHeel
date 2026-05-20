@@ -86,10 +86,6 @@ const WebGL = {
         BLAST_DAMAGE: 100,
         HERO_HEIGHT: 0.6,
         DELTA_HEIGHT_CLIMB: 0.20, //
-        GRAVITY: -9.8,
-        SNOW_FRICTION: 0.1,
-        AIR_DRAG: 0.01,
-        UPHILL_BRAKE: 20.0,
         MAX_JUMP_HEIGHT: 0.55,
         DEFAULT_FALL_CUTOFF: 5.0,
         FEATHER_FALL_CUTOFF: 7.5,
@@ -110,6 +106,15 @@ const WebGL = {
         BACKGROUND_BACK_BOTTOM_OFFSET: 0,
         BACKGROUND_BACK_LATERAL_SHIFT: 0,
         FINISH_ARCH_HEIGHT: 1.5,
+        GRAVITY: -9.8,
+        SNOW_FRICTION: 0.1,
+        AIR_DRAG: 0.01,
+        UPHILL_BRAKE: 20.0,
+        BRAKE_DECEL: 10.0,          // base braking strength
+        BRAKE_UPHILL_GAIN: 2.0,    // braking stronger uphill
+        BRAKE_DOWNHILL_LOSS: 0.50, // braking weaker downhill
+        BRAKE_MIN_FACTOR: 0.25,    // never make braking completely useless
+        MAX_SLIDING_SPEED: 20,
     },
     CONFIG: {
         firstperson: true,
@@ -2517,7 +2522,7 @@ class $3D_player {
             if (z === Infinity) return this._out_of_surface(nextPos3, check);
         }
 
-        this.slidingSpeed = this.updateSlidingSpeed(this.slidingSpeed, length, dZ);
+        this.slidingSpeed = this.updateSlidingSpeed(this.slidingSpeed, length, dZ, this.breaking);
         console.log("slide length", length, "speed", this.slidingSpeed);
         nextPos3.set_y(zAfter);
         this.setPos(nextPos3);
@@ -2525,27 +2530,34 @@ class $3D_player {
             console.error("this.slidingSpeed < 0 ");
             this.setMode("idle");
         }
+        this.breaking = false; //reset
         return;
     }
-    updateSlidingSpeed(v0, L, dZ) {
-        const vMax = 20;                    //provisional
+    updateSlidingSpeed(v0, L, dZ, breaking) {
+        //if (breaking) console.info("_apply_brake");
         const G = WebGL.INI.GRAVITY;
         const slopeDistance = Math.sqrt(L * L + dZ * dZ);
         const sinSlope = dZ / slopeDistance;
         const cosSlope = L / slopeDistance;
-        //const accGravity = G * sinSlope;
         const accGravity = G * sinSlope;
         const accFriction = WebGL.INI.SNOW_FRICTION * cosSlope;
         const accDrag = WebGL.INI.AIR_DRAG * v0 * v0;
         const uphillAmount = Math.max(0, sinSlope);
+        const downhillAmount = Math.max(0, -sinSlope);
         const accUphillBrake = WebGL.INI.UPHILL_BRAKE * uphillAmount;
-        const a = accGravity - accFriction - accDrag - accUphillBrake;
-        console.log(". a", a, "gravity", accGravity, "friction", accFriction, "drag", accDrag, "accUphillBrake", accUphillBrake, "slopeDistance", slopeDistance);
-        
+        let accBrake = 0;
+        if (breaking) {
+            const brakeSlopeFactor = Math.max(WebGL.INI.BRAKE_MIN_FACTOR, 1 + WebGL.INI.BRAKE_UPHILL_GAIN * uphillAmount - WebGL.INI.BRAKE_DOWNHILL_LOSS * downhillAmount);
+            accBrake = WebGL.INI.BRAKE_DECEL * brakeSlopeFactor;
+        }
+        const a = accGravity - accFriction - accDrag - accUphillBrake - accBrake;
+        //console.log(". a", a, "gravity", accGravity, "friction", accFriction, "drag", accDrag, "accUphillBrake", accUphillBrake, "accBrake", accBrake, "slopeDistance", slopeDistance);
+        //console.log(". a", a, "accBrake", accBrake);
+
         const v1Squared = v0 * v0 + 2 * a * slopeDistance;
         if (v1Squared < 0) return 0;
         let v1 = Math.sqrt(v1Squared);
-        v1 = Math.min(v1, vMax);
+        v1 = Math.min(v1, WebGL.INI.MAX_SLIDING_SPEED);
         return v1;
     }
     changeTexture(texture) {
@@ -2971,19 +2983,7 @@ class $3D_player {
         let angle = Math.round(lapsedTime / ENGINE.INI.ANIMATION_INTERVAL) * rotDirection * ((2 * Math.PI) / this.rotationResolution);
         this.setDir(Vector3.from_2D_dir(this.dir.rotate2D(angle), this.dir.y));
 
-        if (this.mode === "Sliding") {
-            console.warn("switching for label", label);
-            switch (label) {
-                case "left":
-                    this.setMode("LeftMove");
-                    break;
-                case "right":
-                    this.setMode("RightMove");
-                    break;
-                default:
-                    throw new Error("mode label error", label);
-            }
-        }
+        if (this.mode === "Sliding") this.setMode(`${label}Move`);
 
         if (WebGL.CONFIG.dual && WebGL.CONFIG.firstperson) this.setRotation();
         this.setTranslation(); //
@@ -3046,9 +3046,9 @@ class $3D_player {
         return this.setPos(nextPos3);
     }
     _apply_brake() {
-        console.info("_apply_brake");
         this.setMode("Breaking");
         this.actor.animate(Date.now());
+        this.breaking = true;
     }
     _out_of_surface(nextPos3, check) {
         //console.log("OOS", nextPos3, check);
@@ -3194,11 +3194,11 @@ class $3D_player {
 
         const map = ENGINE.GAME.keymap;
         if (map[ENGINE.KEY.map.Q]) {
-            this.rotate(-1, lapsedTime, "left");
+            this.rotate(-1, lapsedTime, "Left");
             return;
         }
         if (map[ENGINE.KEY.map.E]) {
-            this.rotate(1, lapsedTime, "right");
+            this.rotate(1, lapsedTime, "Right");
             return;
         }
         if (map[ENGINE.KEY.map.W]) {
