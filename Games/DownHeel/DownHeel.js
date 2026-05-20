@@ -53,7 +53,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.6.5",
+    VERSION: "0.6.6",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -114,7 +114,7 @@ const PRG = {
         ENGINE.addBOX("TITLE", ENGINE.titleWIDTH, ENGINE.titleHEIGHT, ["title"], null);
         ENGINE.addBOX("LSIDE", INI.SCREEN_BORDER, ENGINE.gameHEIGHT, ["Lsideback", "health"], "side");
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "3d_webgl", "info", "text", "FPS", "button", "click"], "side");
-        ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback"], "fside");
+        ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed"], "fside");
         ENGINE.addBOX("DOWN", ENGINE.bottomWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText", "subtitle"], null);
 
         if (DEBUG._2D_display) {
@@ -170,6 +170,8 @@ const HERO = {
         if (["Sliding", "RightMove", "LeftMove", "Breaking"].includes(this.player.mode)) {
             this.player.setMode("Sliding");
         } else if (!this.player.actionModes.includes(this.player.mode)) this.player.setMode("idle");
+
+        //if (this.player.mode !== 'idle') console.warn(this.player.mode);
     },
     applyDamage(damage) {
         HERO.health = Math.max(HERO.health - damage, 0);
@@ -242,8 +244,20 @@ const HERO = {
         sun.pos = this.player.pos.add(INI.SUN_VECTOR);
     },
     manage(lapsedTime) {
-        this.player.slide(lapsedTime);
+        const slideData = this.player.slide(lapsedTime);
+        this.updateGame(slideData);
         this.updateSunPosition();
+    },
+    updateGame(obj) {
+        if (!obj) return;
+        //console.log("obj", obj);
+        //throw "debug";
+        for (const o in obj) {
+            GAME[o] = obj[o];
+        }
+    },
+    crash() {
+        console.warn("crash");
     }
 };
 
@@ -252,6 +266,8 @@ const HERO = {
  */
 
 const GAME = {
+    realSpeed: null,
+    highSpeed: null,
     restarted: false,
     start() {
         console.log("GAME started");
@@ -301,6 +317,8 @@ const GAME = {
     },
     levelStart() {
         console.log("starting level", GAME.level);
+        this.realSpeed = 0;
+        this.highSpeed = 0;
         WebGL.playerList.clear();                           //requred for restart after resurrection
         GAME.initLevel(GAME.level);
         //WebGL.GAME.setFirstPerson();                          //my preference
@@ -466,6 +484,7 @@ const GAME = {
             GAME.drawPlayer();
         }
         WebGL.renderScene(MAP[GAME.level].map);
+        TITLE.speed();
         //TITLE.time();
 
         if (DEBUG.FPS) {
@@ -575,21 +594,9 @@ const GAME = {
 
 const TITLE = {
     stack: {
-        Y2: 66,
-        delta2: 256 + 36,
-        delta3: 120,
-        delta4: 100,
-        DYR: 66,
-        deltaItem: 48,
-        keyDelta: 56,
-        scrollIndex: 0,
-        scrollInRow: 3,
-        scrollDelta: 72,
-        SY: 540, //540
-        OY: 415,
-        HEALTH_TEXT: 720,
-        goldX: 950,
-        goldY: 40,
+        speed: 32,
+        hispeed: 120,
+        
     },
     startTitle() {
         if (DEBUG.VERBOSE) console.log("TITLE started");
@@ -680,6 +687,26 @@ const TITLE = {
         CTX.shadowBlur = 3;
         CTX.fillText(PRG.NAME, x, y);
     },
+    namePlot() {
+        const CTX = LAYER.title;
+        const fs = 64;
+        CTX.font = fs + "px Carolingia";
+        CTX.textAlign = "left";
+        const text = MAP[GAME.level].name;
+        let txt = CTX.measureText(text);
+        let x = ENGINE.sideWIDTH;
+        let y = fs;
+        let gx = x - txt.width / 2;
+        let gy = y - fs;
+        let grad = this.makeGrad(CTX, gx, gy + 10, gx, gy + fs);
+        CTX.fillStyle = grad;
+        GAME.grad = grad;
+        CTX.shadowColor = "#666666";
+        CTX.shadowOffsetX = 2;
+        CTX.shadowOffsetY = 2;
+        CTX.shadowBlur = 3;
+        CTX.fillText(text, x, y);
+    },
     drawButtons() {
         ENGINE.clearLayer("button");
         FORM.BUTTON.POOL.clear();
@@ -705,66 +732,12 @@ const TITLE = {
         $(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, ENGINE.mouseClick);
     },
     firstFrame() {
-        TITLE.titlePlot();
+        //TITLE.titlePlot();
         //TITLE.sidebackground_static();
         TITLE.health();
-
+        TITLE.namePlot();
+        TITLE.speed();
     },
-    sidebackground_static() {
-        //lines
-        let x = ((ENGINE.sideWIDTH - SPRITE.LineTop.width) / 2) | 0;
-        let y = 0;
-        const dY = (SPRITE.wavyR.height / 2) | 0;
-        let cX = ((ENGINE.sideWIDTH) / 2) | 0;
-        ENGINE.draw("sideback", x, y, SPRITE.LineTop);
-        ENGINE.draw("Lsideback", x, y, SPRITE.LineTop);
-
-        //2
-        y = TITLE.stack.Y2;
-        y += (SPRITE.Bag.height / 4) | 0;
-        const lX = ((ENGINE.sideWIDTH - SPRITE.LineTop.width) / 2) | 0;
-        let rX = ENGINE.sideWIDTH - lX - SPRITE.wavyR.width;
-        ENGINE.draw("sideback", lX, y, SPRITE.wavyL);
-        ENGINE.draw("sideback", rX, y, SPRITE.wavyR);
-        ENGINE.spriteDraw("sideback", cX, y + dY, SPRITE.Bag);
-
-        //3
-        y += TITLE.stack.delta2;
-        ENGINE.draw("sideback", lX, y, SPRITE.wavyL);
-        ENGINE.draw("sideback", rX, y, SPRITE.wavyR);
-
-        // 
-        ENGINE.spriteDraw("sideback", cX, y + dY, SPRITE.OrnateMagicFlask);
-
-        //4
-        y += TITLE.stack.delta3;
-        ENGINE.draw("sideback", lX, y, SPRITE.wavyL);
-        ENGINE.draw("sideback", rX, y, SPRITE.wavyR);
-        ENGINE.spriteDraw("sideback", cX, y + dY, SPRITE.FireBall);
-        y += SPRITE.LineTop.height + 8;
-        ENGINE.draw("sideback", x, y, SPRITE.SkillFireball);
-        rX = (3 * cX / 2 - SPRITE.ManaSkill.width / 2) | 0;
-        ENGINE.draw("sideback", rX + 1, y - 5, SPRITE.ManaSkill);
-
-        TITLE.stack.magic = y + 112;
-
-        //5
-        y += TITLE.stack.delta4;
-
-        //
-        y += SPRITE.LineTop.height + 8;
-        ENGINE.draw("sideback", x, y, SPRITE.SkillKick);
-        rX = (3 * cX / 2 - SPRITE.SkillShield.width / 2) | 0;
-        ENGINE.draw("sideback", rX - 7, y, SPRITE.SkillShield);
-
-        TITLE.stack.skills = y + 120;
-
-        //final line
-        y = (ENGINE.gameHEIGHT - SPRITE.LineBottom.height) | 0;
-        ENGINE.draw("sideback", x, y, SPRITE.LineBottom);
-        ENGINE.draw("Lsideback", x, y, SPRITE.LineBottom);
-    },
-
     health() {
         ENGINE.clearLayer("health");
         const cX = ((INI.SCREEN_BORDER) / 2) | 0;
@@ -799,6 +772,52 @@ const TITLE = {
     },
     music() {
         AUDIO.Title.play();
+    },
+    speed() {
+        GAME.realSpeed = Math.round(GAME.realSpeed);
+        GAME.highSpeed = Math.max(GAME.highSpeed, GAME.realSpeed);
+        this._text("speed", "Speed", TITLE.stack.speed, "realSpeed", 0)
+        this._text("maxspeed", "Max Speed", TITLE.stack.hispeed, "highSpeed", 0)
+     },
+    _label(CTX, txt, fs, x, y) {
+        CTX.font = fs + "px CPU";
+        this._grad(CTX, txt, fs, x, y);
+        CTX.shadowColor = "#555555";
+        CTX.shadowOffsetX = 1;
+        CTX.shadowOffsetY = 1;
+        CTX.shadowBlur = 2;
+        CTX.textAlign = "center";
+        CTX.fillText(txt, x, y);
+    },
+    _text(layer, txt, y, what, pad) {
+        ENGINE.clearLayer(layer);
+        let CTX = LAYER[layer];
+        let x = ENGINE.sideWIDTH / 2;
+        let fs = 32;
+        this._label(CTX, txt, fs, x, y);
+        CTX.fillStyle = "#FFF";
+        CTX.shadowColor = "#DDD";
+        CTX.shadowOffsetX = 1;
+        CTX.shadowOffsetY = 1;
+        CTX.shadowBlur = 1;
+        y += fs + 4;
+        CTX.fillText(GAME[what].toString().padStart(pad, "0"), x, y);
+    },
+    _grad(CTX, txt, fs, x, y) {
+        let txtm = CTX.measureText(txt);
+        let gx = x - txtm.width / 2;
+        let gy = y - fs;
+        CTX.fillStyle = this.makeGrad(CTX, gx, gy + 2, gx, gy + fs);
+    },
+    //example usage
+    score() {
+        this._text("score", "SCORE", 32, "score", 6);
+        if (GAME.score >= GAME.extraLife[0]) {
+            GAME.lives++;
+            GAME.extraLife.shift();
+            TITLE.lives();
+            AUDIO.ExtraLife.play();
+        }
     },
 };
 
