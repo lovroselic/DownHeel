@@ -13,8 +13,8 @@ console.log("%cMAP for DownHeel loaded.", "color: #888");
 /** Map definitions */
 const MAP = {
     1: {
-        name: "Generic room name",
-        data: '{"width":"128","height":"3","depth":1,"map":"AA106BB2AA193$AA2BAA6BAA2BAA11BAA58"}',
+        name: "Easy Peasy",
+        data: '{"width":"128","height":"3","depth":1,"map":"AA27BB2AA115BAA23BAA5BAA67$AA20BB2AA14BAA3BAA9BAA54BAA27BAA8"}',
         wall: "MountainWall_123",
         floor: "Snow_002",
         frontPanorama: "AlpinePanorama_176",

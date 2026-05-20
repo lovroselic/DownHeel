@@ -57,7 +57,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.7.0",
+    VERSION: "0.7.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -549,15 +549,13 @@ const GAME = {
             ENGINE.GAME.keymap[ENGINE.KEY.map.F8] = false;
         }
         if (map[ENGINE.KEY.map.F9]) {
-            console.info(" -------------------- Getting help --------------------");
-
-            console.info(" --------------------  ***** --------------------");
             ENGINE.GAME.keymap[ENGINE.KEY.map.F9] = false;
 
             if (!DEBUG.keys) return;
 
             console.log("\nDEBUG:");
             console.log("#######################################################");
+            console.log("X", HERO.player.pos.x);
 
             console.log("#######################################################");
         }
