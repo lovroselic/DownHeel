@@ -2999,6 +2999,7 @@ class $3D_player {
         if (WebGL.CONFIG.dual && WebGL.CONFIG.firstperson) this.setRotation();
         this.setTranslation(); //
         this.actor.animate(Date.now());
+        if (this.parent.turn) this.parent.turn(label, this.sliding);
     }
     bumpEnemy(nextPos, nextPos3) {
         if (!this.map.enemyIA) return;
@@ -3040,10 +3041,10 @@ class $3D_player {
         }
     }
     _apply_surface_move(lapsedTime, dir) {
-        // pushing
-        if (this.mode === "Sliding" && this.slidingSpeed < WebGL.INI.MIN_SLIDING_SPEED){
-            this.slidingSpeed += WebGL.INI.PUSH_SPEED;
-            console.error("pushing", this.slidingSpeed);
+
+        if (this.mode === "Sliding" && this.slidingSpeed < WebGL.INI.MIN_SLIDING_SPEED) {
+            this.slidingSpeed += WebGL.INI.PUSH_SPEED;                  // pushing
+
         }
 
         if (this.mode !== "idle") return;
@@ -3068,6 +3069,7 @@ class $3D_player {
         this.setMode("Breaking");
         this.actor.animate(Date.now());
         this.breaking = true;
+        if (this.parent.break) this.parent.break();
     }
     _out_of_surface(nextPos3, check) {
         if (check.x >= this.QM.W) {
@@ -3077,7 +3079,7 @@ class $3D_player {
     crash() {
         console.info("_out_of_surface player crash");
         this.stopSliding();
-        this.parent.crash(this.slidingSpeed * WebGL.INI.GRID_SIZE * 3.6);    //call parent's crash handler
+        if (this.parent.crash) this.parent.crash(this.slidingSpeed * WebGL.INI.GRID_SIZE * 3.6);    //call parent's crash handler
     }
     _applyMove_(lapsedTime, dir) {
         let length = (lapsedTime / 1000) * this.moveSpeed;
@@ -5150,6 +5152,20 @@ class FloorDust extends ParticleEmmiter {
         this.gravity = new Float32Array([0, -0.05, 0]);
         this.velocity = 0.01;
         this.rounded = 0;
+    }
+}
+
+class SnowCloud extends ParticleEmmiter {
+    constructor(position, duration = WebGL.INI.EXPLOSION_DURATION_MS * 0.9, texture = TEXTURE.SnowTexture, number = WebGL.INI.EXPLOSION_N_PARTICLES * 0.9) {
+        super(position, texture);
+        this.number = number;
+        this.duration = duration;
+        this.build(number);
+        this.lightColor = colorStringToVector("#000000");
+        this.scale = 0.02;
+        this.gravity = new Float32Array([0, 0.3, 0]);
+        this.velocity = 0.025;
+        this.rounded = 1;
     }
 }
 

@@ -110,6 +110,7 @@ LoadTextures = [
     //{ srcName: "ObjectTextures/FireTexture2_Green.webp", name: "FireTexture2_Green" },
     //{ srcName: "ObjectTextures/RedFireTexture.webp", name: "RedFireTexture" },
     //{ srcName: "ObjectTextures/BluBallTexture.webp", name: "BluBallTexture" },
+    { srcName: "ObjectTextures/SnowTexture.webp", name: "SnowTexture" },
 
     //panorama
     { srcName: "Panorama/AlpinePanorama_168.webp", name: "AlpinePanorama_168" },

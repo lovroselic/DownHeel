@@ -57,7 +57,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.6.7",
+    VERSION: "0.7.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -277,6 +277,16 @@ const HERO = {
         const severity = Math.pow(x, INI.CRASH_DAMAGE_POWER);
         const damage = INI.MAX_DAMAGE * severity * impactFactor;
         return Math.round(damage);
+    },
+    break() {
+        const pos = this.player.pos.add(new Vector3(-0.03, 0, 0));
+        EXPLOSION3D.add(new SnowCloud(pos));
+    },
+    turn(label, sliding) {
+        if (!sliding) return;
+        const side = label === "Left" ? -1 : 1;
+        const pos = this.player.pos.add(new Vector3(-0.005, 0, 0.1 * side));
+        EXPLOSION3D.add(new SnowCloud(pos));
     }
 };
 
