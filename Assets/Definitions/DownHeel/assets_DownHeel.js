@@ -103,7 +103,7 @@ LoadTextures = [
     //{ srcName: "ObjectTextures/Explosion3.webp", name: "Explosion" },
     //{ srcName: "ObjectTextures/Tile.webp", name: "Tile" },
     //{ srcName: "ObjectTextures/WoodTexture.webp", name: "WoodTexture" },
-    //{ srcName: "ObjectTextures/RedLiquid.jpg", name: "RedLiquid" },
+    { srcName: "ObjectTextures/RedLiquid.jpg", name: "RedLiquid" },
     //{ srcName: "ObjectTextures/FireTexture.webp", name: "FireTexture" },
     //{ srcName: "ObjectTextures/FireTexture2.webp", name: "FireTexture2" },
     //{ srcName: "ObjectTextures/FireTexture2_Blue.webp", name: "FireTexture2_Blue" },
@@ -162,6 +162,7 @@ LoadAudio = [
     { srcName: "LaughingSkull - Anomalous Anomalies.mp3", name: "Title" },
 
     //action sounds
+    { srcName: "PrincessScream.mp3", name: "PrincessScream" },
     //{ srcName: "Explosion1.mp3", name: "Explosion" },
 
 ];

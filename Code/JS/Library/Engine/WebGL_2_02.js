@@ -116,7 +116,9 @@ const WebGL = {
         BRAKE_MIN_FACTOR: 0.25,         // never make braking completely useless
         MAX_SLIDING_SPEED: 20,          // to be tuned
         GRID_SIZE: 7.5,                 // grid edge in meterss
-        INITIAL_SLIDING_SPEED: 0.35,    //initial speed
+        INITIAL_SLIDING_SPEED: 0.35,    // initial speed
+        MIN_SLIDING_SPEED: 0.75,        // speed after which you cannot use 'push' anymore
+        PUSH_SPEED: 0.05,               // how much each push adds to sliding speed   
     },
     setGridSize(size) {
         this.INI.GRID_SIZE = size;
@@ -2533,7 +2535,7 @@ class $3D_player {
 
         this.slidingSpeed = this.updateSlidingSpeed(this.slidingSpeed, length, dZ, this.breaking);
         const realSpeed = this.slidingSpeed * WebGL.INI.GRID_SIZE * 3.6; //km/h
-        console.log("slide length", length, "speed", this.slidingSpeed, "realSpeed", realSpeed);
+        //console.log("slide length", length, "speed", this.slidingSpeed, "realSpeed", realSpeed);
         nextPos3.set_y(zAfter);
         this.setPos(nextPos3);
         if (this.slidingSpeed <= 0) {
@@ -2561,7 +2563,7 @@ class $3D_player {
             accBrake = WebGL.INI.BRAKE_DECEL * brakeSlopeFactor;
         }
         const a = accGravity - accFriction - accDrag - accUphillBrake - accBrake;
-        console.log(". a", a, "gravity", accGravity, "friction", accFriction, "drag", accDrag, "accUphillBrake", accUphillBrake, "accBrake", accBrake, "dZ", dZ);
+        //console.log(". a", a, "gravity", accGravity, "friction", accFriction, "drag", accDrag, "accUphillBrake", accUphillBrake, "accBrake", accBrake, "dZ", dZ);
         //console.log(". a", a, "accBrake", accBrake);
 
         const v1Squared = v0 * v0 + 2 * a * slopeDistance;
@@ -2886,7 +2888,6 @@ class $3D_player {
         }
 
         const attackedPoint = attackedEnemy.moveState.pos.translate(DOWN3, attackedEnemy.midHeight);
-        //console.info("this.pos, refPoint, attackedPoint, attackedEnemy.r", this.pos, refPoint, attackedPoint, attackedEnemy.r);
         let hit = ENGINE.lineIntersectsSphere(this.pos, refPoint, attackedPoint, attackedEnemy.r);
         if (ENGINE.verbose) console.info("selected attackedEnemy", `${attackedEnemy.name} - ${attackedEnemy.id}: hit ${hit}`);
 
@@ -3039,6 +3040,12 @@ class $3D_player {
         }
     }
     _apply_surface_move(lapsedTime, dir) {
+        // pushing
+        if (this.mode === "Sliding" && this.slidingSpeed < WebGL.INI.MIN_SLIDING_SPEED){
+            this.slidingSpeed += WebGL.INI.PUSH_SPEED;
+            console.error("pushing", this.slidingSpeed);
+        }
+
         if (this.mode !== "idle") return;
 
         let length = (lapsedTime / 1000) * this.moveSpeed;
@@ -3053,7 +3060,7 @@ class $3D_player {
         this.setMode("Sliding");
         this.sliding = true;
         this.slidingSpeed = WebGL.INI.INITIAL_SLIDING_SPEED;
-        console.info("_apply_surface_move", "this.slidingSpeed", this.slidingSpeed);
+        //console.info("_apply_surface_move", "this.slidingSpeed", this.slidingSpeed);
         return this.setPos(nextPos3);
     }
     _apply_brake() {
@@ -3068,8 +3075,9 @@ class $3D_player {
         } else this.crash();
     }
     crash() {
+        console.info("_out_of_surface player crash");
         this.stopSliding();
-        this.parent.crash();    //call parent's crash handler
+        this.parent.crash(this.slidingSpeed * WebGL.INI.GRID_SIZE * 3.6);    //call parent's crash handler
     }
     _applyMove_(lapsedTime, dir) {
         let length = (lapsedTime / 1000) * this.moveSpeed;

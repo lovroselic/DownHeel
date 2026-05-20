@@ -50,10 +50,14 @@ const INI = {
     HERO_HEALTH: 100,
     SUN_VECTOR: Vector3.from_array([0, 50, 0]),
     HERO_HEIGHT: 0.15,
+    CRASH_SAFE_SPEED: 20,
+    CRASH_LETHAL_SPEED: 150,
+    CRASH_DAMAGE_POWER: 2.4,
+    MAX_DAMAGE: 100,
 };
 
 const PRG = {
-    VERSION: "0.6.6",
+    VERSION: "0.6.7",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -189,6 +193,8 @@ const HERO = {
         console.error("HERO DEATH");
         AUDIO.PrincessScream.play();
 
+        throw "hero death not implemented";
+
         ///////////////
         const heroRefGrid = Vector3.to_Grid3D(HERO.player.pos.translate(UP3, HERO.player.heigth));
         const gridValue = REVERSED_MAPDICT[HERO.player.map.GA.getValue(heroRefGrid)];
@@ -250,14 +256,27 @@ const HERO = {
     },
     updateGame(obj) {
         if (!obj) return;
-        //console.log("obj", obj);
-        //throw "debug";
         for (const o in obj) {
             GAME[o] = obj[o];
         }
     },
-    crash() {
-        console.warn("crash");
+    crash(crashSpeed) {
+        const damage = this.calcCrashDamage(crashSpeed);
+        console.warn("crash", crashSpeed, "damage", damage);
+        if (damage > 0) {
+            this.applyDamage(damage);
+            EXPLOSION3D.add(new BloodExplosion(this.player.pos));
+        }
+
+    },
+    calcCrashDamage(crashSpeed) {
+        let impactFactor = 1.0;         //we need to implement wall normals
+        if (crashSpeed < INI.CRASH_SAFE_SPEED) return 0;
+        if (crashSpeed >= INI.CRASH_LETHAL_SPEED) return INI.MAX_DAMAGE;
+        const x = (crashSpeed - INI.CRASH_SAFE_SPEED) / (INI.CRASH_LETHAL_SPEED - INI.CRASH_SAFE_SPEED);
+        const severity = Math.pow(x, INI.CRASH_DAMAGE_POWER);
+        const damage = INI.MAX_DAMAGE * severity * impactFactor;
+        return Math.round(damage);
     }
 };
 
@@ -596,7 +615,7 @@ const TITLE = {
     stack: {
         speed: 32,
         hispeed: 120,
-        
+        HEALTH_TEXT: 720,
     },
     startTitle() {
         if (DEBUG.VERBOSE) console.log("TITLE started");
@@ -778,7 +797,7 @@ const TITLE = {
         GAME.highSpeed = Math.max(GAME.highSpeed, GAME.realSpeed);
         this._text("speed", "Speed", TITLE.stack.speed, "realSpeed", 0)
         this._text("maxspeed", "Max Speed", TITLE.stack.hispeed, "highSpeed", 0)
-     },
+    },
     _label(CTX, txt, fs, x, y) {
         CTX.font = fs + "px CPU";
         this._grad(CTX, txt, fs, x, y);
