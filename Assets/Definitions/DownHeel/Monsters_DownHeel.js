@@ -17,19 +17,21 @@ const HERO_TYPE = {
     ThePrincess: {
         name: "ThePrincess",
         model: "SlidingPrincess",
-        //texture: "BluePrincess",
         scale: 2.0 / 2 ** 4,
         rotateToNorth: Math.PI,
         material: MATERIAL.princess,
         moveSpeed: 2.0
     },
-    /*ThePrincess: {
-        name: "ThePrincess",
-        model: "Princess",
-        texture: "BluePrincess",
-        scale: 2.0 / 2 ** 4,
+};
+
+const MONSTER_TYPE = {
+    Skeleton: {
+        name: "WhiteSkeleton",
+        model: "Skeleton",
+        scale: 1.5 / 2 ** 4,
         rotateToNorth: Math.PI,
-        material: MATERIAL.princess,
-        moveSpeed: 2.0
-    }*/
+        midHeight: 0.5,
+        material: MATERIAL.standardShine,
+        static: true
+    },
 };

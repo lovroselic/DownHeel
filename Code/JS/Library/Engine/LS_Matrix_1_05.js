@@ -58,7 +58,10 @@ class Vector3 {
         return new Grid3D(v.x, v.z, v.y);                   //swaps y and Z
     }
     static to_FP_Grid3D(v) {
-        return new FP_Grid3D(v.x, v.z, v.y);                 //swaps y and Z
+        return new FP_Grid3D(v.x, v.z, v.y);                //swaps y and Z
+    }
+    static to_Vector3D (v){
+        return new Vector3D(v.x, v.y, v.z);                 //y,z keeping position
     }
     same(vector3) {
         return (

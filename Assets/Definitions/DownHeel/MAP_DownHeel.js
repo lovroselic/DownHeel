@@ -10,6 +10,12 @@ console.log("%cMAP for DownHeel loaded.", "color: #888");
  * 253, 128, 13
  */
 
+const MAP_TEXT = {
+    1: {
+        text: "This is an easy slope. I can probably just rush through it.",
+    }
+};
+
 /** Map definitions */
 const MAP = {
     1: {

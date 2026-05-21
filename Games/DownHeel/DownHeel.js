@@ -57,7 +57,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.7.2",
+    VERSION: "0.8.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -191,33 +191,64 @@ const HERO = {
     },
     death() {
         console.error("HERO DEATH");
+        $(AUDIO.PrincessScream).one("ended", HERO.endSpeech);
         AUDIO.PrincessScream.play();
+        HERO.finalDeath();
+    },
+    endSpeech() {
+        const texts = [
+            "Is this game too hard for you? Maybe you should play something less sophisticated",
+            "Next time maybe try to avoid hitting this wall?",
+            "Your playing sucks",
+            "Are you blind? Not into the wall, silly!",
+            "Ah yes, the ancient strategy of steering directly into stone.",
+            "Wonderful. The wall has won again.",
+            "I am starting to suspect the wall is your actual destination.",
+            "That was not a shortcut, that was architecture.",
+            "My royal backside demands a better pilot.",
+            "Do you steer with your elbows?",
+            "Snow, slope, open path, and somehow you chose wall.",
+            "Congratulations, you found the least elegant route down the mountain.",
+            "The wall sends its compliments, and also my bruises.",
+            "I have seen drunken goats with better line control.",
+            "Was that a turn, or a cry for help?",
+            "Try using the path next time, it is the big white thing without rocks.",
+            "Excellent crash. Terrible skiing. No notes.",
+            "If stupidity had traction, we would be uphill by now.",
+            "That impact had more planning than your steering.",
+            "I hope the wall enjoyed that, because I certainly did not.",
+            "My royal medical bill will be sent to your ego.",
+            "You missed the turn by only one entire mountain.",
+            "I asked for speed, not masonry inspection.",
+            "Next time, aim for the gap. It is the suspiciously empty part.",
+            "The good news is, the wall is still standing. Unlike my dignity.",
+            "You drive like a snowman having a panic attack.",
+            "I am a princess, not a demolition permit.",
+            "Try to miss the wall, next time.",
+            "Not only my royal butt, also my royal head hurts.",
+            "Steering clear of fatal acidents is not your strong suit.",
+            "Did you lose a fight with the concept of turning?",
+            "I have more control sliding on my butt than you have with both hands.",
+            "That wall was visible from orbit, genius.",
+            "Were you aiming, or just emotionally collapsing?",
+            "Brilliant. You weaponized incompetence.",
+            "The mountain has many paths, and you chose blunt trauma.",
+            "I have met icicles with better decision making.",
+            "Your steering belongs in a museum of bad ideas.",
+            "My kingdom has fallen to a player with the reflexes of wet bread.",
+            "You missed the road so hard I felt it in my head.",
+            "Did the wall insult your family, or are you just like this?",
+            "If bad driving were royal service, you would be a duke.",
+            "I could steer better using only panic and butt friction.",
+            "That was the gaming equivalent of eating soup with a fork.",
+            "I hope you are proud. The wall certainly is.",
+            "You turned a snowy slope into a crime scene for common sense.",
+            "At this point I trust gravity more than you, and gravity is trying to kill me.",
+            "Next time, give the controls to someone with a pulse and a plan.",
+        ];
+        const text = texts.chooseRandom();
+        HERO.speak(text);
 
-        throw "hero death not implemented";
-
-        ///////////////
-        const heroRefGrid = Vector3.to_Grid3D(HERO.player.pos.translate(UP3, HERO.player.heigth));
-        const gridValue = REVERSED_MAPDICT[HERO.player.map.GA.getValue(heroRefGrid)];
-        const heightOffset = parseInt(gridValue[4], 10) / 10 || 0;
-        const depth = Math.max(0, HERO.player.depth);
-        HERO.player.pos.set_y(0.1 + depth + heightOffset);
-        WebGL.GAME.setFirstPerson();
-        WebGL.GAME.positionUpdate();
-        if (GAME.lives <= 0) return HERO.finalDeath();
-
-        if (gridValue !== "HOLE") {
-            const grid = Vector3.to_Grid3D(HERO.player.pos);
-            const face = DirectionToFace(NOWAY);
-            const decal = SPRITE.DeathPlace;
-            const deathPlace = new StaticDecal(grid, face, decal, "crest", "DeathPlace", true);
-            GAME.deathPlaceDecals.push(deathPlace);
-        }
-
-        HERO.ressurection = true;
-        GAME.STORE.storeIAM(MAP[GAME.level].map);
-        ENGINE.TEXT.centeredText("Press ENTER to resurect The Princess", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
-        ENGINE.GAME.ANIMATION.resetTimer();
-        ENGINE.GAME.ANIMATION.next(GAME.lifeLostRun);
     },
     finalDeath() {
         console.error("HERO FINAL death");
@@ -229,11 +260,14 @@ const HERO = {
         ENGINE.GAME.ANIMATION.resetTimer();
         ENGINE.GAME.ANIMATION.next(GAME.gameOverRun);
 
-        GAME.restarted = true;
-        MAP[GAME.level].map.storage.clear();
+        let dir = HERO.player.camera.dir.reverse2D();
+        const entity = new $3D_Entity(Vector3.to_FP_Grid3D(HERO.player.pos), MONSTER_TYPE.Skeleton, Vector3.to_Vector3D(dir));
+        ENTITY3D.add(entity);
     },
     restore() {
+        this.dead = false;
         this.health = this.maxHealth;
+        //this.health = 1;
         TITLE.health();
     },
     flightOn() {
@@ -293,9 +327,9 @@ const HERO = {
         GAME.timerRunning = true;
         GAME.time = new Timer("Main");
     },
-    completeRun() {
-        GAME.timerRunning = true;
-        throw "completeRun not yet implemented";
+    completeLevel() {
+        GAME.timerRunning = false;
+        throw "completeLevel not yet implemented";
     }
 };
 
@@ -374,7 +408,7 @@ const GAME = {
     levelExecute() {
         GAME.drawFirstFrame(GAME.level);
         ENGINE.GAME.resume();
-        HERO.speak("Level executes");
+        HERO.speak(MAP_TEXT[GAME.level].text);
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
@@ -626,7 +660,7 @@ const GAME = {
             ENGINE.GAME.ANIMATION.waitThen(TITLE.startTitle);
         }
         const date = Date.now();
-        //WebGL.GAME.setFirstPerson();
+        WebGL.GAME.setThirdPerson();
         EXPLOSION3D.manage(date);
         ENTITY3D.manage(lapsedTime, date, [HERO.invisible, HERO.dead]);
         GAME.lifeLostFrameDraw(lapsedTime);
@@ -657,6 +691,7 @@ const TITLE = {
     clearAllLayers() {
         ENGINE.layersToClear = new Set(["text",
             "sideback", "button", "title", "FPS", "info", "subtitle", "health",
+            "speed", "maxspeed", "time",
             "bottomText"]);
         ENGINE.clearLayerStack();
         WebGL.transparent();

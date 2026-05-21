@@ -1265,9 +1265,9 @@ class Vector3D extends MasterVectorClass3D {
     static W2 = 3 * 3;
     constructor(x = 0, y = 0, z = 0) {
         super();
-        this.x = Math.trunc(x);
-        this.y = Math.trunc(y);
-        this.z = Math.trunc(z);
+        this.x = Math.floor(x);
+        this.y = Math.floor(y);
+        this.z = Math.floor(z);
     }
     static fromVector2D(vector2d, z) {
         return new Vector3D(vector2d.x, vector2d.y, z)

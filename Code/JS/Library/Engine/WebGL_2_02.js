@@ -3029,7 +3029,6 @@ class $3D_player {
                 this._applyMove_(lapsedTime, dir);
                 break;
             case "surface":
-                console.info("_route_movement", label);
                 if (["left", "right"].includes(label)) return;              // side strafe is not legal move for this concept
                 if (label === "backward") return this._apply_brake();
                 this._apply_surface_move(lapsedTime, dir);
@@ -3073,6 +3072,7 @@ class $3D_player {
     _out_of_surface(nextPos3, check) {
         if (check.x >= this.QM.W) {
             console.warn("level completed", check.x);
+            this.parent.completeLevel();
         } else this.crash();
     }
     crash() {
@@ -4653,7 +4653,6 @@ class BoundingBox {
                     rotY: this._rotY,
                     bb: this
                 });
-                debugger;
                 throw new TypeError("Invalid rotated bounding box lookup");
             }
         }
