@@ -15,6 +15,7 @@ LoadFonts = [
     { srcName: "ArcadeClassic.ttf", name: "Arcade" },
     { srcName: "carolingia_fixed.ttf", name: "Carolingia" },
     { srcName: "CPU.ttf", name: "CPU" },
+    { srcName: "DigitalNumbers.ttf", name: "DigitalNumbers" },
 ];
 
 LoadTextures = [
@@ -178,7 +179,7 @@ LoadShaders = [
 //LoadObjects = [  ];
 
 LoadModels = [
-    "ThePrincess.gltf", "SlidingPrincess.gltf",
+    "SlidingPrincess.gltf", "Skeleton.gltf",
 ];
 
 LoadSprites = [

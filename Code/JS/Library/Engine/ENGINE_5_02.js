@@ -4091,17 +4091,25 @@ class Timer {
         let hours = Math.floor(time / 3600);
         let min = Math.floor((time % 3600) / 60);
         let sec = Math.floor((time % 3600) % 60);
+        let hundreds = Math.round(Math.frac(time) * 100);
 
         return {
             h: hours,
             m: min,
-            s: sec
+            s: sec,
+            hundreds: hundreds
         };
     }
     static toTimeString(time) {
         let str = time.h.toString().padStart(2, "0") + ":";
         str += time.m.toString().padStart(2, "0") + ":";
         str += time.s.toString().padStart(2, "0");
+        return str;
+    }
+    static MSH_String(time) {
+        let str = time.m.toString().padStart(1, "0") + ":";
+        str += time.s.toString().padStart(2, "0") + ":";
+        str += time.hundreds.toString().padStart(2, "0");
         return str;
     }
     load(template) {
@@ -4114,12 +4122,15 @@ class Timer {
         }
     }
     time(time) {
+        return Timer.toHMS(this.getTime(time));
+    }
+    getTime(time) {
         if (this.runs) {
             time = (time || this.delta + (Date.now() - this.start)) / 1000;
         } else {
             time = this.delta / 1000;
         }
-        return Timer.toHMS(time);
+        return time;
     }
     timeString() {
         let time = this.time();

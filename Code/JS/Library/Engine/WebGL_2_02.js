@@ -2993,12 +2993,10 @@ class $3D_player {
         // calculating new dir
         let angle = Math.round(lapsedTime / ENGINE.INI.ANIMATION_INTERVAL) * rotDirection * ((2 * Math.PI) / this.rotationResolution);
         this.setDir(Vector3.from_2D_dir(this.dir.rotate2D(angle), this.dir.y));
-
         if (this.mode === "Sliding") this.setMode(`${label}Move`);
-
         if (WebGL.CONFIG.dual && WebGL.CONFIG.firstperson) this.setRotation();
-        this.setTranslation(); //
-        this.actor.animate(Date.now());
+        WebGL.GAME.positionUpdate();
+
         if (this.parent.turn) this.parent.turn(label, this.sliding);
     }
     bumpEnemy(nextPos, nextPos3) {
@@ -3042,6 +3040,8 @@ class $3D_player {
     }
     _apply_surface_move(lapsedTime, dir) {
 
+        if (this.parent.startRun) this.parent.startRun();
+
         if (this.mode === "Sliding" && this.slidingSpeed < WebGL.INI.MIN_SLIDING_SPEED) {
             this.slidingSpeed += WebGL.INI.PUSH_SPEED;                  // pushing
 
@@ -3061,7 +3061,6 @@ class $3D_player {
         this.setMode("Sliding");
         this.sliding = true;
         this.slidingSpeed = WebGL.INI.INITIAL_SLIDING_SPEED;
-        //console.info("_apply_surface_move", "this.slidingSpeed", this.slidingSpeed);
         return this.setPos(nextPos3);
     }
     _apply_brake() {
@@ -3077,7 +3076,6 @@ class $3D_player {
         } else this.crash();
     }
     crash() {
-        console.info("_out_of_surface player crash");
         this.stopSliding();
         if (this.parent.crash) this.parent.crash(this.slidingSpeed * WebGL.INI.GRID_SIZE * 3.6);    //call parent's crash handler
     }

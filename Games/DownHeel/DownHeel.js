@@ -57,7 +57,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.7.1",
+    VERSION: "0.7.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -115,7 +115,7 @@ const PRG = {
 
         $("#bottom").css("margin-top", ENGINE.gameHEIGHT + ENGINE.titleHEIGHT + ENGINE.bottomHEIGHT);
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 2 * ENGINE.sideWIDTH + 4);
-        ENGINE.addBOX("TITLE", ENGINE.titleWIDTH, ENGINE.titleHEIGHT, ["title"], null);
+        ENGINE.addBOX("TITLE", ENGINE.titleWIDTH, ENGINE.titleHEIGHT, ["title", "time"], null);
         ENGINE.addBOX("LSIDE", INI.SCREEN_BORDER, ENGINE.gameHEIGHT, ["Lsideback", "health"], "side");
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "3d_webgl", "info", "text", "FPS", "button", "click"], "side");
         ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed"], "fside");
@@ -287,6 +287,15 @@ const HERO = {
         const side = label === "Left" ? -1 : 1;
         const pos = this.player.pos.add(new Vector3(-0.005, 0, 0.1 * side));
         EXPLOSION3D.add(new SnowCloud(pos));
+    },
+    startRun() {
+        if (GAME.timerRunning) return;
+        GAME.timerRunning = true;
+        GAME.time = new Timer("Main");
+    },
+    completeRun() {
+        GAME.timerRunning = true;
+        throw "completeRun not yet implemented";
     }
 };
 
@@ -295,9 +304,11 @@ const HERO = {
  */
 
 const GAME = {
+    time: null,
     realSpeed: null,
     highSpeed: null,
     restarted: false,
+    timerRunning: false,
     start() {
         console.log("GAME started");
         if (AUDIO.Title) {
@@ -323,7 +334,7 @@ const GAME = {
         ENGINE.VECTOR2D.configure("player");
         GAME.fps = new FPS_short_term_measurement(300);
         GAME.prepareForRestart();
-        GAME.time = new Timer("Main");
+
 
         if (DEBUG.AUTO_TEST) {
             return DEBUG.automaticTests();
@@ -348,6 +359,9 @@ const GAME = {
         console.log("starting level", GAME.level);
         this.realSpeed = 0;
         this.highSpeed = 0;
+        this.timerRunning = false;
+        if (GAME.time) GAME.time.unregister();
+        GAME.time = null;
         WebGL.playerList.clear();                           //requred for restart after resurrection
         GAME.initLevel(GAME.level);
         //WebGL.GAME.setFirstPerson();                          //my preference
@@ -514,7 +528,7 @@ const GAME = {
         }
         WebGL.renderScene(MAP[GAME.level].map);
         TITLE.speed();
-        //TITLE.time();
+        TITLE.time();
 
         if (DEBUG.FPS) {
             GAME.FPS(lapsedTime);
@@ -721,7 +735,7 @@ const TITLE = {
         CTX.textAlign = "left";
         const text = MAP[GAME.level].name;
         let txt = CTX.measureText(text);
-        let x = ENGINE.sideWIDTH;
+        let x = ENGINE.sideWIDTH / 2;
         let y = fs;
         let gx = x - txt.width / 2;
         let gy = y - fs;
@@ -759,11 +773,10 @@ const TITLE = {
         $(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, ENGINE.mouseClick);
     },
     firstFrame() {
-        //TITLE.titlePlot();
-        //TITLE.sidebackground_static();
         TITLE.health();
         TITLE.namePlot();
         TITLE.speed();
+        TITLE.time();
     },
     health() {
         ENGINE.clearLayer("health");
@@ -806,6 +819,23 @@ const TITLE = {
         this._text("speed", "Speed", TITLE.stack.speed, "realSpeed", 0)
         this._text("maxspeed", "Max Speed", TITLE.stack.hispeed, "highSpeed", 0)
     },
+    time() {
+        const CTX = LAYER.time;
+        ENGINE.clearLayer("time");
+        const fs = 36;
+        CTX.font = fs + "px DigitalNumbers";
+        CTX.textAlign = "center";
+        let x = 1.5 * ENGINE.sideWIDTH + ENGINE.gameWIDTH;
+        let y = ENGINE.titleHEIGHT / 2 + fs / 4;
+        CTX.fillStyle = "#0D0";
+        CTX.shadowColor = "#666";
+        CTX.shadowOffsetX = 1;
+        CTX.shadowOffsetY = 1;
+        CTX.shadowBlur = 1;
+        let text = "0:00:00";
+        if (GAME.time) text = Timer.MSH_String(GAME.time.time());
+        CTX.fillText(text, x, y);
+    },
     _label(CTX, txt, fs, x, y) {
         CTX.font = fs + "px CPU";
         this._grad(CTX, txt, fs, x, y);
@@ -835,16 +865,6 @@ const TITLE = {
         let gx = x - txtm.width / 2;
         let gy = y - fs;
         CTX.fillStyle = this.makeGrad(CTX, gx, gy + 2, gx, gy + fs);
-    },
-    //example usage
-    score() {
-        this._text("score", "SCORE", 32, "score", 6);
-        if (GAME.score >= GAME.extraLife[0]) {
-            GAME.lives++;
-            GAME.extraLife.shift();
-            TITLE.lives();
-            AUDIO.ExtraLife.play();
-        }
     },
 };
 
