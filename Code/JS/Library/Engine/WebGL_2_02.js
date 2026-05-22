@@ -50,9 +50,11 @@ const WebGL = {
     USE_INTERACTION: true,                              // if true, draws interaction buffer
     FIRST_PERSON_DUAL_DISPLAY: true,                    // if true displays alos the hero model
     NO_TOP_CEILING: false,                              // if true we don't display ctop ceiling  regardless of first person
-    VIEWS_ALLOWED: new Set([1, 2, 3, 4, 5, 6, 7]),      //which cameras are set - default all, sys expects set
+    VIEWS_ALLOWED: new Set([1, 2, 3, 4, 5, 6, 7]),      // which cameras are set - default all, sys expects a set
     BUTTONS_APPENDED: false,                            // perspective buttons already appended  
     INI: {
+        SCALE_DECAL: 1.0,                               // change/adapt decal scale for skewed surface based rendering
+        ADDITIONAL_TOP_OFFSET: 0.0,                     // change/adapt top offset for skewed surface based rendering
         PIC_WIDTH: 0.5,
         PIC_HEIGHT: 0.7,
         PIC_TOP: 0.2,
@@ -96,7 +98,6 @@ const WebGL = {
         DIFFUSE_LIGHT_STRENGTH: 25.0,
         SPECULAR_LIGHT_STRENGTH: 5.0,
         BACKGROUND_ALPHA: 1.0,
-        SURFACE_WALL_HEIGHT: 1.5,
         BACKGROUND_DISTANCE: 48,  //48
         BACKGROUND_HEIGHT: 40,    //40
         BACKGROUND_TOP_PAD: 0, //8
@@ -105,6 +106,7 @@ const WebGL = {
         BACKGROUND_BACK_HEIGHT: 3,
         BACKGROUND_BACK_BOTTOM_OFFSET: 0,
         BACKGROUND_BACK_LATERAL_SHIFT: 0,
+        SURFACE_WALL_HEIGHT: 1.5,
         FINISH_ARCH_HEIGHT: 1.5,
         GRAVITY: -9.8,
         SNOW_FRICTION: 0.015,
@@ -1633,19 +1635,27 @@ const WORLD = {
         }
         return [leftX, rightX, topY, bottomY];
 
+        //SCALE_DECAL
         function calcWide(CAT, R) {
-            leftX = ((1 - WebGL.INI[`${CAT}_WIDTH`]) / 2.0);
+            const width = WebGL.INI[`${CAT}_WIDTH`] * WebGL.INI.SCALE_DECAL;
+            const height = width / R;
+            const top = WebGL.INI.ADDITIONAL_TOP_OFFSET + WebGL.INI[`${CAT}_TOP`];
+
+            leftX = (1.0 - width) / 2.0;
             rightX = 1.0 - leftX;
-            topY = 1.0 - WebGL.INI[`${CAT}_TOP`];
-            bottomY = 1.0 - ((WebGL.INI[`${CAT}_WIDTH`] / R) + WebGL.INI[`${CAT}_TOP`]);
+            topY = 1.0 - top;
+            bottomY = topY - height;
             return [leftX, rightX, topY, bottomY];
         }
         function calcTall(CAT, R) {
-            topY = 1.0 - WebGL.INI[`${CAT}_TOP`];
-            bottomY = topY - WebGL.INI[`${CAT}_HEIGHT`];
-            const scaledWidth = WebGL.INI[`${CAT}_HEIGHT`] * R;
-            leftX = ((1 - scaledWidth) / 2.0);
+            const height = WebGL.INI.SCALE_DECAL;
+            const width = height * R;
+            const top = WebGL.INI.ADDITIONAL_TOP_OFFSET + WebGL.INI[`${CAT}_TOP`];
+
+            leftX = (1.0 - width) / 2.0;
             rightX = 1.0 - leftX;
+            topY = 1.0 - top;
+            bottomY = topY - height;
             return [leftX, rightX, topY, bottomY];
         }
     },

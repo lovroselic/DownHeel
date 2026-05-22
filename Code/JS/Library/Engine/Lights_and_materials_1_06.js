@@ -23,6 +23,7 @@ const LIGHT_COLORS = {
     standardYellowSoft: new Float32Array([0.68, 0.62, 0.47]),       // Gentle soft yellow glow
     standardYellowFaint: new Float32Array([0.58, 0.53, 0.40]),      // Subtle, faint yellowish ambiance
     standardYellowVeryFaint: new Float32Array([0.40, 0.37, 0.20]),  // Subtle, veryfaint yellowish ambiance
+    standardYellowTouch: new Float32Array([0.20, 0.17, 0.10]),      // Subtle, extremelly faint yellowish ambiance
     dim: new Float32Array([0.45, 0.45, 0.40]),
     dimRed: new Float32Array([0.50, 0.225, 0.035]),
     fire: new Float32Array([0.94, 0.50, 0.07]),

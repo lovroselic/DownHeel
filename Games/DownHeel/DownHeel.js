@@ -54,13 +54,14 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
+    MAX_LEVEL: 2,
 };
 
 const PRG = {
-    VERSION: "0.8.1",
+    VERSION: "0.8.2",
     NAME: "DownHeel",
     YEAR: "2026",
-    SG: "HTH",
+    SG: "DH",
     CSS: "color: #239AFF;",
     INIT() {
         console.log("%c**************************************************************************************************************************************", PRG.CSS);
@@ -116,7 +117,7 @@ const PRG = {
         $("#bottom").css("margin-top", ENGINE.gameHEIGHT + ENGINE.titleHEIGHT + ENGINE.bottomHEIGHT);
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 2 * ENGINE.sideWIDTH + 4);
         ENGINE.addBOX("TITLE", ENGINE.titleWIDTH, ENGINE.titleHEIGHT, ["title", "time"], null);
-        ENGINE.addBOX("LSIDE", INI.SCREEN_BORDER, ENGINE.gameHEIGHT, ["Lsideback", "health"], "side");
+        ENGINE.addBOX("LSIDE", INI.SCREEN_BORDER, ENGINE.gameHEIGHT, ["Lsideback", "health", "slopeinfo"], "side");
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "3d_webgl", "info", "text", "FPS", "button", "click"], "side");
         ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed"], "fside");
         ENGINE.addBOX("DOWN", ENGINE.bottomWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText", "subtitle"], null);
@@ -255,14 +256,19 @@ const HERO = {
         for (const L of LIGHTS3D.POOL) {
             L.lightColor = Array(0, 0, 0);
         }
-        ENGINE.TEXT.centeredText("Rest In Peace", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
-        ENGINE.TEXT.centeredText("(ENTER)", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2 + ENGINE.TEXT.RD.fs * 1.2);
-        ENGINE.GAME.ANIMATION.resetTimer();
-        ENGINE.GAME.ANIMATION.next(GAME.gameOverRun);
 
         let dir = HERO.player.camera.dir.reverse2D();
         const entity = new $3D_Entity(Vector3.to_FP_Grid3D(HERO.player.pos), MONSTER_TYPE.Skeleton, Vector3.to_Vector3D(dir));
         ENTITY3D.add(entity);
+        ENGINE.GAME.ANIMATION.stop();
+
+        setTimeout(function () {
+            ENGINE.TEXT.centeredText("Rest In Peace", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
+            ENGINE.TEXT.centeredText("(ENTER)", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2 + ENGINE.TEXT.RD.fs * 1.2);
+            ENGINE.GAME.ANIMATION.resetTimer();
+            ENGINE.GAME.ANIMATION.next(GAME.gameOverRun);
+        }, 6000);
+
     },
     restore() {
         this.dead = false;
@@ -296,7 +302,9 @@ const HERO = {
     },
     crash(crashSpeed) {
         const damage = this.calcCrashDamage(crashSpeed);
-        console.warn("crash", crashSpeed, "damage", damage);
+        console.warn("crash", crashSpeed, "damage", damage, "x", this.player.pos.x);
+        GAME.realSpeed = 0;
+
         if (damage > 0) {
             this.applyDamage(damage);
             EXPLOSION3D.add(new BloodExplosion(this.player.pos));
@@ -363,7 +371,7 @@ const GAME = {
         ENGINE.GAME.setGameLoop(GAME.run);
         ENGINE.GAME.start(16);
 
-        GAME.level = 1;
+        //GAME.level = 1;
 
         HERO.construct();
         ENGINE.VECTOR2D.configure("player");
@@ -389,6 +397,8 @@ const GAME = {
         WebGL.VIEWS_ALLOWED = new Set([1, 3]);
         WebGL.GAME.setViewButtons();
         WebGL.CONFIG.setMovementMode("surface");
+        WebGL.INI.SCALE_DECAL = 0.70;
+        WebGL.INI.ADDITIONAL_TOP_OFFSET = 0.2;
     },
     levelStart() {
         console.log("starting level", GAME.level);
@@ -489,7 +499,7 @@ const GAME = {
         MAP_TOOLS.unpack(level);
     },
     prepareForRestart() {
-        let clear = ["background", "text", "FPS", "button", "bottomText"];
+        let clear = ["background", "text", "FPS", "button", "bottomText", "slopeinfo"];
         ENGINE.clearManylayers(clear);
         TITLE.blackBackgrounds();
         ENGINE.TIMERS.clear();
@@ -677,6 +687,7 @@ const TITLE = {
     startTitle() {
         if (DEBUG.VERBOSE) console.log("TITLE started");
         //if (AUDIO.Title) AUDIO.Title.play(); //dev
+        GAME.level = 1; //1
         ENGINE.GAME.pauseBlock();
         TITLE.clearAllLayers();
         TITLE.blackBackgrounds();
@@ -685,6 +696,7 @@ const TITLE = {
         $("#DOWN")[0].scrollIntoView();
         ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");
         TITLE.drawButtons();
+        TITLE.slopeInfo();
         GAME.setTitle();
         ENGINE.GAME.start(16);
         ENGINE.GAME.ANIMATION.next(GAME.runTitle);
@@ -791,22 +803,81 @@ const TITLE = {
         const w = 100;
         const h = 24;
         const F = 1.5;
-        let y = 668 - F * h;
+        let y = 768 - 6 * (F * h);
 
         const buttonColors = new ColorInfo("#F00", "#A00", "#222", "#666", 13);
         const musicColors = new ColorInfo("#0E0", "#090", "#222", "#666", 13);
+        const prevColors = new ColorInfo("rgb(233, 22, 149)", "rgb(64, 28, 141)", "#222", "#666", 13);
+        const nextColors = new ColorInfo("rgb(111, 84, 171)", "rgb(84, 49, 160)", "#222", "#666", 13);
+        const randomColors = new ColorInfo("rgb(29, 43, 239)", "rgb(84, 49, 160)", "#222", "#666", 13);
 
         y += F * h;
-        let startBA = new Area(x, y, w, h);
-        FORM.BUTTON.POOL.push(new Button("Start game", startBA, buttonColors, GAME.start));
+        FORM.BUTTON.POOL.push(new Button("Start game", new Area(x, y, w, h), buttonColors, GAME.start));
 
         y += F * h;
-        let music = new Area(x, y, w, h);
-        FORM.BUTTON.POOL.push(new Button("Title music", music, musicColors, TITLE.music));
+        FORM.BUTTON.POOL.push(new Button("Title music", new Area(x, y, w, h), musicColors, TITLE.music));
+
+        y += F * h;
+        FORM.BUTTON.POOL.push(new Button("Slope Before", new Area(x, y, w, h), prevColors, TITLE.previousSlope));
+
+        y += F * h;
+        FORM.BUTTON.POOL.push(new Button("Next Slope", new Area(x, y, w, h), nextColors, TITLE.nextSlope));
+
+        y += F * h;
+        FORM.BUTTON.POOL.push(new Button("Random Slope", new Area(x, y, w, h), randomColors, TITLE.randomSlope));
 
         FORM.BUTTON.draw();
         $(ENGINE.topCanvas).on("mousemove", { layer: ENGINE.topCanvas }, ENGINE.mouseOver);
         $(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, ENGINE.mouseClick);
+    },
+    previousSlope() {
+        GAME.level = Math.max(1, --GAME.level);
+        TITLE.slopeInfo();
+    },
+    nextSlope() {
+        GAME.level = Math.min(INI.MAX_LEVEL, ++GAME.level);
+        TITLE.slopeInfo();
+    },
+    randomSlope() {
+        GAME.level = RND(1, INI.MAX_LEVEL);
+        TITLE.slopeInfo();
+    },
+    slopeInfo() {
+        //console.warn("slopeInfo", GAME.level);
+        const CTX = LAYER.slopeinfo;
+        ENGINE.clearLayer("slopeinfo");
+        const fs = 16;
+        CTX.font = fs + "px Consolas";
+        CTX.textAlign = "left";
+
+        let x = 16;
+        let y = 8;
+        let W = ENGINE.sideWIDTH - x;
+
+        const color = "rgba(0, 200, 0, 0.9)";
+        CTX.fillStyle = color;
+        CTX.shadowColor = "rgba(28, 220, 28, 0.73)";
+        CTX.shadowOffsetX = 1;
+        CTX.shadowOffsetY = 1;
+        CTX.shadowBlur = 1;
+
+        ENGINE.drawLine(CTX, new Point(x, y), new Point(x + W, y), color);
+        y += 1.5 * fs;
+        CTX.fillText(`Slope: ${GAME.level.toString().padStart(2, "0")} / ${INI.MAX_LEVEL.toString().padStart(2, "0")}`, x, y);
+        y += 1.5 * fs;
+        CTX.fillText(MAP[GAME.level].name, x, y);
+        y += 1.5 * fs;
+        CTX.fillText(`Max angle: ${MAP_DESCRIPTION[GAME.level].maxSlope}°`, x, y);
+        y += 1.5 * fs;
+        CTX.fillText(`Average angle: ${MAP_DESCRIPTION[GAME.level].avgSlope}°`, x, y);
+        y += 1.5 * fs;
+        CTX.fillText(`Length: ${MAP_DESCRIPTION[GAME.level].len} m`, x, y);
+        y += 1.5 * fs;
+        CTX.fillText(`Top speed: ${MAP_DESCRIPTION[GAME.level].maxSpeed} km/h`, x, y);
+        y += 1.5 * fs;
+        CTX.fillText(`Difficulty: ${MAP_DESCRIPTION[GAME.level].difficulty}`, x, y);
+        y += 1.5 * fs;
+        ENGINE.drawLine(CTX, new Point(x, y), new Point(x + W, y), color);
     },
     firstFrame() {
         TITLE.health();

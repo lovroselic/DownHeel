@@ -1693,7 +1693,6 @@ const NOISE_FUNCTION = {
         $("#dir_bias").val(params.biasDeg);
         $("#dir_smooth").val(params.smooth);
     },
-
     writeWidthParams(params) {
         if (!params) return;
 
@@ -1708,7 +1707,6 @@ const NOISE_FUNCTION = {
         $("#width_max").val(params.maxWidth);
         $("#width_smooth").val(params.smooth);
     },
-
     writeSlopeParams(params) {
         if (!params) return;
 
