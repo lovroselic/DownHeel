@@ -4112,6 +4112,13 @@ class Timer {
         str += time.hundreds.toString().padStart(2, "0");
         return str;
     }
+    static toSeconds(T) {
+        let seconds = T.s;
+        seconds += T.hundreds / 100;
+        seconds += T.m * 60;
+        seconds += T.h * 3600;
+        return seconds;
+    }
     load(template) {
         this.delta = template.delta;
     }

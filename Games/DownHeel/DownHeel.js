@@ -23,7 +23,7 @@ const DEBUG = {
     AUTO_TEST: false,
     FPS: true,
     VERBOSE: true,
-    _2D_display: true,
+    _2D_display: false,
     INVINCIBLE: false,
     keys: true,
     max17: false,
@@ -57,7 +57,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.8.0",
+    VERSION: "0.8.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "HTH",
@@ -329,6 +329,7 @@ const HERO = {
     },
     completeLevel() {
         GAME.timerRunning = false;
+        console.log("time", GAME.time.time(), GAME.time.getTime(), "princess", $("#princess")[0].value);
         throw "completeLevel not yet implemented";
     }
 };
