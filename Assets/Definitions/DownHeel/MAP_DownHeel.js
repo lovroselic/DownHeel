@@ -72,3 +72,18 @@ const MAP_DESCRIPTION = {
         difficulty: "Easy",
     },
 };
+
+const MAP_SCORES = {
+    1: {
+        active: false,
+        name: "The Princess",
+        score: 80,
+        increment: 2,
+    },
+    2: {
+        active: false,
+        name: "The Princess",
+        score: 80,
+        increment: 2,
+    },
+};

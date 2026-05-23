@@ -58,7 +58,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.8.3",
+    VERSION: "0.8.4",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DH",
@@ -125,6 +125,8 @@ const PRG = {
         if (DEBUG._2D_display) {
             ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["pacgrid", "grid", "coord", "player", "debug"], null);
         }
+
+        MAP_SCORE_MANAGER.init(MAP_SCORES);
 
         /** dev settings */
         if (DEBUG.VERBOSE) {

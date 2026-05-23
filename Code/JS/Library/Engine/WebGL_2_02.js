@@ -41,7 +41,7 @@ const WebGL = {
     VERSION: "2.02",
     CSS: "color: gold",
     CTX: null,
-    DEBUG: true,
+    DEBUG: false,
     VERBOSE: false,                                     // default: false
     PRUNE: true,                                        // if true, only visible faces are considered - looks bad in 3rd person, but the amount of vertices are significantlly reduced
     PRUNE_BLOCKS: true,                                 // if true, only visible blocks considered - looks better 3rd person, a compromise which allows separate pruning of faces
@@ -334,7 +334,7 @@ const WebGL = {
     setContext(layer) {
         this.CTX = LAYER[layer];
         const gl = this.CTX;
-        if (this.VERBOSE) {
+        if (this.DEBUG) {
             console.info("******* WebGL initialized *******");
             console.log(`%cContext:`, this.CSS, gl);
             console.info(`MAX_VERTEX_UNIFORM_VECTORS ${gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS)}`);
