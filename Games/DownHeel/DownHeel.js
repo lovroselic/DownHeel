@@ -58,7 +58,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.8.4",
+    VERSION: "0.8.5",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DH",
@@ -119,7 +119,7 @@ const PRG = {
         ENGINE.addBOX("TITLE", ENGINE.titleWIDTH, ENGINE.titleHEIGHT, ["title", "time"], null);
         ENGINE.addBOX("LSIDE", INI.SCREEN_BORDER, ENGINE.gameHEIGHT, ["Lsideback", "health", "slopeinfo"], "side");
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "3d_webgl", "info", "text", "FPS", "button", "click"], "side");
-        ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed"], "fside");
+        ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed", "timeinfo"], "fside");
         ENGINE.addBOX("DOWN", ENGINE.bottomWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText", "subtitle"], null);
 
         if (DEBUG._2D_display) {
@@ -845,7 +845,6 @@ const TITLE = {
         TITLE.slopeInfo();
     },
     slopeInfo() {
-        //console.warn("slopeInfo", GAME.level);
         const CTX = LAYER.slopeinfo;
         ENGINE.clearLayer("slopeinfo");
         const fs = 16;
@@ -879,6 +878,47 @@ const TITLE = {
         y += 1.5 * fs;
         CTX.fillText(`Difficulty: ${MAP_DESCRIPTION[GAME.level].difficulty}`, x, y);
         y += 1.5 * fs;
+        ENGINE.drawLine(CTX, new Point(x, y), new Point(x + W, y), color);
+
+        if (!MAP_SCORES[GAME.level].active) MAP_SCORE_MANAGER.expandLevel(MAP_SCORES, GAME.level);
+        TITLE.timeInfo();
+
+    },
+    timeInfo() {
+        const CTX = LAYER.timeinfo;
+        ENGINE.clearLayer("timeinfo");
+        let fs = 16;
+        CTX.font = fs + "px Consolas";
+        CTX.textAlign = "left";
+
+        let x = 0;
+        let y = 8;
+        let W = ENGINE.sideWIDTH - 16;
+
+        const color = "rgba(0, 200, 0, 0.9)";
+        CTX.fillStyle = color;
+        CTX.shadowColor = "rgba(28, 220, 28, 0.73)";
+        CTX.shadowOffsetX = 1;
+        CTX.shadowOffsetY = 1;
+        CTX.shadowBlur = 1;
+
+        ENGINE.drawLine(CTX, new Point(x, y), new Point(x + W, y), color);
+
+        y += 2 * fs;
+
+        for (let i = 0; i < MAP_SCORE_MANAGER.ENTRIES; i++) {
+            fs = 16;
+            CTX.font = fs + "px Consolas";
+            CTX.fillText(`${(i + 1).toString().padStart(2, '0')}.`, x, y);
+            let nx = x + fs * 1.7;
+            CTX.fillText(`${MAP_SCORES[GAME.level].scores.names[i]}:`, nx, y);
+            CTX.font = (fs - 2) + "px DigitalNumbers";
+            nx = x + fs * 1.7 + fs * 8;
+            let time = Timer.MSH_String(Timer.toHMS(MAP_SCORES[GAME.level].scores.values[i]));
+            CTX.fillText(time, nx, y);
+            y += 1.5 * fs;
+        }
+
         ENGINE.drawLine(CTX, new Point(x, y), new Point(x + W, y), color);
     },
     firstFrame() {
