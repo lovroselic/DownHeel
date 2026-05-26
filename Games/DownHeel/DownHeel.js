@@ -55,13 +55,15 @@ const INI = {
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
     MAX_LEVEL: 2,
+    WINDOW_SCALE: 0.90,
+    DISPLAY_SCORES: 15,
 };
 
 const PRG = {
-    VERSION: "0.8.5",
+    VERSION: "0.9.0",
     NAME: "DownHeel",
     YEAR: "2026",
-    SG: "DH",
+    SG: "DownHeel",
     CSS: "color: #239AFF;",
     INIT() {
         console.log("%c**************************************************************************************************************************************", PRG.CSS);
@@ -151,6 +153,8 @@ const PRG = {
 
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
+
+        GAME.level = 1; //1
         TITLE.startTitle();
     }
 };
@@ -189,11 +193,11 @@ const HERO = {
     },
     die() {
         if (HERO.dead) return;
-        console.warn("hero dies");
+        //console.warn("hero dies");
         HERO.dead = true;
     },
     death() {
-        console.error("HERO DEATH");
+        //console.error("HERO DEATH");
         $(AUDIO.PrincessScream).one("ended", HERO.endSpeech);
         AUDIO.PrincessScream.play();
         HERO.finalDeath();
@@ -254,7 +258,7 @@ const HERO = {
 
     },
     finalDeath() {
-        console.error("HERO FINAL death");
+        //console.error("HERO FINAL death");
         for (const L of LIGHTS3D.POOL) {
             L.lightColor = Array(0, 0, 0);
         }
@@ -304,7 +308,7 @@ const HERO = {
     },
     crash(crashSpeed) {
         const damage = this.calcCrashDamage(crashSpeed);
-        console.warn("crash", crashSpeed, "damage", damage, "x", this.player.pos.x);
+        //console.warn("crash", crashSpeed, "damage", damage, "x", this.player.pos.x);
         GAME.realSpeed = 0;
 
         if (damage > 0) {
@@ -338,9 +342,55 @@ const HERO = {
         GAME.time = new Timer("Main");
     },
     completeLevel() {
+        if (GAME.levelComplete) return;
         GAME.timerRunning = false;
-        console.log("time", GAME.time.time(), GAME.time.getTime(), "princess", $("#princess")[0].value);
-        throw "completeLevel not yet implemented";
+        GAME.levelComplete = true;
+        GAME.time.stop();
+        const name = $("#princess")[0].value;
+        let time = GAME.time.getTime();
+        console.log("time", GAME.time.time(), time, "princess", name);
+
+
+        const W = ENGINE.gameWIDTH * INI.WINDOW_SCALE >>> 0;
+        const H = ENGINE.gameHEIGHT * INI.WINDOW_SCALE >>> 0;
+        const X = (ENGINE.gameWIDTH - W >>> 1) + ENGINE.sideWIDTH;
+        const Y = (ENGINE.gameHEIGHT - H >>> 1) + ENGINE.titleHEIGHT;
+        ENGINE.GAME.pause(false);
+
+        //preparing
+        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time);
+        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES);
+        let endIdx = startIdx + INI.DISPLAY_SCORES;
+        console.log("idx", idx, "startIdx", startIdx);
+
+        MAP_SCORES[GAME.level].scores.values.splice(idx, 0, time);
+        MAP_SCORES[GAME.level].scores.values.pop();
+        MAP_SCORES[GAME.level].scores.names.splice(idx, 0, name);
+        MAP_SCORES[GAME.level].scores.names.pop();
+
+        // creating html wedge
+        let WEDGE = "";
+
+        for (let resultIndex = startIdx; resultIndex < endIdx; resultIndex++) {
+            let P = `<p id="result_${resultIndex}">${(resultIndex + 1).toString().padStart(2, "0")}. ${MAP_SCORES[GAME.level].scores.names[resultIndex]}:`
+            let time = Timer.MSH_String(Timer.toHMS(MAP_SCORES[GAME.level].scores.values[resultIndex]));
+            P += ` ${time}</p>`;
+            WEDGE += P;
+        }
+
+        // done creating html wedge
+
+        const _form = new Form(`${name}'s result:`, X, Y, W, H, WEDGE);                      //don't be fooled, this IS used, it draws!
+        $("#form_done").off("click", FORM.exit);
+        $("#form_done").on("click", HERO.nextLevel);
+        $(`#result_${idx}`).css("color", "#00FF00");
+
+        localStorage.setItem(PRG.SG, JSON.stringify(MAP_SCORES));                           // save scores
+    },
+    nextLevel() {
+        $("#FORM").remove();
+        GAME.level = Math.min(INI.MAX_LEVEL, ++GAME.level);
+        GAME.start();
     }
 };
 
@@ -354,6 +404,7 @@ const GAME = {
     highSpeed: null,
     restarted: false,
     timerRunning: false,
+    levelComplete: false,
     start() {
         console.log("GAME started");
         if (AUDIO.Title) {
@@ -404,6 +455,7 @@ const GAME = {
     },
     levelStart() {
         console.log("starting level", GAME.level);
+        this.levelComplete = false;
         this.realSpeed = 0;
         this.highSpeed = 0;
         this.timerRunning = false;
@@ -501,7 +553,7 @@ const GAME = {
         MAP_TOOLS.unpack(level);
     },
     prepareForRestart() {
-        let clear = ["background", "text", "FPS", "button", "bottomText", "slopeinfo"];
+        let clear = ["background", "text", "FPS", "button", "bottomText", "slopeinfo", "timeinfo"];
         ENGINE.clearManylayers(clear);
         TITLE.blackBackgrounds();
         ENGINE.TIMERS.clear();
@@ -593,6 +645,7 @@ const GAME = {
     },
     respond(lapsedTime) {
         if (HERO.dead) return;
+        if (GAME.levelComplete) return;
 
         HERO.player.respond(lapsedTime);
         WebGL.GAME.respond(lapsedTime);
@@ -689,7 +742,7 @@ const TITLE = {
     startTitle() {
         if (DEBUG.VERBOSE) console.log("TITLE started");
         //if (AUDIO.Title) AUDIO.Title.play(); //dev
-        GAME.level = 1; //1
+
         ENGINE.GAME.pauseBlock();
         TITLE.clearAllLayers();
         TITLE.blackBackgrounds();

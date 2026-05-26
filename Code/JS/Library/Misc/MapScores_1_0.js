@@ -10,14 +10,34 @@ const MAP_SCORE_MANAGER = {
     ENTRIES: 30,
     init(map_score_object) {
         if (localStorage[PRG.SG]) {
-            console.log("deal with loading ....");
+            const loaded = JSON.parse(localStorage.getItem(PRG.SG));
+            console.error("deal with loading ....", loaded);
+            const LK = Object.keys(loaded);
+            const MK = Object.keys(map_score_object);
+            console.log(LK);
+            console.info(MK);
+            if (LK.length === MK.length) {
+                console.info("assign");
+                for (const key of Object.keys(map_score_object)) {
+                    delete map_score_object[key];
+                }
+
+                Object.assign(map_score_object, loaded);
+            } else {
+                for (const key of LK) {
+                    console.info("copy");
+                    map_score_object[key] = loaded[key];
+                }
+            }
+
         } else {
             for (const level in map_score_object) {
                 const active = map_score_object[level].active;
                 if (!active) this.expandLevel(map_score_object, level);
             }
-
+            localStorage.setItem(PRG.SG, JSON.stringify(map_score_object));
         }
+        console.warn(map_score_object);
     },
     expandLevel(map_score_object, level) {
         let levelObj = map_score_object[level];
