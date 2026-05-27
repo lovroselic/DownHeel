@@ -54,13 +54,13 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 2,
+    MAX_LEVEL: 3,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
 };
 
 const PRG = {
-    VERSION: "0.9.0",
+    VERSION: "0.9.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -154,7 +154,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 1; //1
+        GAME.level = 3; //1
         TITLE.startTitle();
     }
 };
@@ -308,7 +308,7 @@ const HERO = {
     },
     crash(crashSpeed) {
         const damage = this.calcCrashDamage(crashSpeed);
-        //console.warn("crash", crashSpeed, "damage", damage, "x", this.player.pos.x);
+        console.warn("crash", crashSpeed, "damage", damage, "x", this.player.pos.x);
         GAME.realSpeed = 0;
 
         if (damage > 0) {
@@ -450,7 +450,7 @@ const GAME = {
         WebGL.VIEWS_ALLOWED = new Set([1, 3]);
         WebGL.GAME.setViewButtons();
         WebGL.CONFIG.setMovementMode("surface");
-        WebGL.INI.SCALE_DECAL = 0.70;
+        WebGL.INI.SCALE_DECAL = 0.60;
         WebGL.INI.ADDITIONAL_TOP_OFFSET = 0.2;
     },
     levelStart() {
@@ -508,7 +508,7 @@ const GAME = {
         let start_grid = start_quad.getSurfaceCenter();
         let z = map.zMap.getZ(start_grid.x, start_grid.y);
         start_grid = new Vector3(start_grid.x, HERO.height + z, start_grid.y);
-        HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess);
+        HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess, 0.1);
 
         GAME.setCameraView();
         //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);

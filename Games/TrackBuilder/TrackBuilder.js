@@ -9,7 +9,7 @@ const INI = {
     MININT: 3,
     MAX_GRID: 64,
     MIN_GRID: 5,
-    SPACE_X: 4096,
+    SPACE_X: 8192,
     SPACE_Y: 2048,
     CANVAS_RESOLUTION: 256,
     DRAW_OCCLUSION_MAP: false,
@@ -56,7 +56,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.6.0",
+    VERSION: "0.6.1",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -258,6 +258,7 @@ const GAME = {
 
         const start_dir = map.startPosition.vector;
         const start_index = map.GA.gridToIndex(map.startPosition.grid);
+        console.info("start_dir", start_dir, "start_index", start_index, "map.quadMap.map", map.quadMap.map);
         const start_quad = map.quadMap.map[start_index];
 
         if (!start_quad) throw new Error(`initLevel: missing start_quad at index ${start_index}`);
@@ -558,6 +559,7 @@ const GAME = {
                 case 'F8':
                     GAME.randomPic();
                     GAME.randomCrest();
+                    GAME.randomLight();
                     break;
                 default:
                     break;

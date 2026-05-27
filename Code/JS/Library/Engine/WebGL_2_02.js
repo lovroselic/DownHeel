@@ -106,8 +106,8 @@ const WebGL = {
         BACKGROUND_BACK_HEIGHT: 3,
         BACKGROUND_BACK_BOTTOM_OFFSET: 0,
         BACKGROUND_BACK_LATERAL_SHIFT: 0,
-        SURFACE_WALL_HEIGHT: 1.5,
-        FINISH_ARCH_HEIGHT: 1.5,
+        SURFACE_WALL_HEIGHT: 1.15,
+        FINISH_ARCH_HEIGHT: 1.15,
         GRAVITY: -9.8,
         SNOW_FRICTION: 0.015,
         AIR_DRAG: 0.002,
@@ -2814,7 +2814,8 @@ class $3D_player {
         const dY = (this.boundingBox.max.y - this.boundingBox.min.y) / 2;
         const avgDim = (dZ + dX) / 2;
         const maxDim = Math.max(dZ, dX);
-        this.r = Math.max((avgDim + maxDim) / 2, WebGL.INI.MIN_R);
+        //this.r = Math.max((avgDim + maxDim) / 2, WebGL.INI.MIN_R);
+        this.r = (avgDim + maxDim) / 2;
         this.bb_deltas = { x: dX, y: dY, z: dZ };
     }
     inWhichGridIndices() {
@@ -3060,7 +3061,7 @@ class $3D_player {
 
         let length = (lapsedTime / 1000) * this.moveSpeed;
         let nextPos3 = this.pos.translate(dir, length);                                     //3D - Vector3
-        let checks = this.GA.Vector3_pointsAroundEntity(nextPos3, dir, this.r);
+        let checks = this.GA.Vector3_pointsAroundEntity(nextPos3, dir, this.r);             //
         for (const check of checks) {
             let z = this.ZM.getZ(check.x, check.z);
             if (z === Infinity) return this._out_of_surface(nextPos3, check);
