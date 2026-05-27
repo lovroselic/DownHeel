@@ -1187,8 +1187,8 @@ const NOISE_FUNCTION = {
         lacunarity: 2.0,
         biasDeg: 0.0,
         smooth: "smootherstep",
-        minDeg: -45,
-        maxDeg: 45,
+        minDeg: -90, //-45
+        maxDeg: 90, //45
         decimals: 3
     },
     WIDTH_NOISE_DEFAULTS: {
@@ -1292,12 +1292,12 @@ const NOISE_FUNCTION = {
 
         return {
             seed: seed,
-            amplitude: Math.clamp(amplitude, 0, 45),
+            amplitude: Math.clamp(amplitude, 0, 90),
             wavelength: Math.clamp(wavelength, 1, 512),
             octaves: Math.clamp(octaves, 1, 8),
             persistence: Math.clamp(persistence, 0, 1),
             lacunarity: Math.clamp(lacunarity, 1.01, 8),
-            biasDeg: Math.clamp(biasDeg, -45, 45),
+            biasDeg: Math.clamp(biasDeg, -90, 90),
             smooth: smooth,
             minDeg: d.minDeg,
             maxDeg: d.maxDeg,

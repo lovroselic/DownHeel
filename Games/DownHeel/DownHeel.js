@@ -54,13 +54,13 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 3,
+    MAX_LEVEL: 4,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
 };
 
 const PRG = {
-    VERSION: "0.10.1",
+    VERSION: "0.10.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -154,7 +154,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 3; //1
+        GAME.level = 4; //1
         TITLE.startTitle();
     }
 };
@@ -450,7 +450,7 @@ const GAME = {
         WebGL.VIEWS_ALLOWED = new Set([3]);
         WebGL.GAME.setViewButtons();
         WebGL.CONFIG.setMovementMode("surface");
-        WebGL.INI.SCALE_DECAL = 0.60;
+        WebGL.INI.SCALE_DECAL = 0.50;
         WebGL.INI.ADDITIONAL_TOP_OFFSET = 0.2;
     },
     levelStart() {
@@ -463,7 +463,6 @@ const GAME = {
         GAME.time = null;
         WebGL.playerList.clear();                           //requred for restart after resurrection
         GAME.initLevel(GAME.level);
-        //WebGL.GAME.setFirstPerson();                          //my preference
         WebGL.GAME.setThirdPerson();                            //my preference
         GAME.continueLevel(GAME.level);
     },
@@ -511,9 +510,8 @@ const GAME = {
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess, 0.1);
 
         GAME.setCameraView();
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
