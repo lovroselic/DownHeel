@@ -121,6 +121,8 @@ const WebGL = {
         INITIAL_SLIDING_SPEED: 0.35,    // initial speed
         MIN_SLIDING_SPEED: 0.75,        // speed after which you cannot use 'push' anymore
         PUSH_SPEED: 0.05,               // how much each push adds to sliding speed   
+        CAMERA_SAFETY_RADIUS: 0.2,
+        CAMERA_SAFETY_LERP_STEPS: 10,
     },
     setGridSize(size) {
         this.INI.GRID_SIZE = size;
@@ -2462,9 +2464,57 @@ class $3D_Camera {
         this.fov = Math.radians(fov);
     }
     update() {
-        this.pos = this.reference.pos.translate(this.translation_direction, this.translation_offset);
+        let pos = this.reference.pos.translate(this.translation_direction, this.translation_offset);
         this.updateDir();
-        this.pos = this.pos.translate(this.reference.dir.reverse2D(), this.back_offset);
+        pos = pos.translate(this.reference.dir.reverse2D(), this.back_offset);
+
+        if (this.isCameraSafe(pos) || !this.pos) {
+            this.pos = pos;
+        } else {
+            //if (!pos) console.error("pos not defined", pos);
+            //if (!this.reference.pos) console.error("this.reference.pos not defined", this.reference.pos);
+
+            this.pos = this.findSafeCameraPos(this.reference.pos, pos);
+            //console.info("camera pos was blocked, new pos", this.pos);
+        }
+    }
+    findSafeCameraPos(fallback, desired) {
+        let best = fallback;
+        const STEPS = WebGL.INI.CAMERA_SAFETY_LERP_STEPS;;
+
+        for (let i = 1; i <= STEPS; i++) {
+            //console.warn("best", best, "i", i);
+            const t = i / STEPS;
+            let candidate = glMatrix.vec3.create();
+            glMatrix.vec3.lerp(candidate, fallback.array, desired.array, t);
+            candidate = Vector3.from_array(candidate);
+            //console.log("..candidate", candidate, "i", i, "t", t, "fallback.array, desired.array", fallback.array, desired.array);
+            if (this.isCameraSafe(candidate)) {
+                best = candidate;
+            } else break;
+
+        }
+        return best;
+
+    }
+    isCameraSafe(pos) {
+        const ZM = this.reference.map.zMap;
+        const R = WebGL.INI.CAMERA_SAFETY_RADIUS;
+
+        const samples = [
+            [0, 0],
+            [R, 0],
+            [-R, 0],
+            [0, R],
+            [0, -R],
+        ];
+
+        for (const [dx, dz] of samples) {
+            const z = ZM.getZ(pos.x + dx, pos.z + dz);
+            if (z === Infinity) return false;
+        }
+
+        return true;
     }
     updateDir() {
         this.dir = this.reference.dir.add(this.direction_offset);

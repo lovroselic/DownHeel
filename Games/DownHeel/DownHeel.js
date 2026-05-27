@@ -60,7 +60,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.9.1",
+    VERSION: "0.10.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -447,7 +447,7 @@ const GAME = {
         WebGL.INI.HERO_HEIGHT = INI.HERO_HEIGHT;
         WebGL.FIRST_PERSON_DUAL_DISPLAY = true;
         WebGL.NO_TOP_CEILING = true;
-        WebGL.VIEWS_ALLOWED = new Set([1, 3]);
+        WebGL.VIEWS_ALLOWED = new Set([3]);
         WebGL.GAME.setViewButtons();
         WebGL.CONFIG.setMovementMode("surface");
         WebGL.INI.SCALE_DECAL = 0.60;
@@ -919,8 +919,10 @@ const TITLE = {
         y += 1.5 * fs;
         CTX.fillText(`Slope: ${GAME.level.toString().padStart(2, "0")} / ${INI.MAX_LEVEL.toString().padStart(2, "0")}`, x, y);
         y += 1.5 * fs;
+        CTX.fillStyle = "rgba(200, 214, 200, 1.0)";
         CTX.fillText(MAP[GAME.level].name, x, y);
         y += 1.5 * fs;
+        CTX.fillStyle = color;
         CTX.fillText(`Max angle: ${MAP_DESCRIPTION[GAME.level].maxSlope}°`, x, y);
         y += 1.5 * fs;
         CTX.fillText(`Average angle: ${MAP_DESCRIPTION[GAME.level].avgSlope}°`, x, y);
