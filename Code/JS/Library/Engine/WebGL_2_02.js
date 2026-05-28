@@ -447,11 +447,11 @@ const WebGL = {
         height = Number(height);
         depth = Number(depth ?? 1);
 
-        //const expected = width * height * depth;
+        const expected = width * height * depth;
 
         if (!(width > 0 && height > 0 && depth > 0)) throw new Error(`Bad 3D texture dimensions: ${width} x ${height} x ${depth}`);
         if (!(pixelData instanceof Uint8Array)) throw new Error(`pixelData must be Uint8Array, got ${pixelData?.constructor?.name}`);
-        //if (pixelData.length !== expected) throw new Error(`Bad pixelData length: got ${pixelData.length}, expected ${expected}`);
+        if (pixelData.length !== expected) throw new Error(`Bad pixelData length: got ${pixelData.length}, expected ${expected}, ` + `size=${width}x${height}x${depth}`);
 
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_3D, texture);
@@ -480,6 +480,7 @@ const WebGL = {
         );
 
         const err = gl.getError();
+
         if (err !== gl.NO_ERROR) {
             throw new Error(
                 `createOcclusionTexture3D: gl.texImage3D failed: ${err}, ` +

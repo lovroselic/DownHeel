@@ -532,22 +532,22 @@ const QUAD_MAP = {
         }
     },
     toTextureMap(zMap) {
-        //expected zMap of tiling resolution 1! more than that and you will not have same coord system!!
-        /** 0 - light can pass through */
+        // 0   = light can pass through
+        // 255 = occluded
+        // no padding required
 
-        const paddedWidth = POT(zMap.xSize);
-        const paddedHeight = POT(zMap.ySize);
-        console.log("toTextureMap zMap", zMap, "paddedWidth", paddedWidth, "paddedHeight", paddedHeight);
-        const pixelData = new Uint8Array(paddedWidth * paddedHeight).fill(255);
+        const pixelData = new Uint8Array(zMap.xSize * zMap.ySize).fill(255);
+
         for (let y = 0; y < zMap.ySize; y++) {
             for (let x = 0; x < zMap.xSize; x++) {
-                let zIndex = y * zMap.xSize + x;
-                let tIndex = y * paddedWidth + x;
-                if (zMap.map[zIndex] < Infinity) {
-                    pixelData[tIndex] = 0;
+                const index = x + y * zMap.xSize;
+
+                if (zMap.map[index] < Infinity) {
+                    pixelData[index] = 0;
                 }
             }
         }
+
         return pixelData;
     }
 };

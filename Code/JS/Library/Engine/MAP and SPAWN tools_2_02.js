@@ -134,7 +134,7 @@ const MAP_TOOLS = {
             map.occlusionMap = {
                 texture: texture,
                 originXZ: new Float32Array([map.zMap1.minX, map.zMap1.minY]),
-                resolution: map.zMap1.TR,
+                resolution: map.zMap1.resolution,
                 size: new Float32Array([map.zMap1.xSize, map.zMap1.ySize, 1])
             }
 

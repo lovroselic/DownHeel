@@ -54,13 +54,14 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 4,
+    MAX_LEVEL: 7,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
+    OCCLUSION_RESOLUTION: 4,
 };
 
 const PRG = {
-    VERSION: "0.10.2",
+    VERSION: "0.10.3",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -154,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 4; //1
+        GAME.level = 7; //1
         TITLE.startTitle();
     }
 };
@@ -315,7 +316,6 @@ const HERO = {
             this.applyDamage(damage);
             EXPLOSION3D.add(new BloodExplosion(this.player.pos));
         }
-
     },
     calcCrashDamage(crashSpeed) {
         let impactFactor = 1.0;         //we need to implement wall normals
@@ -439,7 +439,8 @@ const GAME = {
         GAME.levelStart();
     },
     WebGL_settings() {
-        WebGL.setAmbientStrength(0.1);
+        //WebGL.setAmbientStrength(0.1);
+        WebGL.setAmbientStrength(1);
         WebGL.setDiffuseStrength(0.5);
         WebGL.INI.BACKGROUND_ALPHA = 0.0;
         WebGL.USE_SHADOW = false;
@@ -450,8 +451,8 @@ const GAME = {
         WebGL.VIEWS_ALLOWED = new Set([3]);
         WebGL.GAME.setViewButtons();
         WebGL.CONFIG.setMovementMode("surface");
-        WebGL.INI.SCALE_DECAL = 0.50;
-        WebGL.INI.ADDITIONAL_TOP_OFFSET = 0.2;
+        WebGL.INI.SCALE_DECAL = 0.40;
+        WebGL.INI.ADDITIONAL_TOP_OFFSET = 0.3;
     },
     levelStart() {
         console.log("starting level", GAME.level);
@@ -510,8 +511,10 @@ const GAME = {
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess, 0.1);
 
         GAME.setCameraView();
-        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
         //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
+        SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
+        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.none);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
@@ -543,7 +546,7 @@ const GAME = {
         WebGL.init_required_IAM(MAP[level].map, HERO);
         MAP[level].map.quadMap = QUAD_MAP.create(MAP[level].map.GA, MAP[level].terrain);
         MAP[level].map.zMap = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA);
-        MAP[level].map.zMap1 = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA, 1); //TR = 1 ...
+        MAP[level].map.zMap1 = QUAD_MAP.create_zMap(MAP[level].map.quadMap, MAP[level].map.GA, INI.OCCLUSION_RESOLUTION); 
         SPAWN_TOOLS.spawn(level);
         MAP[level].world = WORLD.buildSurfaceBasedWorld(MAP[level].map);
     },
@@ -624,6 +627,7 @@ const GAME = {
             GAME.drawPlayer();
         }
         WebGL.renderScene(MAP[GAME.level].map);
+        //WebGL.renderScene(MAP[GAME.level].map, true);
         TITLE.speed();
         TITLE.time();
 

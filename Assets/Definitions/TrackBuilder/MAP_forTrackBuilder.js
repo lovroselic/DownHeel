@@ -14,6 +14,7 @@ const TEXTURE_LIST = [
     "MountainWall_136", "MountainWall_137", "MountainWall_138", "MountainWall_139", "MountainWall_140", "MountainWall_141", "MountainWall_142", "MountainWall_143", "MountainWall_144", "MountainWall_145", "MountainWall_146", "MountainWall_147",
     "MountainWall_148", "MountainWall_149", "MountainWall_150", "MountainWall_151", "MountainWall_152",
     "Snow_001", "Snow_002", "Snow_003", "Snow_004", "Snow_005", "Snow_006", "Snow_007", "Snow_008", "Snow_009", "Snow_010", "Snow_011",
+    "WinterForest_207", "WinterForest_208", "WinterForest_209"
 ].sort();
 
 /** Decals */

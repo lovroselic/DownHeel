@@ -9,28 +9,28 @@ const INI = {
     MININT: 3,
     MAX_GRID: 64,
     MIN_GRID: 5,
-    SPACE_X: 8192,
-    SPACE_Y: 2048,
+    SPACE_X: 8192 * 4,
+    SPACE_Y: 2048 * 4,
     CANVAS_RESOLUTION: 256,
     DRAW_OCCLUSION_MAP: false,
+    OCCLUSION_RESOLUTION: 4,
 };
 
 const MAP = {
     Demo: {
-        name: "Generic room name",
-        data: '{"width":"128","height":"3","depth":1,"map":"AA106BB2AA193$AA2BAA6BAA2BAA11BAA58"}',
-        wall: "MountainWall_123",
-        floor: "Snow_002",
-        frontPanorama: "AlpinePanorama_176",
-        leftPanorama: "AlpinePanorama_170",
-        rightPanorama: "AlpinePanorama_181",
-        backPanorama: "BackAlpinePanorama_195",
-        archPanorama: "Arch_200",
+        name: "Pac Slide",
+        data: '{"width":"140","height":"5","depth":1,"map":"AA28BB2AA2BAA27BAA5BAA2BAA3BAA6BAA19BABAA17BAA9BB2AA6BABB3AA4BAA6BABAA4BAA3BAA2BAA5BB2AA7BAA2BABAA7BAA3BAA8BAA3BAA14BAA3BAA2BAA2BAA4BAA32BAA6BAA2BAA21$BABAA2BABAA3BAA8BAA21BAA2BAA5BAA36BAA31BAA59BAA23BAA9BAA9BAA167"}',
+        wall: "MountainWall_148",
+        floor: "Snow_009",
+        frontPanorama: "AlpinePanorama_171",
+        leftPanorama: "AlpinePanorama_194",
+        rightPanorama: "AlpinePanorama_170",
+        backPanorama: "AlpinePanorama_180",
+        archPanorama: "Arch_203",
         skyPanorama: "Sky_204",
-        start: '[128,5]',
-        decals: '[[249,3,"Warnings_018","picture"],[16,3,"Warnings_002","picture"]]',
-        lights: '[[16,5,"AlpineLight_162","standardYellowFaint"]]',
-        terrain: '{"direction":{"parameters":{"seed":666,"amplitude":45,"wavelength":3,"octaves":4,"persistence":0.1,"lacunarity":3,"biasDeg":0,"smooth":"smootherstep","minDeg":-45,"maxDeg":45,"decimals":3},"values":[-33.051,-28.42,-29.859,-35.588,-19.737,20.866,35.621,38.612,33.146,25.006,11.641,-25.562,-37.954,-23.549,6.948,22.366,19.382,16.098,17.564,19.822,23.324,18.896,13.404,-24.618,-36.621,-34.868,-21.101,-21.477,-9.677,7.655,18.492,14.769,11.562,7.865,3.571,-7.66,-16.852,-23.092,-32.33,-37.343,-41.374,-33.794,-26.911,-26.517,-37.582,-31.488,-30.766,-8.698,-0.399,-4.3,-14.846,-17.078,-9.203,18.853,32.597,29.327,40.162,40.403,26.991,-7.18,-21.174,-28.512,-32.997,-40.158,-21.864,20.607,29.092,23.791,8.908,6.166,-2.573,-14.952,-18.332,-8.384,16.686,25.869,20.648,2.43,-3.72,-6.86,-6.769,-3.922,-5.061,12.651,19.156,19.724,6.952,5.715,-2.904,-28.066,-28.56,-18.842,11.085,21.784,24.691,19.751,25.229,14.233,-2.766,-13.667,-14.563,-32.973,-34.745,-21.742,14.379,26.672,20.586,5.14,-5.851,-5.555,-8.793,-18.967,-19.61,-31.232,-40.728,-28.57,-1.423,4.795,13.39,28.377,35.949,29.81,16.404,16.314,8.456,-29.02,-36.792,-35.308]},"width":{"parameters":{"seed":777,"amplitude":1.5,"wavelength":7,"octaves":4,"persistence":0.15,"lacunarity":3,"biasWidth":1,"smooth":"smootherstep","minWidth":0.75,"maxWidth":2,"decimals":3},"values":[0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.836,1.319,1.802,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1.873,1.783,1.61,1.541,1.538,1.489,1.341,1.153,1.027,1.142,1.253,1.163,1.028,1.012,1.01,0.946,0.937,0.983,0.894,0.833,0.897,0.882,0.975,0.965,0.988,0.993,1.015,1.039,1.149,1.256,1.298,1.315,1.311,1.192,0.946,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.813,1.113,1.31,1.411,1.366,1.444,1.456,1.404,1.443,1.509,1.523,1.534,1.561,1.476,1.457,1.426,1.273,1.217,1.248,1.298,1.215,1.254,1.209,1.138,1.124,1.119,1.199,1.331,1.376,1.482,1.765,1.867,1.792,1.548,1.383,1.321,1.147,1.026,1.028,1.05,1.263,1.497,1.809,2,2,2,2,1.991,1.413,0.75,0.75,0.75,0.75,0.75]},"slope":{"parameters":{"seed":888,"amplitude":30,"wavelength":12,"octaves":3,"persistence":0.65,"lacunarity":2,"biasSlope":15,"smooth":"smootherstep","minSlope":5,"maxSlope":35,"decimals":3},"values":[5.305,5,5,7.637,12.388,16.211,17.171,17.583,18.723,19.012,18.095,15.899,15.12,14.615,13.053,12.171,11.682,11.211,13.55,16.524,18.054,19.016,20.511,23.512,24.569,25.119,25.977,24.092,19.34,12.258,7.016,5,5,5,5,5,5,5,9.357,9.747,7.706,5.976,8.389,13.86,22.487,29.86,34.587,35,35,35,35,35,35,29.794,26.875,28.352,33.942,35,33.668,27.898,25.818,26.43,27.388,25.446,22.912,22.232,20.936,18.942,17.006,16.027,16.374,18.104,18.752,16.88,10.899,6.284,5,5,5,5,5.619,9.234,11.718,13.214,13.512,12.423,9.45,8.463,9.381,11.679,12.117,11.217,8.819,5.077,5,5,5,5,5,5,7.307,13.591,18.415,22.761,25.806,25.519,22.378,17.521,15.961,17.058,20.976,24.904,26.784,25.034,22.482,21.221,21.198,18.209,15.311,15.547,15.98,14.271,9.384,7.163,8.181,12.249,14.229,13.516]}}',
+        start: '[280,5]',
+        decals: '[[7,3,"TheHobbit99","picture"],[288,3,"NewDommes_376","picture"],[151,3,"NewDommes_492","picture"],[432,3,"AtariST_Games_4044","picture"],[18,3,"NewDommes_077","picture"],[298,3,"NewDommes_337","picture"],[441,3,"GameScreens009","picture"],[163,3,"C64_ZX_Classics118","picture"],[308,3,"NewDommes_143","picture"],[30,3,"NewDommes_265","picture"],[173,3,"Warnings_054","picture"],[316,3,"Ishar14","picture"],[599,3,"RetroGames_2121","picture"],[180,3,"TombRaider113","picture"],[45,3,"AtariST_Games_4030","picture"],[327,3,"C64Games_3253","picture"],[190,3,"LSL31","picture"],[475,3,"C64Games_3078","picture"],[56,3,"NewDommes_339","picture"],[338,3,"Unknown501","picture"],[344,3,"Commando201","picture"],[348,3,"C64Games_3155","picture"],[352,3,"LaraCroft123","picture"],[215,3,"Prince41","picture"],[496,3,"NewDommes_447","picture"],[78,3,"MoonZX","picture"],[228,3,"TombRaider111","picture"],[509,3,"RetroGames061","picture"],[97,3,"Witcher113","picture"],[523,3,"C64Games_3152","picture"],[105,3,"GameScreen1018","picture"],[253,3,"NewDommes_422","picture"],[671,3,"Warnings_013","picture"],[543,3,"CrawlMaster112","picture"],[271,3,"NewDommes_249","picture"],[553,3,"Scramble60","picture"],[416,3,"NewDommes_232","picture"]]',
+        terrain: '{"direction":{"parameters":{"seed":231,"amplitude":90,"wavelength":4,"octaves":5,"persistence":0.2,"lacunarity":5,"biasDeg":0,"smooth":"smootherstep","minDeg":-120,"maxDeg":120,"decimals":3},"values":[78.753,59.295,31.172,13.717,16.774,20.486,-12.701,-57.538,-53.369,-56.489,-0.595,30.194,44.52,35.654,-5.923,-45.8,-60.102,-41.899,-12.042,-9.525,-1.735,-0.37,-24.138,-27.741,-30.419,-38.124,-50.653,-27.153,-32.777,-28.623,8.504,41.177,45.86,43.046,9.189,-34.197,-36.671,-36.605,-12.274,-33.097,-17.29,-19.092,0.828,34.35,25.301,16.249,-0.672,-16.559,-9.89,-14.652,26.725,58.057,58.621,61.485,41.014,46.056,32.839,28.534,17.146,-33.07,-33.573,-27.265,1.517,54.239,61.507,57.379,51.863,22.868,9.003,20.319,62.934,70.741,69.967,53.931,6.749,-35.957,-46.768,-26.915,-15.61,5.85,0.289,9.995,-16.998,-28.216,-34.416,-44.022,-29.473,-35.958,-17.196,-35.783,-20.141,-23.525,-27.72,-39.666,-37.503,-47.678,-47.397,-50.063,-19.132,4.937,4.106,5.176,31.776,46.624,34.162,40.239,23.976,27.66,20.079,14.219,-1.259,10.626,-4.267,-8.444,-33.263,-50.594,-67.816,-71.103,-21.464,-4.091,3.939,4.619,-5.89,-8.597,-32.794,-16.234,17.221,28.001,31.255,23.96,18.952,19.355,12.88,14.162,-15.476,-33.567,-34.106,-36.535,-33.774,-19.334]},"width":{"parameters":{"seed":101,"amplitude":2,"wavelength":5,"octaves":5,"persistence":0.1,"lacunarity":3,"biasWidth":1.35,"smooth":"smootherstep","minWidth":1.2,"maxWidth":2,"decimals":3},"values":[2,2,2,2,2,2,2,1.823,1.2,1.2,1.2,1.2,1.2,1.958,2,2,2,2,1.758,1.365,1.297,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.389,1.88,2,1.956,2,2,2,2,2,1.858,1.326,1.2,1.2,1.2,1.291,1.63,1.957,2,1.852,1.503,1.236,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.6,2,2,2,2,2,2,2,2,2,2,2,2,2,1.528,1.2,1.2,1.2,1.2,1.2,2,2,2,2,2,2,2,2,2,1.41,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.848,2,2,2,2,1.2,1.2,1.2,1.2,1.2,1.759,2,2,2,1.599,1.2,1.2,1.2,1.2,1.2,1.2,1.2]},"slope":{"parameters":{"seed":131,"amplitude":40,"wavelength":2,"octaves":5,"persistence":0.1,"lacunarity":3,"biasSlope":25,"smooth":"smootherstep","minSlope":5,"maxSlope":35,"decimals":3},"values":[35,35,29.175,32.933,35,11.82,5,7.261,22.114,31.875,35,16.776,5,14.93,35,35,35,35,21.826,7.787,5,5,5,23.896,35,35,35,35,35,35,35,32.706,28.812,12.311,5,5,5,11.454,26.333,26.12,22.414,35,35,31.626,15.549,5.798,5,8.852,23.417,22.792,20.854,33.578,35,16.187,5,5.13,22.688,17.717,7.799,26.711,35,35,35,31.375,15.74,35,35,35,25.889,8.739,5,5,5,18.284,29.976,23.058,17.641,6.87,5,5,5,19.322,35,35,35,34.074,35,24.732,17.655,11.535,5.729,31.497,35,35,32.189,18.652,5,14.254,24.697,35,35,25.015,5,15.328,28.356,21.443,23.015,34.937,35,35,35,29.087,5,6.799,19.728,35,35,35,31.771,35,35,32.409,14.146,15.559,19.714,29.35,35,35,35,35,35,22.604,10.267,16.912,33,30.946,26.559,15.226,11.724,24.639]}}',
     }
 };
 
@@ -56,7 +56,7 @@ const $MAP = {
 };
 
 const PRG = {
-    VERSION: "0.6.1",
+    VERSION: "0.6.2",
     NAME: "TrackBuilder",
     YEAR: "2026",
     CSS: "color: #239AFF;",
@@ -325,7 +325,7 @@ const GAME = {
         const QM = QUAD_MAP.create(GA, map.terrain);
         map.quadMap = QM;
         map.zMap = QUAD_MAP.create_zMap(QM, GA);
-        map.zMap1 = QUAD_MAP.create_zMap(QM, GA, 1);
+        map.zMap1 = QUAD_MAP.create_zMap(QM, GA, INI.OCCLUSION_RESOLUTION);
 
         if (paint) {
             QUAD_MAP.paintTopDown(QM, "surface");
@@ -340,16 +340,16 @@ const GAME = {
 
         const zMap = map.zMap1;
         const pixelData = QUAD_MAP.toTextureMap(zMap);
-        const texWidth = POT(zMap.xSize);
-        const texHeight = POT(zMap.ySize);
+        //const texWidth = POT(zMap.xSize);
+        //const texHeight = POT(zMap.ySize);
         const texDepth = 1;
 
         if (map.occlusionMap?.texture && WebGL.CTX) WebGL.CTX.deleteTexture(map.occlusionMap.texture);
 
         map.textureMap = pixelData;
         map.occlusionMap = {
-            texture: WebGL.createOcclusionTexture3D(pixelData, texWidth, texHeight, texDepth),
-            size: new Float32Array([texWidth, texHeight, texDepth]),
+            texture: WebGL.createOcclusionTexture3D(pixelData, zMap.xSize, zMap.ySize, texDepth),
+            size: new Float32Array([zMap.xSize, zMap.ySize, texDepth]),
             originXZ: new Float32Array([zMap.minX, zMap.minY]),
             resolution: zMap.resolution,
             zMap: zMap,
@@ -1187,8 +1187,8 @@ const NOISE_FUNCTION = {
         lacunarity: 2.0,
         biasDeg: 0.0,
         smooth: "smootherstep",
-        minDeg: -90, //-45
-        maxDeg: 90, //45
+        minDeg: -120, //-45
+        maxDeg: 120, //45
         decimals: 3
     },
     WIDTH_NOISE_DEFAULTS: {
@@ -1297,7 +1297,7 @@ const NOISE_FUNCTION = {
             octaves: Math.clamp(octaves, 1, 8),
             persistence: Math.clamp(persistence, 0, 1),
             lacunarity: Math.clamp(lacunarity, 1.01, 8),
-            biasDeg: Math.clamp(biasDeg, -90, 90),
+            biasDeg: Math.clamp(biasDeg, -120, 120),
             smooth: smooth,
             minDeg: d.minDeg,
             maxDeg: d.maxDeg,
