@@ -1135,7 +1135,7 @@ skyPanorama: "${$("#skyPanorama")[0].value}",
         }
     },
     resizeGL_window() {
-        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * 128 + 2 * 256 + 768}px`)
+        $("#WEBGL_canvas_0").css("top", `${ENGINE.gameHEIGHT + 4 + 3 * 128 + 2 * 256 + 768 + 320}px`)
     },
     parseFloatSafe(value, fallback) {
         const n = parseFloat(value);
