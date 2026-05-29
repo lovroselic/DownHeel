@@ -395,12 +395,12 @@ const GAME = {
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["pacgrid", "wall", "grid", "hint", "coord", "click"], null);
+        ENGINE.addBOX("ZMAP", 2048, 256, ["zmap"], null);
+        ENGINE.addBOX("SURFACE", 2048, 256, ["surface"], null);
         ENGINE.addBOX("DIRECTION", 2048, 128, ["direction"], null);
         ENGINE.addBOX("WIDTH", 2048, 128, ["width"], null);
         ENGINE.addBOX("SLOPE", 2048, 128, ["slope"], null);
-        ENGINE.addBOX("SURFACE", 2048, 256, ["surface"], null);
         ENGINE.addBOX("SIDE_SLOPE", 2048, 768, ["sideslope"], null);
-        ENGINE.addBOX("ZMAP", 2048, 256, ["zmap"], null);
         ENGINE.addBOX("WEBGL", 1024, 768, ["3d_webgl"], null);
 
         $("#buttons").append("<input type='button' id='new' value='New'>");
@@ -688,9 +688,9 @@ const GAME = {
 
         if ($("#gridsize").val() < INI.MIN_GRID) $("#gridsize").val(INI.MIN_GRID);
         if ($("#gridsize").val() > INI.MAX_GRID) $("#gridsize").val(INI.MAX_GRID);
-        if ($("#gridsize").val() % 8 !== 0) {
+        /*if ($("#gridsize").val() % 8 !== 0) {
             $("#gridsize").val(Math.floor($("#gridsize").val() / 8) * 8);
-        }
+        }*/
         ENGINE.INI.GRIDPIX = parseInt($("#gridsize").val(), 10);
         //change grids
         if ($("#horizontalGrid").val() * ENGINE.INI.GRIDPIX > INI.SPACE_X) {
@@ -1473,8 +1473,8 @@ const NOISE_FUNCTION = {
 
         this.drawBackground("direction", gridPx, W, H, midY, mapWidth);
 
-        const minDeg = directionData.min ?? -45;
-        const maxDeg = directionData.max ?? 45;
+        const minDeg = directionData.min ?? -90;
+        const maxDeg = directionData.max ?? 90;
         const legalAbs = Math.max(Math.abs(minDeg), Math.abs(maxDeg), 1);
         const s = this.stats(values);
         const maxAbs = Math.min(legalAbs, Math.max(s.absMax * 1.15, 1.0));                      // Auto-scale to the generated curve, but keep at least 1 degree visible range.
