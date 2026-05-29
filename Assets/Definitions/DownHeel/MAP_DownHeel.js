@@ -12,41 +12,44 @@ console.log("%cMAP for DownHeel loaded.", "color: #888");
 
 const MAP_TEXT = {
     1: {
-        text: "This is an easy slope. I can probably just rush through it.",
+        text: "This slope looks harmless. Which is exactly what a slope says before it ruins your pelvis.",
     },
     2: {
         text: "Not ever road leads to Rome. Some lead to hospital.",
     },
     3: {
-        text: "Braking is not a crime.",
+        text: "Braking is not cowardice. It is advanced survival for people with bones.",
     },
     4: {
-        text: "Stir carefully.",
+        text: "Gently now. I am a princess, not a meatball in a snow blender.",
     },
     5: {
-        text: "At least in this forest I will not be attacked.",
+        text: "A peaceful forest. Birds, snow, silence, and absolutely no suspiciously placed trees.",
     },
     6: {
-        text: "Mind the walls.",
+        text: "Mind the walls. They are rude, stationary, and full of opinions.",
     },
     7: {
-        text: "Don't get lost.",
+        text: "Do not get lost. Freezing to death is undignified, even for peasants.",
     },
     8: {
-        text: "Catch the rhythm.",
+        text: "Catch the rhythm. Preferably before the rhythm catches your spine.",
     },
     9: {
-        text: "Keep your eyes on the path. This one may look easy, but then you are dead.",
+        text: "Keep your eyes on the path. This one smiles like a tutorial and murders like a tax collector.",
     },
     10: {
-        text: "This will go fast. Try to survive.",
+        text: "This will go fast. If something red appears in the snow, pretend it was already there.",
+    },
+    11: {
+        text: "Braking is for pussies. Funerals are for people who believed that.",
     },
 };
 
 /** Map definitions */
 const MAP = {
     1: {
-        name: "Easy Peasy",
+        name: "Tutorial for the Terminally Brave",
         data: '{"width":"128","height":"3","depth":1,"map":"AA27BB2AA115BAA23BAA5BAA67$AA20BB2AA14BAA3BAA9BAA54BAA27BAA8"}',
         wall: "MountainWall_123",
         floor: "Snow_002",
@@ -63,7 +66,7 @@ const MAP = {
     }
     ,
     2: {
-        name: "Squeezzy",
+        name: "Royal Buttcrack Pass",
         data: '{"width":"128","height":"4","depth":1,"map":"AA24BB2AA23BB3AA4BAA4BAA5BAA4BAA2BAA3BAA7BAA3BAA4BAA4BB3AA31BAA26BABABABAA6BAA5BAA4BB2AA12BB2AA4BABAA7BAA8BABAA13B$AA11BAA9BAA7BAA5BAA5BAA2BB2AA12BAA17BAA4BAA12BAA15BB2AA10BAA70BABAA2BABAA8BAA2BABABAA3BB3ABABAA3BAA4BB4ABB2AA3BB2ABB2ABAA2BAA2BB2ABB4ABAA2BA"}',
         wall: "MountainWall_126",
         floor: "Snow_001",
@@ -80,7 +83,7 @@ const MAP = {
     }
     ,
     3: {
-        name: "Narrow",
+        name: "Butt Avalanche Protocol",
         data: '{"width":"160","height":"3","depth":1,"map":"AA14BB2AA2BAA3BB2ABB2AA3BAA2BB2AA3BB2AA4BAA7BAA3BAA2BAA2BABAA3BB2ABB2AA7BAA5BAA7BAA3BAA8BAA2BB2AA2BAA18BAA6BB2AA3BAA7BABAA8BAA25BAA3BAA16BAA7BAA8BAA2BAA3BAA34BAA3BAA12$AA12BAA19BAA14BAA36BAA108"}',
         wall: "MountainWall_129",
         floor: "Snow_004",
@@ -97,7 +100,7 @@ const MAP = {
     }
     ,
     4: {
-        name: "Curvy",
+        name: "Downhill Dignity Disposal",
         data: '{"width":"132","height":"3","depth":1,"map":"AA18BB2AA24BAA60BAA2BAA11BAA5BAA11BAA34BAA7BAA2BAA4BABAA2BABAA2BAA6BB2ABAA7BAA5BAA6BAA4BAA2BAA4BAA41BAA20BAA45BAA2BAA3BB2AA2BB3AA2BAB$BB4ABB4AA2BAA3BB2AA2BB5A"}',
         wall: "MountainWall_132",
         floor: "Snow_005",
@@ -114,7 +117,7 @@ const MAP = {
     }
     ,
     5: {
-        name: "Cosy Forest Path",
+        name: "Skidmarks of the Crown",
         data: '{"width":"148","height":"3","depth":1,"map":"AA444$"}',
         wall: "WinterForest_209",
         floor: "Snow_011",
@@ -129,7 +132,7 @@ const MAP = {
     }
     ,
     6: {
-        name: "Slalom",
+        name: "Thighway to Hell",
         data: '{"width":"128","height":"3","depth":1,"map":"AA12BB2AA59BAA3BAA13BAA12BAA8BABAA3BAA7BAA4BB2ABAA20BAA5BAA12BAA5BAA3BB2ABAA9BAA12BAA7BB2AA2BAA10BAA8BAA2BAA9BAA15$AA64BABB2ABAA2BABAA2BB2ABB4AA6BB2ABAA2BB2AA4BAA4BAA4"}',
         wall: "MountainWall_149",
         floor: "Snow_010",
@@ -146,7 +149,7 @@ const MAP = {
     }
     ,
     7: {
-        name: "Pac Slide",
+        name: "Alpine OnlyFans Denial",
         data: '{"width":"140","height":"5","depth":1,"map":"AA28BB2AA2BAA27BAA5BAA2BAA3BAA6BAA19BABAA17BAA9BB2AA6BABB3AA4BAA6BABAA4BAA3BAA2BAA5BB2AA7BAA2BABAA7BAA3BAA8BAA3BAA14BAA3BAA2BAA2BAA4BAA32BAA6BAA2BAA21$BABAA2BABAA3BAA8BAA21BAA2BAA5BAA36BAA31BAA59BAA23BAA9BAA9BAA167"}',
         wall: "MountainWall_148",
         floor: "Snow_009",
@@ -162,8 +165,24 @@ const MAP = {
         terrain: '{"direction":{"parameters":{"seed":231,"amplitude":90,"wavelength":4,"octaves":5,"persistence":0.2,"lacunarity":5,"biasDeg":0,"smooth":"smootherstep","minDeg":-120,"maxDeg":120,"decimals":3},"values":[78.753,59.295,31.172,13.717,16.774,20.486,-12.701,-57.538,-53.369,-56.489,-0.595,30.194,44.52,35.654,-5.923,-45.8,-60.102,-41.899,-12.042,-9.525,-1.735,-0.37,-24.138,-27.741,-30.419,-38.124,-50.653,-27.153,-32.777,-28.623,8.504,41.177,45.86,43.046,9.189,-34.197,-36.671,-36.605,-12.274,-33.097,-17.29,-19.092,0.828,34.35,25.301,16.249,-0.672,-16.559,-9.89,-14.652,26.725,58.057,58.621,61.485,41.014,46.056,32.839,28.534,17.146,-33.07,-33.573,-27.265,1.517,54.239,61.507,57.379,51.863,22.868,9.003,20.319,62.934,70.741,69.967,53.931,6.749,-35.957,-46.768,-26.915,-15.61,5.85,0.289,9.995,-16.998,-28.216,-34.416,-44.022,-29.473,-35.958,-17.196,-35.783,-20.141,-23.525,-27.72,-39.666,-37.503,-47.678,-47.397,-50.063,-19.132,4.937,4.106,5.176,31.776,46.624,34.162,40.239,23.976,27.66,20.079,14.219,-1.259,10.626,-4.267,-8.444,-33.263,-50.594,-67.816,-71.103,-21.464,-4.091,3.939,4.619,-5.89,-8.597,-32.794,-16.234,17.221,28.001,31.255,23.96,18.952,19.355,12.88,14.162,-15.476,-33.567,-34.106,-36.535,-33.774,-19.334]},"width":{"parameters":{"seed":101,"amplitude":2,"wavelength":5,"octaves":5,"persistence":0.1,"lacunarity":3,"biasWidth":1.35,"smooth":"smootherstep","minWidth":1.2,"maxWidth":2,"decimals":3},"values":[2,2,2,2,2,2,2,1.823,1.2,1.2,1.2,1.2,1.2,1.958,2,2,2,2,1.758,1.365,1.297,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.389,1.88,2,1.956,2,2,2,2,2,1.858,1.326,1.2,1.2,1.2,1.291,1.63,1.957,2,1.852,1.503,1.236,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.6,2,2,2,2,2,2,2,2,2,2,2,2,2,1.528,1.2,1.2,1.2,1.2,1.2,2,2,2,2,2,2,2,2,2,1.41,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.848,2,2,2,2,1.2,1.2,1.2,1.2,1.2,1.759,2,2,2,1.599,1.2,1.2,1.2,1.2,1.2,1.2,1.2]},"slope":{"parameters":{"seed":131,"amplitude":40,"wavelength":2,"octaves":5,"persistence":0.1,"lacunarity":3,"biasSlope":25,"smooth":"smootherstep","minSlope":5,"maxSlope":35,"decimals":3},"values":[35,35,29.175,32.933,35,11.82,5,7.261,22.114,31.875,35,16.776,5,14.93,35,35,35,35,21.826,7.787,5,5,5,23.896,35,35,35,35,35,35,35,32.706,28.812,12.311,5,5,5,11.454,26.333,26.12,22.414,35,35,31.626,15.549,5.798,5,8.852,23.417,22.792,20.854,33.578,35,16.187,5,5.13,22.688,17.717,7.799,26.711,35,35,35,31.375,15.74,35,35,35,25.889,8.739,5,5,5,18.284,29.976,23.058,17.641,6.87,5,5,5,19.322,35,35,35,34.074,35,24.732,17.655,11.535,5.729,31.497,35,35,32.189,18.652,5,14.254,24.697,35,35,25.015,5,15.328,28.356,21.443,23.015,34.937,35,35,35,29.087,5,6.799,19.728,35,35,35,31.771,35,35,32.409,14.146,15.559,19.714,29.35,35,35,35,35,35,22.604,10.267,16.912,33,30.946,26.559,15.226,11.724,24.639]}}',
     }
     ,
+    8: {
+        name: "Crash Course in Monarchy",
+        data: '{"width":"150","height":"4","depth":1,"map":"AA10BB4AA2BAA3BAA4BAA9BABAA4BB2AA2BB2AA10BB2AA2BB4AA3BABB6AA2BAA2BB5AA2BB2AA2BB2AA2BAA4BB3ABB3ABB2ABB8AA17BAA3BAA6BB3AA4BAA11BAA9BB3ABABAA9BAA15BAA41BAA47$AA7BAA80BAA176BAA34"}',
+        wall: "MountainWall_140",
+        floor: "Snow_008",
+        frontPanorama: "AlpinePanorama_171",
+        leftPanorama: "AlpinePanorama_194",
+        rightPanorama: "AlpinePanorama_179",
+        backPanorama: "BackAlpinePanorama_196",
+        archPanorama: "Arch_200",
+        skyPanorama: "Sky_205",
+        start: '[150,5]',
+        decals: '[[472,3,"NewDommes_164","picture"],[185,3,"NewDommes_310","picture"],[558,3,"NewDommes_394","picture"],[194,3,"NewDommes_118","picture"],[202,3,"NewDommes_125","picture"],[356,3,"AtariST_Games_4057","picture"],[219,3,"RetroGames_2348","picture"],[227,3,"Cavelon11","picture"],[381,3,"C64Games_3084","picture"],[234,3,"Warnings_011","picture"],[538,3,"RMC50","picture"],[395,3,"RMC50","picture"],[97,3,"RMC50","picture"],[112,3,"RetroGames_2313","picture"],[416,3,"NewDommes_199","picture"],[574,3,"MonkeyIsland143","picture"],[277,3,"NewDommes_480","picture"],[431,3,"C64Games_3336","picture"],[285,3,"Retro_Games_9026","picture"],[439,3,"NewDommes_412","picture"]]',
+        lights: '[[104,5,"AlpineLight_158","fireSubtleRed"]]',
+        terrain: '{"direction":{"parameters":{"seed":11,"amplitude":90,"wavelength":4,"octaves":5,"persistence":0.4,"lacunarity":5,"biasDeg":0,"smooth":"smootherstep","minDeg":-120,"maxDeg":120,"decimals":3},"values":[55.372,24.98,16.32,1.636,25.68,12.705,14.692,8.09,-2.099,-4.222,28.071,39.409,29.577,-0.421,-4.733,14.681,6.692,-7.675,-48.87,-68.666,-49.988,-39.978,-2.128,-29.289,-21.932,-4.109,-1.158,-8.371,23.481,23.787,27.366,43.091,49.084,32.483,25.401,2.632,1.692,16.425,-4.14,10.982,-1.507,-8.642,-37.85,-55.705,-45.079,-45.082,-46.584,-15.983,-5.372,-9.059,0.438,0.408,2.673,-0.213,17.081,27.475,14.359,29.459,23.992,5.054,47.228,3.077,-14.788,-31.018,-46.15,-11.334,-50.835,3.593,-14.466,-18.389,-23.392,-25.235,-34.461,-33.141,-22.73,-28.073,-18.68,-30.259,-3.964,-11.102,6.743,-3.58,14.388,-18.647,-28.041,-15.318,4.523,30.027,23.334,35.833,17.724,25.062,-6.477,-19.899,-0.813,-31.022,-4,-35.212,-21.942,-19.247,-24.136,-13.673,4.642,44.528,56.769,45.469,34.579,35.592,71.587,56.786,3.604,-14.124,-29.323,-31.788,-35.904,-18.81,-40.939,-36.526,-36.393,-25.361,-36.261,-30.987,-45.282,-48.442,-18.788,-22.788,18.749,35.312,25.216,28.191,3.675,-13.287,-38.467,-30.637,-5.11,45.022,33.097,16.75,28.467,-14.506,-30.378,-9.262,2.366,17.026,-13.128,6.943,33.284,38.745,61.638,51.545]},"width":{"parameters":{"seed":313,"amplitude":2,"wavelength":5,"octaves":5,"persistence":0.1,"lacunarity":3,"biasWidth":1.35,"smooth":"smootherstep","minWidth":1.2,"maxWidth":1.8,"decimals":3},"values":[1.8,1.8,1.8,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.709,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.651,1.399,1.432,1.528,1.422,1.209,1.2,1.2,1.2,1.2,1.321,1.449,1.443,1.402,1.733,1.8,1.8,1.8,1.8,1.8,1.8,1.689,1.8,1.721,1.8,1.8,1.8,1.8,1.8,1.8,1.578,1.282,1.427,1.351,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.283,1.39,1.455,1.492,1.615,1.52,1.375,1.524,1.539,1.201,1.2,1.2,1.2,1.648,1.8,1.8,1.8,1.8,1.8,1.745,1.264,1.2,1.2,1.616,1.8,1.8,1.8,1.8,1.8,1.484,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.674,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8]},"slope":{"parameters":{"seed":7,"amplitude":40,"wavelength":2,"octaves":5,"persistence":0.1,"lacunarity":3,"biasSlope":20,"smooth":"smootherstep","minSlope":5,"maxSlope":35,"decimals":3},"values":[35,30.359,7.141,25.046,35,27.24,13.445,33.091,35,13.007,5,6.439,26.026,7.871,5,12.225,35,27.049,7.73,25.22,35,20.815,5,17.979,26.04,34.021,35,31.706,30.442,35,35,35,28.838,17.436,5.101,5,5,7.56,28.103,32.181,35,20.135,5,5,5,5,5,23.666,35,35,31.863,27.27,21.66,32.111,35,16.866,5,13.832,35,35,35,35,23.517,35,35,35,33.84,14.692,5,20.482,35,35,35,35,30.415,35,35,16.781,5,5,5,10.772,13.137,12.236,5,16.808,26.634,21.28,19.629,16.02,7.741,25.832,34.855,33.543,22.073,13.118,5,16.942,26.188,35,35,35,27.416,15.534,5,7.491,23.328,18.839,16.47,34.011,35,35,11.299,16.168,12.447,5,5,9.2,25.39,30.005,35,11.184,5,7.184,22.074,19.295,14.161,20.585,26.173,5.76,5,5,5,5,5,11.116,21.956,5.653,5,22.918,35,35,35,35,35,35,23.394,24.058,32.021,34.121]}}',
+    },
     9: {
-        name: "Long and Winding",
+        name: "The Butt Stops Here",
         data: '{"width":"196","height":"3","depth":1,"map":"AA19BB2AA225BAA3BB2AA5BB2AA18BAA2BAA4BAA2BAA2BAA17BAA19BAA7BAA12BABAA15BAA7BAA12BAA3BB2AA11BAA6BAA59$AA14BAA41BAA30BAA6BAA20"}',
         wall: "MountainWall_102",
         floor: "Snow_007",
@@ -179,7 +198,7 @@ const MAP = {
     }
     ,
     10: {
-        name: "Steepy",
+        name: "Royal Rump Rupture",
         data: '{"width":"160","height":"3","depth":1,"map":"AA23BB2AA154BAA19BAA38BAA18BAA4BABAA8BAA5BAA15BAA28BAA2BAA16BAA8BABAA3BB2ABB2AA33BAA4BB2AA21$AA32BAA16BB2ABB2A"}',
         wall: "MountainWall_133",
         floor: "Snow_006",
@@ -193,6 +212,23 @@ const MAP = {
         decals: '[[2,3,"NewDommes_122","picture"],[30,3,"MontyMole112","picture"],[43,3,"NewDommes_389","picture"],[376,3,"C64Games_3307","picture"],[334,3,"Retro_Games_7054","picture"],[24,3,"NewDommes_172","picture"],[391,3,"C64Games_3148","picture"],[405,3,"C64Games_3001","picture"]]',
         lights: '[[18,5,"AlpineLight_158","standardYellowTouch"],[368,5,"AlpineLight_162","standardYellowTouch"],[409,5,"AlpineLight_162","standardYellowTouch"],[425,5,"AlpineLight_166","standardYellowTouch"],[127,5,"AlpineLight_165","standardYellowTouch"],[456,5,"AlpineLight_164","standardYellowTouch"]]',
         terrain: '{"direction":{"parameters":{"seed":16,"amplitude":82,"wavelength":4,"octaves":5,"persistence":0.05,"lacunarity":5,"biasDeg":0,"smooth":"smootherstep","minDeg":-120,"maxDeg":120,"decimals":3},"values":[61.997,49.928,3.063,-48.472,-61.423,-48.582,6.635,50.426,63.084,65.863,53.778,46.424,47.633,42.712,47.034,45.811,47.899,47.268,47.626,45.473,46.195,39.375,21.221,6.167,3.522,0.183,-19.101,-30.323,-37.163,-32.999,-26.04,-15.8,-11.634,-5.212,23.256,57.053,59.83,61.926,58.612,53.262,55.258,49.385,20.007,-1.435,-5.748,-7.336,-9.642,-17.116,-20.357,-25.593,-26.399,-25.951,-27.973,-21.939,4.721,24.863,35.471,27.333,-16.838,-51.983,-64.142,-43.577,2.777,57.833,74.931,60.12,31.203,-8.532,-12.629,-5.317,17.982,40.715,46.242,39.269,25.268,15.088,9.784,4.716,-30.831,-67.392,-77.129,-71.239,-63.09,-51.815,-52.884,-51.482,-47.779,-37.621,-41.578,-25.82,11.318,51.868,67.165,62.367,64.174,69.612,66.919,58.864,42.662,23.283,18.673,28.025,38.4,55.84,55.411,56.375,54.242,48.657,43.851,36.121,13.766,-20.568,-28.218,-28.316,-25.489,-29.98,-26.255,-33.944,-44.555,-53.966,-57.052,-37.418,8.307,59.709,78.21,73.364,44.808,23.069,20.718,9.136,-13.771,-39.475,-49.722,-42.253,-1.591,38.751,46.123,36.128,-11.746,-64.857,-71.423,-61.297,-20.206,20.855,30.945,16.332,-22.616,-64.404,-78.527,-72.249,-72.582,-71.76,-70.112,-67.305,-49.388,-24.805,-19.847,-15.27,11.296,46.667]},"width":{"parameters":{"seed":16,"amplitude":2,"wavelength":5,"octaves":5,"persistence":0.05,"lacunarity":3,"biasWidth":1.6,"smooth":"smootherstep","minWidth":1.6,"maxWidth":2,"decimals":3},"values":[2,2,2,1.6,1.6,1.6,1.6,1.6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1.98,1.715,1.682,1.612,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.94,2,2,2,2,2,2,2,2,2,2,1.908,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,2,2,2,2,1.663,1.6,1.6,1.6,1.6,1.6,2,2,2,2,2,1.878,1.6,1.6,1.6,1.689,2,2,2,2,2,2,1.945,1.925,1.703,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,2,2,2,2,2,2,2]},"slope":{"parameters":{"seed":16,"amplitude":40,"wavelength":2,"octaves":5,"persistence":0.01,"lacunarity":3,"biasSlope":25,"smooth":"smootherstep","minSlope":12,"maxSlope":40,"decimals":3},"values":[40,25.578,12,26.609,40,40,40,40,40,40,40,36.645,26.128,15.634,12,12.392,19.198,37.493,40,40,40,36.768,22.159,18.103,14.019,12.71,12,27.3,40,18.63,12,27.805,40,39.713,17.561,32.817,40,39.165,30.957,12,12,12,12,12,12,31.9,40,40,40,40,36.024,40,40,40,40,30.107,12,12,12,12,12,30.89,40,40,35.333,17.1,12,23.795,40,18.337,12,13.676,39.361,12.695,12,12,12,12,13.778,31.91,40,35.374,19.967,14.622,12,21.921,35.005,40,40,36.231,14.391,12.595,12,12,12,32.856,40,40,40,40,40,26.862,12,26.111,40,34.756,28.838,32.111,35.178,37.069,39.641,15.752,12,12,24.011,36.425,40,31.483,13.819,21.368,28.878,12,12,12,23.571,38.434,40,39.074,25.934,40,40,40,39.886,21.7,12,15.558,26.568,13.21,12,12,12,12.338,34.549,12,12,12,24.242,12,12,17.124,40,38.38,31.971,35.726,39.601,23.417,12,21.499,36.429,40]}}',
+    }
+    ,
+    11: {
+        name: "Butt First, Questions Later",
+        data: '{"width":"160","height":"3","depth":1,"map":"AA7BB2AA142BAA22BABB2AA7BAA3BAA9BAA16BAA17BB3AA8BAA2BABAA4BABAA4BAA2BAA6BAA5BAA4BB2ABAA9BB4AA2BAA18BAA32BAA6BAA2BAA3BAA28$AA52BAA21BB3ABB2ABA"}',
+        wall: "MountainWall_102",
+        floor: "Snow_003",
+        frontPanorama: "AlpinePanorama_176",
+        leftPanorama: "AlpinePanorama_171",
+        rightPanorama: "AlpinePanorama_181",
+        backPanorama: "BackAlpinePanorama_198",
+        archPanorama: "Arch_201",
+        skyPanorama: "Sky_204",
+        start: '[160,5]',
+        decals: '[[2,3,"NewDommes_122","picture"],[30,3,"MontyMole112","picture"],[376,3,"C64Games_3307","picture"],[24,3,"NewDommes_172","picture"],[405,3,"C64Games_3001","picture"],[60,3,"CastleLady79","picture"]]',
+        lights: '[[18,5,"AlpineLight_158","standardYellowTouch"],[368,5,"AlpineLight_162","standardYellowTouch"],[409,5,"AlpineLight_162","standardYellowTouch"],[425,5,"AlpineLight_166","standardYellowTouch"],[127,5,"AlpineLight_165","standardYellowTouch"],[456,5,"AlpineLight_164","standardYellowTouch"]]',
+        terrain: '{"direction":{"parameters":{"seed":21,"amplitude":82,"wavelength":4,"octaves":5,"persistence":0.05,"lacunarity":5,"biasDeg":0,"smooth":"smootherstep","minDeg":-120,"maxDeg":120,"decimals":3},"values":[62.315,53.441,33.837,16.421,11.941,11.113,-9.459,-18.012,-22.68,-17.102,25.492,66.455,75.52,63.999,10.602,-41.77,-57.655,-49.58,-28.91,-6.454,1.405,3.838,15.823,26.546,24.334,25.149,38.202,52.336,53.724,57.595,61.038,67.65,71.552,59.478,9.969,-36.9,-48.917,-48.52,-58.029,-62.578,-61.048,-50.063,2.2,52.009,60.482,49.991,14.257,-28.797,-42.16,-39.729,-54.493,-59.402,-63.459,-54.037,-3.31,41.217,56.499,51.38,24.264,-1.689,-10.726,-2.889,10.256,28.617,35.737,31.018,15.871,-0.881,-1.856,-7.767,-20.735,-31.977,-34.714,-38.008,-55.663,-73.547,-76.148,-72.942,-39.126,-12.152,-7.727,0.933,32.789,70.431,73.54,73.275,49.169,21.961,13.407,7.816,-12.38,-30.646,-37.565,-34.073,-12.054,-0.226,0.079,4,28.7,52.499,58.076,54.187,54.863,60.105,57.233,53.885,38.381,27.439,19.162,17.362,2.716,-12.581,-20.646,-19.957,-17.774,-19.102,-13.803,-20.97,-43.436,-57.889,-60.713,-53.885,-13.505,28.464,37.8,34.252,16.6,-0.954,-6.368,-12.514,-23.723,-44.839,-43.182,-32.384,2.738,36.406,43.535,41.489,34.942,27.946,22.68,29.456,49.032,70.316,69.633,54.979,6.198,-44.173,-57.956,-54.163,-26.787,-2.088,2.607,-0.135,-26.446,-57.159,-62.322,-54.466,-30.279,-4.904]},"width":{"parameters":{"seed":21,"amplitude":2,"wavelength":5,"octaves":5,"persistence":0.05,"lacunarity":3,"biasWidth":1.75,"smooth":"smootherstep","minWidth":1.6,"maxWidth":2.2,"decimals":3},"values":[2.2,2.2,2.2,2.2,2.074,2.023,1.983,1.765,1.6,1.6,1.6,1.6,1.973,2.2,2.2,2.2,2.2,2.2,1.6,1.6,1.6,1.6,1.6,1.6,1.791,1.868,1.864,1.99,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,2.2,2.2,2.2,2.2,2.2,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,2.185,2.2,2.2,2.2,2.2,2.037,1.608,1.6,1.64,1.956,2.2,2.2,2.2,2.2,2.2,1.946,1.732,1.765,1.688,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.622,1.795,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.123,2.024,1.708,1.6,1.6,1.6,1.6,1.6,1.6,1.76,1.832,1.919,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.2,2.188,2.134,1.887,1.654,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.842,2.2,2.2,2.2,2.2,1.941,1.606]},"slope":{"parameters":{"seed":21,"amplitude":45,"wavelength":2,"octaves":5,"persistence":0.01,"lacunarity":3,"biasSlope":30,"smooth":"smootherstep","minSlope":20,"maxSlope":40,"decimals":3},"values":[40,40,36.675,26.5,20,40,40,35.26,20,20,32.16,38.748,40,40,40,40,40,36.586,20,20,20,29.381,40,36.301,20,20,20,28.025,40,40,24.32,37.242,40,39.532,28.391,20,20,20,20,20,27.975,40,40,40,39.158,24.826,20,21.085,31.152,40,40,40,40,40,40,30.656,20,20.175,20.57,20,20,23.682,40,38.69,24.95,20,20,29.606,40,40,40,40,40,33.953,20,20,33.655,20,20,20,28.17,40,40,29.417,20,20,22.62,40,40,40,20,20,20,40,40,40,24.964,28.36,32.355,39.573,40,40,40,40,40,40,25.799,32.496,38.322,40,40,40,40,39.791,20,20,20,26.509,37.449,40,40,40,40,40,27.564,34.504,40,20,20,20,20,20,20,20,20,20,20,26.3,32.903,28.725,24,20,20,29.769,40,40,40,38.192,20,27.485,37.307,40,40,40,40,40,20,34.492,40,40]}}',
     }
 };
 
@@ -267,6 +303,13 @@ const MAP_DESCRIPTION = {
         maxSpeed: 230,
         difficulty: "Hard",
     },
+    11: {
+        maxSlope: 40,
+        avgSlope: 31,
+        len: Math.round(160 * 7.5),
+        maxSpeed: 340,
+        difficulty: "Hard",
+    },
 };
 
 const MAP_SCORES = {
@@ -325,6 +368,12 @@ const MAP_SCORES = {
         increment: 1.5,
     },
     10: {
+        active: false,
+        name: "The Princess",
+        score: 100,
+        increment: 1.5,
+    },
+    11: {
         active: false,
         name: "The Princess",
         score: 100,
