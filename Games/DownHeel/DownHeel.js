@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.10.9",
+    VERSION: "0.10.10",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -253,7 +253,8 @@ const HERO = {
             "You turned a snowy slope into a crime scene for common sense.",
             "At this point I trust gravity more than you, and gravity is trying to kill me.",
             "Next time, give the controls to someone with a pulse and a plan.",
-            "This ruined my makeup."
+            "This ruined my makeup.",
+            "The wall didn't give way. But my nose did.",
         ];
         const text = texts.chooseRandom();
         HERO.speak(text);
@@ -359,9 +360,9 @@ const HERO = {
         ENGINE.GAME.pause(false);
 
         //preparing
-        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time); //16
-        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES + 1); // 16-15, ->1
-        let endIdx = startIdx + INI.DISPLAY_SCORES; //1+15 = 16
+        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time); //30
+        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES + 1); // 30-15-1, ->16
+        let endIdx = Math.min(MAP_SCORE_MANAGER.ENTRIES, startIdx + INI.DISPLAY_SCORES); //36+15 = 31
         console.log("idx", idx, "startIdx", startIdx);
 
         MAP_SCORES[GAME.level].scores.values.splice(idx, 0, time);
@@ -664,6 +665,13 @@ const GAME = {
             if (!DEBUG.keys) return;
 
             ENGINE.GAME.keymap[ENGINE.KEY.map.F8] = false;
+
+            console.log("\nDEBUG:");
+            console.log("#######################################################");
+            HERO.player.slidingSpeed = 2.0;
+            console.log("set speed", HERO.player.slidingSpeed);
+            console.log("X", HERO.player.pos.x);
+            console.log("#######################################################");
         }
         if (map[ENGINE.KEY.map.F9]) {
             ENGINE.GAME.keymap[ENGINE.KEY.map.F9] = false;
@@ -673,7 +681,7 @@ const GAME = {
             console.log("\nDEBUG:");
             console.log("#######################################################");
             console.log("X", HERO.player.pos.x);
-
+            console.log("speed", HERO.player.slidingSpeed);
             console.log("#######################################################");
         }
 
