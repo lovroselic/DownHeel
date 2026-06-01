@@ -54,14 +54,14 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 12,
+    MAX_LEVEL: 14,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
     OCCLUSION_RESOLUTION: 4,
 };
 
 const PRG = {
-    VERSION: "0.10.8",
+    VERSION: "0.10.9",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -155,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 12; //1
+        GAME.level = 14; //1
         TITLE.startTitle();
     }
 };
@@ -253,6 +253,7 @@ const HERO = {
             "You turned a snowy slope into a crime scene for common sense.",
             "At this point I trust gravity more than you, and gravity is trying to kill me.",
             "Next time, give the controls to someone with a pulse and a plan.",
+            "This ruined my makeup."
         ];
         const text = texts.chooseRandom();
         HERO.speak(text);
