@@ -1214,7 +1214,7 @@ const NOISE_FUNCTION = {
         biasSlope: 18.0,
         smooth: "smootherstep",
         minSlope: 3.0,
-        maxSlope: 45.0,
+        maxSlope: 60.0,
         decimals: 3
     },
     readSlopeParams() {
@@ -1232,11 +1232,11 @@ const NOISE_FUNCTION = {
         const octaves = GAME.parseIntSafe($("#slope_octaves").val(), d.octaves);
 
         const safeMin = Math.clamp(Math.min(minSlope, maxSlope), 0.1, 44.9);
-        const safeMax = Math.clamp(Math.max(minSlope, maxSlope), safeMin + 0.1, 45.0);
+        const safeMax = Math.clamp(Math.max(minSlope, maxSlope), safeMin + 0.1, 60.0);
 
         return {
             seed: seed,
-            amplitude: Math.clamp(amplitude, 0, 45),
+            amplitude: Math.clamp(amplitude, 0, 60),
             wavelength: Math.clamp(wavelength, 1, 512),
             octaves: Math.clamp(octaves, 1, 8),
             persistence: Math.clamp(persistence, 0, 1),

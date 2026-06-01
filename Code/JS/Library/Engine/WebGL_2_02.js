@@ -121,8 +121,8 @@ const WebGL = {
         INITIAL_SLIDING_SPEED: 0.35,    // initial speed
         MIN_SLIDING_SPEED: 0.75,        // speed after which you cannot use 'push' anymore
         PUSH_SPEED: 0.05,               // how much each push adds to sliding speed   
-        CAMERA_SAFETY_RADIUS: 0.2,
-        CAMERA_SAFETY_LERP_STEPS: 10,
+        CAMERA_SAFETY_RADIUS: 0.225,
+        CAMERA_SAFETY_LERP_STEPS: 12,
     },
     setGridSize(size) {
         this.INI.GRID_SIZE = size;

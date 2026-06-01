@@ -54,14 +54,14 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 15,
+    MAX_LEVEL: 17,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
     OCCLUSION_RESOLUTION: 4,
 };
 
 const PRG = {
-    VERSION: "0.10.11",
+    VERSION: "0.10.12",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -155,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 15; //1
+        GAME.level = 17; //1
         TITLE.startTitle();
     }
 };
@@ -255,6 +255,42 @@ const HERO = {
             "Next time, give the controls to someone with a pulse and a plan.",
             "This ruined my makeup.",
             "The wall didn't give way. But my nose did.",
+            "I wanted a finish line, not a facial reconstruction.",
+            "Some players chase glory. You chased geology.",
+            "The mountain called. It wants its wall back, with fewer princess dents.",
+            "Your sense of direction has declared war on survival.",
+            "That was less skiing and more aggressive wall appreciation.",
+            "I am beginning to understand why helmets were invented.",
+            "Did the path move, or did your brain simply resign?",
+            "Beautiful impact. Shame about everything before it.",
+            "You have the survival instincts of decorative pudding.",
+            "I requested elegance, not a full-body argument with stone.",
+            "Even the snow is embarrassed to be part of this.",
+            "The royal chiropractor just bought a second castle.",
+            "You did not miss the turn. You divorced it.",
+            "That was a bold interpretation of navigation.",
+            "Please tell me the controller is haunted. I need hope.",
+            "My bones now know more about this wall than the architect did.",
+            "The kingdom thanks you for your service to masonry.",
+            "I have seen avalanches with better self-preservation.",
+            "That corner was optional only if breathing was optional.",
+            "Next time try steering before the screaming starts.",
+            "If walls could laugh, this one would need medical assistance.",
+            "I admire your commitment to being wrong at high speed.",
+            "The path was wide, white, and friendly. Naturally, you attacked a wall.",
+            "You have the reflexes of a sleepy cabbage.",
+            "I am not sure what died first, my dignity or your strategy.",
+            "That crash had all the grace of a piano falling down stairs.",
+            "You aimed for victory and hit infrastructure.",
+            "The wall and I are now on first-name terms, thanks to your stupidity.",
+            "I asked for downhill momentum, not a brick interview.",
+            "The wall did nothing wrong. You, however, did everything wrong.",
+            "The good news is we stopped. The bad news is how.",
+            "I trusted you with one princess and one slope. Somehow both are worse now.",
+            "Was the goal survival, or were we collecting bruises?",
+            "That was a direct deposit into the bank of pain.",
+            "I have more faith in blindfolded furniture.",
+            "Next time, let the mountain play. It cannot do worse."
         ];
         const text = texts.chooseRandom();
         HERO.speak(text);
