@@ -6,7 +6,7 @@
 
 const INI = {
     MAXINT: 256,
-    MININT: 3,
+    MININT: 1,
     MAX_GRID: 64,
     MIN_GRID: 5,
     SPACE_X: 8192 * 4,
@@ -285,10 +285,6 @@ const GAME = {
 
         if (typeof SPAWN_TOOLS !== "undefined" && SPAWN_TOOLS.spawn) SPAWN_TOOLS.spawn(level);
 
-        // Important:
-        // SPAWN_TOOLS.spawn() calls MAP_TOOLS.setOcclusionMap(),
-        // which currently uses map.zMap1.TR.
-        // Rebuild here so TrackBuilder uses zMap.resolution.
         GAME.rebuildOcclusionMap(map);
         map.world = WORLD.buildSurfaceBasedWorld(map);
         MAP[level].world = map.world;
@@ -340,8 +336,6 @@ const GAME = {
 
         const zMap = map.zMap1;
         const pixelData = QUAD_MAP.toTextureMap(zMap);
-        //const texWidth = POT(zMap.xSize);
-        //const texHeight = POT(zMap.ySize);
         const texDepth = 1;
 
         if (map.occlusionMap?.texture && WebGL.CTX) WebGL.CTX.deleteTexture(map.occlusionMap.texture);
@@ -1201,7 +1195,7 @@ const NOISE_FUNCTION = {
         biasWidth: 1.0,
         smooth: "smootherstep",
         minWidth: 0.5,
-        maxWidth: 2.0,
+        maxWidth: 3.0,
         decimals: 3
     },
     SLOPE_NOISE_DEFAULTS: {
