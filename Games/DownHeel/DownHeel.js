@@ -54,14 +54,14 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 29,
+    MAX_LEVEL: 30,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
     OCCLUSION_RESOLUTION: 4,
 };
 
 const PRG = {
-    VERSION: "0.10.17",
+    VERSION: "0.11.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -155,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 29; //1
+        GAME.level = 30; //1
         TITLE.startTitle();
     }
 };
