@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.12.1",
+    VERSION: "1.0.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -432,9 +432,9 @@ const HERO = {
         ENGINE.GAME.pause(false);
 
         //preparing
-        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time); 
-        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES + 1); 
-        let endIdx = Math.min(MAP_SCORE_MANAGER.ENTRIES, startIdx + INI.DISPLAY_SCORES); 
+        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time);
+        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES + 1);
+        let endIdx = Math.min(MAP_SCORE_MANAGER.ENTRIES, startIdx + INI.DISPLAY_SCORES);
         console.log("idx", idx, "startIdx", startIdx);
 
         MAP_SCORES[GAME.level].scores.values.splice(idx, 0, time);
