@@ -54,14 +54,14 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 21,
+    MAX_LEVEL: 22,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
     OCCLUSION_RESOLUTION: 4,
 };
 
 const PRG = {
-    VERSION: "0.10.14",
+    VERSION: "0.10.15",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -155,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 21; //1
+        GAME.level = 22; //1
         TITLE.startTitle();
     }
 };
@@ -292,6 +292,46 @@ const HERO = {
             "I have more faith in blindfolded furniture.",
             "Next time, let the mountain play. It cannot do worse.",
             "Is that your idea of fun? Bashing Princess' head full speed into a wall?",
+            "Wonderful. You painted the snow with my face.",
+            "The wall asked for a kiss. You gave it my skull.",
+            "I have seen smarter steering from a sausage.",
+            "Congratulations, you turned me into princess flavored jam.",
+            "That corner was so easy it came with instructions, and you still ate the wall.",
+            "My nose is now doing modern art on the snow.",
+            "You have the tactical awareness of a boiled potato.",
+            "Bloody brilliant. Mostly bloody.",
+            "The wall wanted tribute, so you paid in royal cartilage.",
+            "I am leaking dignity, and possibly blood.",
+            "You just gave the mountain a fresh coat of princess.",
+            "I hope you enjoyed that, because my spleen just rage quit.",
+            "That impact sounded expensive and stupid, mostly stupid.",
+            "My royal butt survived, but my patience died on impact.",
+            "You made the wall blush. With my blood.",
+            "This is why peasants are not allowed near steering decisions.",
+            "You missed the gap so hard the gap is filing a complaint.",
+            "A turn signal would not help you. A brain signal might.",
+            "The wall has more personality than your route planning.",
+            "I came, I slid, I bled, I questioned your existence.",
+            "That was a perfect landing, if the target was internal bleeding.",
+            "You have weaponized dumb.",
+            "This is not a ski game anymore. It is a princess disposal simulator.",
+            "Your steering is a crime against geometry.",
+            "My royal bloodline nearly ended because you feared turning.",
+            "The wall did not hit me. Your incompetence did.",
+            "If stupidity were a slope, you would be world champion.",
+            "That was a headbutt with extra steps.",
+            "I asked for control, not a crimson snow angel.",
+            "You just invented the blood slalom. Please uninvent it.",
+            "Even the rocks are whispering, what an idiot.",
+            "My face has merged with local architecture.",
+            "You make gravity look professional.",
+            "The wall took my health bar and your reputation.",
+            "I should have hired a drunk mule. At least it would zigzag.",
+            "My royal insurance does not cover players with soup for brains.",
+            "That was not wall damage. That was princess puree.",
+            "If bad steering were a kingdom, you would be its idiot king.",
+            "I am starting to think the real final boss is your thumb.",
+            "Nice work. The mountain now has a blood stained signature edition.",
         ];
         const text = texts.chooseRandom();
         HERO.speak(text);
