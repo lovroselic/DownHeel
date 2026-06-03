@@ -54,7 +54,7 @@ const INI = {
     CRASH_LETHAL_SPEED: 150,
     CRASH_DAMAGE_POWER: 2.4,
     MAX_DAMAGE: 100,
-    MAX_LEVEL: 24,
+    MAX_LEVEL: 27,
     WINDOW_SCALE: 0.90,
     DISPLAY_SCORES: 15,
     OCCLUSION_RESOLUTION: 4,
@@ -155,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 24; //1
+        GAME.level = 27; //1
         TITLE.startTitle();
     }
 };

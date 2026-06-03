@@ -97,6 +97,13 @@ LoadTextures = [
     { srcName: "Wall/WinterForest_209.webp", name: "WinterForest_209" },
     { srcName: "Wall/CreepyForest_1171.webp", name: "CreepyForest_1171" },
     { srcName: "Wall/BrightForest_0845.webp", name: "BrightForest_0845" },
+    { srcName: "Wall/Forest102.webp", name: "Forest102" },
+    { srcName: "Wall/Forest104.webp", name: "Forest104" },
+    { srcName: "Wall/Forest107.webp", name: "Forest107" },
+    { srcName: "Wall/Forest110.webp", name: "Forest110" },
+    { srcName: "Wall/Forest111.webp", name: "Forest111" },
+    { srcName: "Wall/Forest114.webp", name: "Forest114" },
+    { srcName: "Wall/Hills3.webp", name: "Hills3" },
 
     //objects
     { srcName: "ObjectTextures/BluePrincess.webp", name: "BluePrincess" },
@@ -163,6 +170,7 @@ LoadTextures = [
     { srcName: "Sky/Sky_205.webp", name: "Sky_205" },
     { srcName: "Sky/Sky_206.webp", name: "Sky_206" },
     { srcName: "Sky/SnowFloorPanoramaTexture.webp", name: "SnowFloorPanoramaTexture" },
+
 ];
 
 LoadAudio = [
