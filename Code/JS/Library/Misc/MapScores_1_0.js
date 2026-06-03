@@ -45,4 +45,4 @@ const MAP_SCORE_MANAGER = {
     }
 };
 
-console.log(`%cMAP_SCORE_MANAGER v${MAP_SCORE_MANAGER.VERSION}for DownHeel loaded.`, MAP_SCORE_MANAGER.CSS);
+console.log(`%cMAP_SCORE_MANAGER v${MAP_SCORE_MANAGER.VERSION} for DownHeel loaded.`, MAP_SCORE_MANAGER.CSS);
