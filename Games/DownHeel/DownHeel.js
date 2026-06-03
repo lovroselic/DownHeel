@@ -19,10 +19,10 @@ retests:
 ////////////////////////////////////////////////////
 
 const DEBUG = {
-    SETTING: true,
+    SETTING: false,
     AUTO_TEST: false,
-    FPS: true,
-    VERBOSE: true,
+    FPS: false,
+    VERBOSE: false,
     _2D_display: false,
     INVINCIBLE: false,
     keys: true,
@@ -33,7 +33,7 @@ const DEBUG = {
     automaticTests() {
         console.time("automaticTests");
         console.info("***** Automatic level testing *****");
-        for (let level = 1; level <= 125; level++) {
+        for (let level = 1; level <= 30; level++) {
             console.log("testing level", level);
             GAME.level = level;
             GAME.levelStart();
@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.11.1",
+    VERSION: "0.12.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -183,7 +183,6 @@ const HERO = {
             this.player.setMode("Sliding");
         } else if (!this.player.actionModes.includes(this.player.mode)) this.player.setMode("idle");
 
-        //if (this.player.mode !== 'idle') console.warn(this.player.mode);
     },
     applyDamage(damage) {
         HERO.health = Math.max(HERO.health - damage, 0);
@@ -194,11 +193,9 @@ const HERO = {
     },
     die() {
         if (HERO.dead) return;
-        //console.warn("hero dies");
         HERO.dead = true;
     },
     death() {
-        //console.error("HERO DEATH");
         $(AUDIO.PrincessScream).one("ended", HERO.endSpeech);
         AUDIO.PrincessScream.play();
         HERO.finalDeath();
@@ -338,7 +335,6 @@ const HERO = {
 
     },
     finalDeath() {
-        //console.error("HERO FINAL death");
         for (const L of LIGHTS3D.POOL) {
             L.lightColor = Array(0, 0, 0);
         }
@@ -359,7 +355,6 @@ const HERO = {
     restore() {
         this.dead = false;
         this.health = this.maxHealth;
-        //this.health = 1;
         TITLE.health();
     },
     flightOn() {
@@ -372,7 +367,7 @@ const HERO = {
 
     },
     updateSunPosition() {
-        const sun = SUN3D.POOL[0];              //assuming single sun
+        const sun = SUN3D.POOL[0];                              //assuming single sun
         sun.pos = this.player.pos.add(INI.SUN_VECTOR);
     },
     manage(lapsedTime) {
@@ -397,7 +392,7 @@ const HERO = {
         }
     },
     calcCrashDamage(crashSpeed) {
-        let impactFactor = 1.0;         //we need to implement wall normals
+        let impactFactor = 1.0;                                         //we need to implement wall normals, or maybe not ... fuck it
         if (crashSpeed < INI.CRASH_SAFE_SPEED) return 0;
         if (crashSpeed >= INI.CRASH_LETHAL_SPEED) return INI.MAX_DAMAGE;
         const x = (crashSpeed - INI.CRASH_SAFE_SPEED) / (INI.CRASH_LETHAL_SPEED - INI.CRASH_SAFE_SPEED);
@@ -437,9 +432,9 @@ const HERO = {
         ENGINE.GAME.pause(false);
 
         //preparing
-        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time); //30
-        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES + 1); // 30-15-1, ->16
-        let endIdx = Math.min(MAP_SCORE_MANAGER.ENTRIES, startIdx + INI.DISPLAY_SCORES); //36+15 = 31
+        let idx = binarySearch(MAP_SCORES[GAME.level].scores.values, time); 
+        let startIdx = Math.max(0, idx - INI.DISPLAY_SCORES + 1); 
+        let endIdx = Math.min(MAP_SCORE_MANAGER.ENTRIES, startIdx + INI.DISPLAY_SCORES); 
         console.log("idx", idx, "startIdx", startIdx);
 
         MAP_SCORES[GAME.level].scores.values.splice(idx, 0, time);
@@ -472,10 +467,6 @@ const HERO = {
         GAME.start();
     }
 };
-
-/**
- * *******************************************************************************************
- */
 
 const GAME = {
     time: null,
@@ -518,7 +509,6 @@ const GAME = {
         GAME.levelStart();
     },
     WebGL_settings() {
-        //WebGL.setAmbientStrength(0.1);
         WebGL.setAmbientStrength(1);
         WebGL.setDiffuseStrength(0.5);
         WebGL.INI.BACKGROUND_ALPHA = 0.0;
@@ -556,7 +546,6 @@ const GAME = {
     },
     setCameraView() {
         WebGL.hero.firstPersonCamera = new $3D_Camera(WebGL.hero.player, DIR_NOWAY, 0.0, new Vector3(0, 0, 0), 0);
-        //WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.5, new Vector3(0, -0.35, 0), 0.80);
         WebGL.hero.topCamera = new $3D_Camera(WebGL.hero.player, DIR_UP, 0.5, new Vector3(0, -0.30, 0), 0.45, 80);
 
         switch (WebGL.CONFIG.cameraType) {
@@ -590,10 +579,7 @@ const GAME = {
         HERO.player = new $3D_player(start_grid, Vector3.from_2D_dir(start_dir), MAP[level].map, HERO_TYPE.ThePrincess, 0.1);
 
         GAME.setCameraView();
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.sun);
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.mediumSun);
         SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.weakSun);
-        //SPAWN_TOOLS.spawnSunFromCamera(HERO.player.pos.add(INI.SUN_VECTOR), LIGHT_COLORS.none);
         GAME.setWorld(level);
     },
     setWorld(level, decalsAreSet = false) {
@@ -706,7 +692,6 @@ const GAME = {
             GAME.drawPlayer();
         }
         WebGL.renderScene(MAP[GAME.level].map);
-        //WebGL.renderScene(MAP[GAME.level].map, true);
         TITLE.speed();
         TITLE.time();
 
@@ -829,7 +814,7 @@ const TITLE = {
     },
     startTitle() {
         if (DEBUG.VERBOSE) console.log("TITLE started");
-        //if (AUDIO.Title) AUDIO.Title.play(); //dev
+        if (AUDIO.Title) AUDIO.Title.play(); //dev
 
         ENGINE.GAME.pauseBlock();
         TITLE.clearAllLayers();
