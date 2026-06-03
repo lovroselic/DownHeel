@@ -95,7 +95,8 @@ LoadTextures = [
     { srcName: "Wall/WinterForest_207.webp", name: "WinterForest_207" },
     { srcName: "Wall/WinterForest_208.webp", name: "WinterForest_208" },
     { srcName: "Wall/WinterForest_209.webp", name: "WinterForest_209" },
-
+    { srcName: "Wall/CreepyForest_1171.webp", name: "CreepyForest_1171" },
+    { srcName: "Wall/BrightForest_0845.webp", name: "BrightForest_0845" },
 
     //objects
     { srcName: "ObjectTextures/BluePrincess.webp", name: "BluePrincess" },
@@ -174,9 +175,9 @@ LoadAudio = [
 ];
 
 LoadShaders = [
-    'vShader_1_2.glsl', 
+    'vShader_1_2.glsl',
     //'fShader_1_4.glsl', 
-    'fShader_1_5.glsl', 
+    'fShader_1_5.glsl',
     'pick_vShader_1_0.glsl', 'pick_fShader_1_0.glsl',
     'particle_render_fShader_1_1.glsl', 'particle_render_vShader_1_0.glsl', 'particle_transform_fShader_1_0.glsl', 'particle_transform_vShader_1_1.glsl',
     'model_vShader_1_2.glsl', 'fire_transform_vShader_1_0.glsl', 'fire_render_fShader_1_0.glsl',
