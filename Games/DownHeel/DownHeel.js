@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "0.11.0",
+    VERSION: "0.11.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -155,7 +155,7 @@ const PRG = {
         $("#startGame").addClass("hidden");
         ENGINE.disableDefaultKeys();
 
-        GAME.level = 30; //1
+        GAME.level = 1; //1
         TITLE.startTitle();
     }
 };
