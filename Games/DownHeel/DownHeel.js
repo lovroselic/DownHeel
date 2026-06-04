@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.1.1",
+    VERSION: "1.1.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -827,7 +827,7 @@ const TITLE = {
     clearAllLayers() {
         ENGINE.layersToClear = new Set(["text",
             "sideback", "button", "title", "FPS", "info", "subtitle", "health",
-            "speed", "maxspeed", "time",
+            "speed", "maxspeed", "time","addinfo",
             "bottomText"]);
         ENGINE.clearLayerStack();
         WebGL.transparent();
