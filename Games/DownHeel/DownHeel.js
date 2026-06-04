@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.2.0",
+    VERSION: "1.2.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -279,7 +279,7 @@ const HERO = {
             "I am not sure what died first, my dignity or your strategy.",
             "That crash had all the grace of a piano falling down stairs.",
             "You aimed for victory and hit infrastructure.",
-            "The wall and I are now on first-name terms, thanks to your stupidity.",
+            "The wall and I are now on first name terms, thanks to your stupidity.",
             "I asked for downhill momentum, not a brick interview.",
             "The wall did nothing wrong. You, however, did everything wrong.",
             "The good news is we stopped. The bad news is how.",
