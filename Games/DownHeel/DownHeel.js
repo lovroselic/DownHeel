@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.1.2",
+    VERSION: "1.2.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
