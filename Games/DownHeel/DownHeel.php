@@ -5,13 +5,17 @@
 <head>
     <?php include_once $GL_root . $GL_path . '/Include/head_includes.php';?>
     <link href="/CSS/DownHeel.css" rel="stylesheet" type="text/css">
-     <link href="/CSS/FORM.css" rel="stylesheet" type="text/css">
+    <link href="/CSS/FORM.css" rel="stylesheet" type="text/css">
 
-    <meta name="description"        content="" />
-    <meta name="keywords" content="" />
+    <meta name="description"
+        content="DownHeel is a 3D arcade skiing game where The Princess goes buttboarding down deadly snowy slopes, dodging rocks, walls, and humiliation." />
+    <meta name="keywords"
+        content="DownHeel, 3D arcade skiing game, buttboarding, princess game, snow slope game, winter arcade game, funny skiing game, browser game, free game" />
+
+
 
     <link rel="canonical" href="https://www.laughingskull.org/Games/DownHeel/DownHeel.php">
-    <title>Taxxon</title>
+    <title>DownHeel</title>
 </head>
 
 <body>
@@ -20,7 +24,7 @@
     <?php include_once $GL_root . $GL_path . '/Games/DownHeel/DownHeel.html.php';?>
     <?php include_once $GL_root . $GL_path . '/Include/footer.php';?>
 
-   <!-- JS -->
+    <!-- JS -->
     <script src="/Code/JS/Library/Engine/Prototype_5_03.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/LS_Matrix_1_05.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/ENGINE_5_02.js" type="text/javascript"></script>

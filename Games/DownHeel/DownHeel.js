@@ -25,7 +25,7 @@ const DEBUG = {
     VERBOSE: false,
     _2D_display: false,
     INVINCIBLE: false,
-    keys: true,
+    keys: false,
     max17: false,
     goto(grid) {
         HERO.player.pos = Vector3.from_Grid(Grid.toCenter(grid), 0.5);
@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.0.0",
+    VERSION: "1.1.0",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -122,7 +122,7 @@ const PRG = {
         ENGINE.addBOX("TITLE", ENGINE.titleWIDTH, ENGINE.titleHEIGHT, ["title", "time"], null);
         ENGINE.addBOX("LSIDE", INI.SCREEN_BORDER, ENGINE.gameHEIGHT, ["Lsideback", "health", "slopeinfo"], "side");
         ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "3d_webgl", "info", "text", "FPS", "button", "click"], "side");
-        ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed", "timeinfo"], "fside");
+        ENGINE.addBOX("SIDE", ENGINE.sideWIDTH, ENGINE.gameHEIGHT, ["sideback", "speed", "maxspeed", "timeinfo", "addinfo"], "fside");
         ENGINE.addBOX("DOWN", ENGINE.bottomWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText", "subtitle"], null);
 
         if (DEBUG._2D_display) {
@@ -811,6 +811,10 @@ const TITLE = {
         speed: 32,
         hispeed: 120,
         HEALTH_TEXT: 720,
+        maxSlope: 210,
+        avgSlope: 300,
+        bestTime: 390,
+        bestPlayer: 480,
     },
     startTitle() {
         if (DEBUG.VERBOSE) console.log("TITLE started");
@@ -1054,6 +1058,18 @@ const TITLE = {
         TITLE.namePlot();
         TITLE.speed();
         TITLE.time();
+        TITLE.additionalInfo();
+    },
+    additionalInfo() {
+        GAME.maxSlope = MAP_DESCRIPTION[GAME.level].maxSlope;
+        GAME.avgSlope = MAP_DESCRIPTION[GAME.level].avgSlope;
+        GAME.bestTime = Timer.MSH_String(Timer.toHMS(MAP_SCORES[GAME.level].scores.values[0]));
+        GAME.bestPlayer = MAP_SCORES[GAME.level].scores.names[0];
+
+        this._text("addinfo", "Max Slope", TITLE.stack.maxSlope, "maxSlope", 0);
+        this._text("addinfo", "Avg Slope", TITLE.stack.avgSlope, "avgSlope", 0, false);
+        this._text("addinfo", "Best Time", TITLE.stack.bestTime, "bestTime", 0, false);
+        this._text("addinfo", "Best Player", TITLE.stack.bestPlayer, "bestPlayer", 0, false);
     },
     health() {
         ENGINE.clearLayer("health");
@@ -1093,8 +1109,8 @@ const TITLE = {
     speed() {
         GAME.realSpeed = Math.round(GAME.realSpeed);
         GAME.highSpeed = Math.max(GAME.highSpeed, GAME.realSpeed);
-        this._text("speed", "Speed", TITLE.stack.speed, "realSpeed", 0)
-        this._text("maxspeed", "Max Speed", TITLE.stack.hispeed, "highSpeed", 0)
+        this._text("speed", "Speed", TITLE.stack.speed, "realSpeed", 0);
+        this._text("maxspeed", "Max Speed", TITLE.stack.hispeed, "highSpeed", 0);
     },
     time() {
         const CTX = LAYER.time;
@@ -1114,7 +1130,7 @@ const TITLE = {
         CTX.fillText(text, x, y);
     },
     _label(CTX, txt, fs, x, y) {
-        CTX.font = fs + "px CPU";
+        CTX.font = fs + "px DigitalNumbers";
         this._grad(CTX, txt, fs, x, y);
         CTX.shadowColor = "#555555";
         CTX.shadowOffsetX = 1;
@@ -1123,11 +1139,11 @@ const TITLE = {
         CTX.textAlign = "center";
         CTX.fillText(txt, x, y);
     },
-    _text(layer, txt, y, what, pad) {
-        ENGINE.clearLayer(layer);
+    _text(layer, txt, y, what, pad, clear = true) {
+        if (clear) ENGINE.clearLayer(layer);
         let CTX = LAYER[layer];
         let x = ENGINE.sideWIDTH / 2;
-        let fs = 32;
+        let fs = 18;
         this._label(CTX, txt, fs, x, y);
         CTX.fillStyle = "#FFF";
         CTX.shadowColor = "#DDD";
