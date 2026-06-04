@@ -1081,7 +1081,18 @@ const ENGINE = {
                 if (key === 1) return ENGINE.directions[index];
             }
             return null;
-        }
+        },
+        isTypingTarget(e) {
+            const target = e.target;
+            if (!target) return false;
+            const tag = (target.tagName || "").toUpperCase();
+            return (
+                tag === "INPUT" ||
+                tag === "TEXTAREA" ||
+                tag === "SELECT" ||
+                target.isContentEditable === true
+            );
+        },
     },
     GAME: {
         running: false,
@@ -1130,6 +1141,8 @@ const ENGINE = {
             }
         },
         checkKey(e) {
+            if (ENGINE.KEY.isTypingTarget(e)) return;
+
             const code = e.keyCode || e.which;
             if (code in ENGINE.GAME.keymap) {
                 ENGINE.GAME.keymap[code] = true;
@@ -1137,6 +1150,8 @@ const ENGINE = {
             }
         },
         clearKey(e) {
+            if (ENGINE.KEY.isTypingTarget(e)) return;
+
             const code = e.keyCode || e.which;
             if (code in ENGINE.GAME.keymap) {
                 ENGINE.GAME.keymap[code] = false;

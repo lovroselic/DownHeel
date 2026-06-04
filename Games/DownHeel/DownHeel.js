@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.1.0",
+    VERSION: "1.1.1",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -745,15 +745,6 @@ const GAME = {
             console.log("X", HERO.player.pos.x);
             console.log("speed", HERO.player.slidingSpeed);
             console.log("#######################################################");
-        }
-
-        //controls
-
-        if (map[ENGINE.KEY.map.up]) { }
-        if (map[ENGINE.KEY.map.down]) { }
-        if (map[ENGINE.KEY.map.space]) {
-            HERO.player.attack();
-            ENGINE.GAME.keymap[ENGINE.KEY.map.space] = false; //NO repeat
         }
 
         return;
