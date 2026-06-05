@@ -19,7 +19,7 @@ retests:
 ////////////////////////////////////////////////////
 
 const DEBUG = {
-    SETTING: false,
+    SETTING: true,
     AUTO_TEST: false,
     FPS: false,
     VERBOSE: false,
@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.2.1",
+    VERSION: "1.2.2",
     NAME: "DownHeel",
     YEAR: "2026",
     SG: "DownHeel",
@@ -83,18 +83,16 @@ const PRG = {
         ENGINE.init();
     },
     setup() {
-        if (DEBUG.SETTING) {
-            $("#engine_version").html(ENGINE.VERSION);
-            $("#grid_version").html(GRID.VERSION);
-            $("#maze_version").html(DUNGEON.VERSION);
-            $("#iam_version").html(IndexArrayManagers.VERSION);
-            $("#lib_version").html(LIB.VERSION);
-            $("#webgl_version").html(WebGL.VERSION);
-            $("#maptools_version").html(MAP_TOOLS.VERSION);
-            $("#speech_version").html(SPEECH.VERSION);
-        } else {
-            $('#debug').hide();
-        }
+
+        $("#engine_version").html(ENGINE.VERSION);
+        $("#grid_version").html(GRID.VERSION);
+        $("#maze_version").html(DUNGEON.VERSION);
+        $("#iam_version").html(IndexArrayManagers.VERSION);
+        $("#lib_version").html(LIB.VERSION);
+        $("#webgl_version").html(WebGL.VERSION);
+        $("#maptools_version").html(MAP_TOOLS.VERSION);
+        $("#speech_version").html(SPEECH.VERSION);
+
 
         $("#toggleHelp").click(function () {
             $("#help").toggle(400);
@@ -827,7 +825,7 @@ const TITLE = {
     clearAllLayers() {
         ENGINE.layersToClear = new Set(["text",
             "sideback", "button", "title", "FPS", "info", "subtitle", "health",
-            "speed", "maxspeed", "time","addinfo",
+            "speed", "maxspeed", "time", "addinfo",
             "bottomText"]);
         ENGINE.clearLayerStack();
         WebGL.transparent();
